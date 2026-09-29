@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **BOZZA, in attesa di conferma di Giorgio.** Nessun codice scritto.
+Stato: piano confermato. Step 1 in corso (scheletro scritto, verifiche npm bloccate dalla rete).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -32,7 +32,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 ## Step
 
-### 1. Setup progetto
+### 1. Setup progetto (IN CORSO)
 - **Obiettivo**: scheletro Vite + React + TS strict, Zustand, Dexie, Zod, Vitest, vite-plugin-pwa (config base), struttura cartelle, `.gitignore` (private/, docs/rules/*.pdf), spostamento dei PDF, `README.md`/`ARCHITECTURE.md`/`DATA_TODO.md` scheletro, `ATTRIBUTION.md` provvisorio.
 - **File**: `package.json`, `vite.config.ts`, `tsconfig.json`, `src/**` (vuote), `.gitignore`, doc.
 - **Fatto**: `npm run dev/build/test` funzionano; niente contenuto protetto tracciato.

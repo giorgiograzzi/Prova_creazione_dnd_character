@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.log
+.env
+.DS_Store
+coverage/
+*.tsbuildinfo
+
+# Contenuti protetti da copyright: mai tracciati (vedi PLAN.md, sez. 11 del brief)
+src/data/private/
+docs/rules/*.pdf
+docs/rules/*.txt

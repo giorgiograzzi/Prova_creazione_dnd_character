@@ -172,7 +172,12 @@ export const CLASS_RULES: Record<string, ClassRule> = {
       gloom_stalker: {
         dread_ambusher: { effects: [{ op: "initiativeBonus", value: "mod:wis" }] },
         umbral_sight: { effects: [{ op: "sense", kind: "darkvision", range: 60, additive: true }] }, // 60 ft, oppure +60 se già ce l'hai
-        iron_mind: { effects: [{ op: "grantSaveProficiency", abilities: ["wis"] }] },
+        // Competenza nei TS di Saggezza; se già ce l'hai (dalla classe di partenza) scegli Intelligenza o Carisma
+        iron_mind: { choices: [{ id: "iron_mind", label: T("Competenza nei tiri salvezza"), count: 1, options: [
+          { id: "wis", name: T("Saggezza"), requires: "!saveProficient:wis", effects: [{ op: "grantSaveProficiency", abilities: ["wis"] }] },
+          { id: "int", name: T("Intelligenza"), requires: "saveProficient:wis", effects: [{ op: "grantSaveProficiency", abilities: ["int"] }] },
+          { id: "cha", name: T("Carisma"), requires: "saveProficient:wis", effects: [{ op: "grantSaveProficiency", abilities: ["cha"] }] },
+        ] }] },
       },
       fey_wanderer: {
         otherworldly_glamour: {

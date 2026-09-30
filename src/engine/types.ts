@@ -53,6 +53,7 @@ export interface Character {
   };
   overrides: Record<string, number>; // valori forzati a mano, visibili e rimovibili
   notes: string;
+  xp?: number; // punti esperienza (opzionale: molti gruppi salgono di livello a discrezione del DM)
 }
 
 // Un valore calcolato con le sue fonti ("da dove viene")

@@ -93,7 +93,12 @@ export const classSchema = z.object({
   spellList: id.optional(), // lista di incantesimi della classe (es. "cleric")
   spellSlots: z.array(z.array(z.number().int())).length(20).optional(), // per livello di classe: slot di 1°, 2°, ...
   pactSlots: z.array(z.object({ count: z.number().int(), level: z.number().int() })).length(20).optional(), // Warlock
-  multiclassRequirement: z.string().optional(), // solo annotato (step 17)
+  multiclassRequirement: z.string().optional(),
+  // Competenze che dà un livello in questa classe se NON è la prima (file 01, riga "Ottieni"): armi, armature, abilità e strumenti a scelta
+  multiclass: z.object({
+    weapons: z.array(z.string()).default([]), armor: z.array(armorTraining).default([]),
+    skills: z.number().int().default(0), toolChoices: z.number().int().default(0), tools: z.array(z.string()).default([]),
+  }).optional(),
   equipment: z.partialRecord(z.enum(["A", "B", "C"]), equipmentSet),
   features: z.array(featureSchema),
   // Colonne della tabella 1-20 (ire, dadi, trucchetti, preparati...); 20 valori ciascuna
@@ -264,4 +269,5 @@ export const creationRulesSchema = z.object({
     magicItems: z.object({ common: z.number().int(), uncommon: z.number().int(), rare: z.number().int(), veryRare: z.number().int() }),
   })),
   alignments: z.array(z.object({ id, name: text })),
+  xpThresholds: z.array(z.number().int()).length(20).optional(), // PX minimi per livello 1-20 (§7 del file 02)
 });

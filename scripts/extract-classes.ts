@@ -190,6 +190,8 @@ heads.forEach((h, hi) => {
   const unknownTool = tools.find((t) => !toolId.has(t) && !/^(\d+) (Strumento musicale|Strumenti da artigiano o Strumento musicale)$/.test(t));
   if (unknownTool) throw new Error(`${id}: strumento sconosciuto "${unknownTool}"`);
   const mc = /^Requisito: (.+?)\. Ottieni: (.+)$/.exec(F["Multiclasse"]!)!;
+  // Competenze che si ottengono prendendo un livello in questa classe come NON prima (riga "Ottieni:" del file 01)
+  const multiclass = parseMulticlass(mc[2]!, id, new Set(toolId.values()));
   const req = mc[1]!.replace(/ oppure /g, " || ").replace(/ e /g, " && ").replace(/(\w+) 13/g, (_, a) => `ability:${ABIL[a]}>=13`);
   const spell = F["Incantesimi"] ? /^Tipo: (.+?); caratteristica (\w+); lista (\w+); (.*)$/.exec(F["Incantesimi"]!) : null;
   if (F["Incantesimi"] && !spell) throw new Error(`${id}: riga Incantesimi non riconosciuta: ${F["Incantesimi"]}`);
@@ -351,7 +353,7 @@ heads.forEach((h, hi) => {
     weaponProficiency: F["Armi"]!.split(/, (?=semplici|marziali)/).map((w) => WEAPON[w] ?? (() => { throw new Error(`Armi sconosciute: "${w}"`); })()), toolProficiency: fixedTools,
     ...(spell ? { caster: CASTER[spell[1]!], spellAbility: ABIL[spell[2]!], spellList: spell[3] } : {}),
     description: [notes, optionsNote].filter(Boolean).join(" "),
-    ...(slots ? { spellSlots: slots } : {}), ...(pact ? { pactSlots: pact } : {}), multiclassRequirement: req, equipment: eq,
+    ...(slots ? { spellSlots: slots } : {}), ...(pact ? { pactSlots: pact } : {}), multiclassRequirement: req, multiclass, equipment: eq,
     features: fs, table, subclassLevel: 3, choices,
   });
 });
@@ -378,3 +380,24 @@ fixSpellModes(classes, "classes");
 fixSpellModes(subclasses, "subclasses");
 merge("classes", classes);
 merge("subclasses", subclasses);
+
+// "Dado Vita, armi marziali, armature leggere, medie, scudi, 1 abilità, 1 strumento, Arnesi da scasso" → competenze strutturate
+function parseMulticlass(text: string, classId: string, toolIds: Set<string>) {
+  const out = { weapons: [] as string[], armor: [] as string[], skills: 0, toolChoices: 0, tools: [] as string[] };
+  const parts = text.split(", ").map((x) => x.trim());
+  let mode: "armor" | "weapons" | "" = "";
+  const ARMOR: Record<string, string> = { leggere: "light", medie: "medium", pesanti: "heavy", scudi: "shield" };
+  for (const p of parts) {
+    let m: RegExpExecArray | null;
+    if (p === "Dado Vita") { mode = ""; continue; }
+    if ((m = /^armature (\w+)$/.exec(p)) && ARMOR[m[1]!]) { mode = "armor"; out.armor.push(ARMOR[m[1]!]!); continue; }
+    if (mode === "armor" && ARMOR[p]) { out.armor.push(ARMOR[p]!); continue; }
+    if ((m = /^armi (semplici|marziali)$/.exec(p))) { mode = "weapons"; out.weapons.push(m[1] === "semplici" ? "simple" : "martial"); continue; }
+    if (mode === "weapons" && (m = /^marziali con proprietà Leggera$/.exec(p))) { out.weapons.push("martial[light]"); continue; }
+    if ((m = /^(\d+) abilità$/.exec(p))) { out.skills = Number(m[1]); mode = ""; continue; }
+    if ((m = /^(\d+) strumento$/.exec(p))) { out.toolChoices = Number(m[1]); mode = ""; continue; }
+    if (p === "Arnesi da scasso" && toolIds.has("thieves_tools")) { out.tools.push("thieves_tools"); mode = ""; continue; }
+    throw new Error(`${classId}: competenza multiclasse non riconosciuta "${p}" in "${text}"`);
+  }
+  return out;
+}

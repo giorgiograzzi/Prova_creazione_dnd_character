@@ -59,6 +59,14 @@ const AL: Record<string, string> = {
 };
 const alignments = [...al[0].split(", ").map((n) => ({ id: AL[n]!, name: { it: n } })), { id: "unaligned", name: { it: "Non allineato" } }];
 
-const entry = { id: "creation", standardArray, pointBuy, recommendedArrays, startingLevels, alignments };
+// punti esperienza per livello (§7 "Avanzamento di livello"): due colonne "Liv PX Comp." affiancate
+const xpText = /Liv PX Comp\. Liv PX Comp\.(.*?)• A ogni livello/.exec(text)?.[1];
+const xpRows = [...(xpText ?? "").matchAll(/(\d+) ([\d.]+) \+(\d)/g)].map((m) => ({ level: Number(m[1]), xp: Number(m[2]!.replace(/\./g, "")), pb: Number(m[3]) }));
+const xpByLevel = Array.from({ length: 20 }, (_, i) => xpRows.find((r) => r.level === i + 1));
+if (xpByLevel.some((r) => !r)) throw new Error(`Tabella PX incompleta: ${xpRows.length} righe`);
+const xpThresholds = xpByLevel.map((r) => r!.xp);
+if (xpThresholds.some((v, i) => i > 0 && v <= xpThresholds[i - 1]!) || xpThresholds[0] !== 0 || xpThresholds[19] !== 355000) throw new Error("Tabella PX non coerente");
+
+const entry = { id: "creation", standardArray, pointBuy, recommendedArrays, startingLevels, alignments, xpThresholds };
 writeFileSync(`${OUT}/creation.json`, JSON.stringify({ kind: "creation", entries: [entry] }, null, 1) + "\n");
 console.log(`creation          1 (array ${standardArray.join("/")}, ${budget} punti, ${startingLevels.length} fasce di livello, ${alignments.length} allineamenti)`);

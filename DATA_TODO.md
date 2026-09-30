@@ -17,9 +17,6 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
   - Bonus che dipendono da uno stato attivo: Danno ira (serve "Ira attiva"), Punizione divina, Colpo brutale, Furia, Sacro Simbolo ecc. Nelle schede degli attacchi ci sono solo gli extra sempre validi (Attacco furtivo, come promemoria).
   - Proprietà di maestria: il motore dice quale è attiva e la CD di Rovesciare; l'effetto (Spingere, Fiaccare...) è solo testo della regola.
   - Attacco a distanza con nemico entro 5 ft / a gittata lunga: promemoria di Svantaggio (dipende dalla situazione).
-- **Step 17 (avanzamento di livello)**
-  - Multiclasse: `classOptions` già controlla il 13 richiesto; restano le competenze parziali della nuova classe (solo quelle "multiclasse") e il Dado Vita/PF al nuovo livello.
-  - Mente di ferro (Cacciatore delle tenebre): "se hai già la competenza Sag, Int o Car" (ora sempre Sag).
 - **Privilegi ancora solo descritti** (step 14b ha messo l'elenco, i contatori e 7 stati attivabili; il resto si legge ma non modifica i numeri):
   - Contatori: 49 ricavati dal testo dei riepiloghi (`scripts/lib/feature-play.ts`, `deriveUsage`): solo formule esplicite ("Usi = mod Sag (min 1) per Riposo Lungo", "1 volta per Riposo Breve o Lungo"); il minimo 1 c'è solo dove il testo lo scrive.
     I costi alternativi ("o spendendo un dado / uno slot / 5 punti") restano nel testo: il contatore conta solo gli usi a riposo.

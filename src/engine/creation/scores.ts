@@ -1,8 +1,7 @@
 import { ABILITIES, type Ability } from "../schema";
 import type { Ruleset } from "../ruleset";
 import type { Character } from "../types";
-import { buildCtx } from "../compute/context";
-import { asiProblems, parseAsi, type AsiPick } from "./asi";
+import { asiProblems, asiScores, parseAsi, type AsiPick } from "./asi";
 import { validateDecisions } from "./decisions";
 import { allQuestions } from "./questions";
 import type { Removed } from "./types";
@@ -70,7 +69,11 @@ export function setAsi(ch: Character, rs: Ruleset, key: string, picks: AsiPick[]
   if (!q?.asi) return { ok: false, errors: [`Aumento di caratteristica non disponibile: ${key}`], character: ch };
   const without: Character = { ...ch, asi: ch.asi.filter((a) => a.key !== key) };
   if (!picks.length) return { ok: true, errors: [], character: without };
-  const before = buildCtx(without, rs).scores;
+  // punteggi PRIMA di questo aumento, in ordine cronologico: il background per primo, poi quelli di livello (i successivi non contano)
+  const qs = allQuestions(ch, rs);
+  const later = new Set(qs.slice(qs.findIndex((x) => x.key === key)).filter((x) => x.kind === "abilityIncrease").map((x) => x.key));
+  const chrono: Character = { ...without, asi: without.asi.filter((a) => !a.key || (key === "background/asi" ? false : a.key === "background/asi" || !later.has(a.key))) };
+  const before = asiScores(chrono);
   const errors = asiProblems(q.asi, picks, before);
   if (errors.length) return { ok: false, errors, character: ch };
   const asi = [...without.asi, ...picks.map((p) => ({ source: q.owner, ability: p.ability, amount: p.amount, cap: q.asi!.cap, key }))];

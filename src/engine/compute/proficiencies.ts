@@ -23,6 +23,14 @@ export function computeProfs(x: Ctx): Profs {
     first.weaponProficiency.forEach((w) => p.weapons.add(w));
     first.toolProficiency.forEach((t) => p.tools.add(t));
   }
+  // Un livello in una classe che non è la prima dà solo le competenze "multiclasse" (armi, armature, strumenti fissi), non i TS (file 02 §8)
+  x.ch.classes.slice(1).forEach((cl) => {
+    const m = x.rs.classes.get(cl.classId)?.multiclass;
+    if (!m) return;
+    m.armor.forEach((a) => p.armor.add(a));
+    m.weapons.forEach((w) => p.weapons.add(w));
+    m.tools.forEach((t) => p.tools.add(t));
+  });
   const bg = x.rs.backgrounds.get(x.ch.backgroundId);
   if (bg) {
     bg.skills.forEach((s) => p.skills.add(s));

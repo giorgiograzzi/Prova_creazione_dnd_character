@@ -1,4 +1,5 @@
-import type { Ability } from "../schema";
+import { ABILITIES, type Ability } from "../schema";
+import type { Character } from "../types";
 import type { Question } from "./types";
 
 export interface AsiPick { ability: Ability; amount: number }
@@ -25,3 +26,11 @@ export function asiProblems(spec: NonNullable<Question["asi"]>, picks: AsiPick[]
 }
 
 export const parseAsi = (selected: string[]): AsiPick[] => selected.map((s) => { const [a, n] = s.split("+"); return { ability: a as Ability, amount: Number(n) }; });
+
+// Punteggi per il controllo del tetto degli aumenti: base + aumenti scelti (senza gli effetti dei privilegi, che vengono dopo
+// nel tempo: es. il Campione primevo del Barbaro al 20° non deve invalidare l'aumento del background)
+export function asiScores(ch: Character): Record<Ability, number> {
+  const s = { ...ch.baseScores };
+  for (const a of ch.asi) s[a.ability] += a.amount;
+  return Object.fromEntries(ABILITIES.map((a) => [a, s[a]])) as Record<Ability, number>;
+}

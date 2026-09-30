@@ -103,6 +103,7 @@ export function testRuleset(): Ruleset {
       recommendedArrays: { fighter: { str: 15, dex: 14, con: 13, int: 8, wis: 10, cha: 12 } },
       startingLevels: [{ minLevel: 5, maxLevel: 10, gold: 500, goldDice: { sides: 10, count: 1, multiplier: 25 }, magicItems: { common: 1, uncommon: 1, rare: 0, veryRare: 0 } }],
       alignments: [{ id: "true_neutral", name: t("Neutrale") }],
+      xpThresholds: [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000],
     }] },
     { kind: "weapons", entries: TEST_WEAPONS },
     { kind: "items", entries: [{ id: "arrow", name: t("Frecce (20)"), category: "ammunition", weight: 1 }, { id: "ring", name: t("Anello"), category: "gear", attunement: true }, { id: "rope", name: t("Corda"), category: "gear", weight: 5 }] },

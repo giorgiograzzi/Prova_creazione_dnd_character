@@ -43,11 +43,18 @@ export function collectSlots(ch: Character, rs: Ruleset, ctx: Ctx = buildCtx(ch,
     const f = rs.feats.get(bg.feat);
     if (f) addChoices(f, { prefix: "", owner: f.name.it, step: "background", featId: f.id });
   }
-  for (const cl of ch.classes) {
+  for (const [ci, cl] of ch.classes.entries()) {
     const def = rs.classes.get(cl.classId);
     if (!def) continue;
     const b: Base = { prefix: "", owner: def.name.it, step: "class", classId: cl.classId, classLevel: cl.level };
-    addChoices(def, b);
+    // classe aggiunta dopo la prima (multiclasse): abilità e strumenti a scelta secondo la riga "Ottieni" (spesso nessuno)
+    const mc = def.multiclass;
+    const choices = ci === 0 || !mc ? def.choices : def.choices.flatMap((c) => {
+      if (c.id === `${def.id}_skills`) return mc.skills > 0 ? [{ ...c, count: mc.skills }] : [];
+      if (c.id.startsWith(`${def.id}_tools`)) return mc.toolChoices > 0 && c.id === `${def.id}_tools` ? [{ ...c, count: mc.toolChoices }] : [];
+      return [c];
+    });
+    addChoices({ name: def.name, choices }, b);
     leveled(def.features, cl.level, b);
     const sub = cl.subclassId ? rs.subclasses.get(cl.subclassId) : undefined;
     if (sub && cl.level >= def.subclassLevel) {

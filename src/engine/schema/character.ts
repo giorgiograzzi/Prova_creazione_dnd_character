@@ -39,6 +39,7 @@ export const characterSchema = z.object({
   }),
   overrides: z.record(z.string(), z.number()),
   notes: z.string(),
+  xp: int.min(0).optional(),
   creation: z.object({ method: z.enum(["array", "roll", "pointbuy", "manual"]), rolls: z.array(int).optional() }).optional(),
   pactWeapon: z.string().optional(),
 });

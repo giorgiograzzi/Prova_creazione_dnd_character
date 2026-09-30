@@ -3,7 +3,7 @@ import type { Ruleset } from "../ruleset";
 import type { Character } from "../types";
 import { buildCtx } from "../compute/context";
 import { lookupItem } from "../equipment/loadout";
-import { asiProblems, parseAsi } from "./asi";
+import { asiProblems, asiScores, parseAsi } from "./asi";
 import { optionStates } from "./options";
 import { collectSlots, resolveCount, type Slot } from "./slots";
 import { STEPS, type OptionState, type Question, type StepId } from "./types";
@@ -101,13 +101,16 @@ export function allQuestions(ch: Character, rs: Ruleset): Question[] {
     const later = drafts.slice(i).map((x) => x.q.key);
     const stripped: Character = {
       ...ch, decisions: Object.fromEntries(Object.entries(ch.decisions).filter(([k]) => !later.some((l) => k === l || k.startsWith(`${l}/`)))),
-      asi: ch.asi.filter((a) => !a.key || !drafts.slice(i).some((x) => x.asiKey === a.key)),
+      // cronologia degli aumenti: il background viene per primo (si applica alla creazione), poi quelli di livello in ordine.
+      // Le altre domande lo contano sempre; il background stesso non conta nessun aumento di livello.
+      asi: ch.asi.filter((a) => !a.key || (a.key === "background/asi" ? d.asiKey !== "background/asi"
+        : d.asiKey !== "background/asi" && !drafts.slice(i).some((x) => x.asiKey === a.key))),
     };
     const selected = selectedOf(d);
     let options: OptionState[];
     let asiOk = true;
     if (d.q.kind === "abilityIncrease") {
-      const sc = buildCtx(stripped, rs).scores;
+      const sc = asiScores(stripped);
       // gli aumenti scelti devono rispettare le regole della fonte (caratteristiche ammesse, forma +2/+1, tetto)
       asiOk = selected.length > 0 && asiProblems(d.q.asi!, parseAsi(selected), sc).length === 0;
       const cap = d.q.asi!.cap;

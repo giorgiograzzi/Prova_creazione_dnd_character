@@ -78,6 +78,7 @@ export function buildCtx(ch: Character, rs: Ruleset, weapon?: Weapon, hand?: { t
     totalLevel, classLevels, scores: ch.baseScores, equipped: gear.equipped,
     features: collected.features, feats: collected.feats, activeStates: ch.state.active ?? {},
     ...(hand?.ability ? { attackAbility: hand.ability } : {}),
+    classSaves: new Set(ch.classes[0] ? rs.classes.get(ch.classes[0].classId)?.saves ?? [] : []),
     ...(gear.body ? { bodyArmor: gear.body } : {}), ...(gear.shield ? { shield: gear.shield } : {}),
     ...(weapon ? { weapon } : {}), ...(hand?.twoHanded ? { twoHanded: true } : {}), ...(hand?.otherWeapon ? { otherWeapon: true } : {}),
   };

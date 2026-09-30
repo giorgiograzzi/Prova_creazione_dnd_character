@@ -1,5 +1,5 @@
 import it from "../i18n/it.json";
-import { computeCharacter } from "../engine/compute";
+import { buildCtx, computeCharacter } from "../engine/compute";
 import {
   allQuestions, creationProgress, fillHpRolls, pointBuyCost, previewDecision, recommendedArray, rollAbilityScores, setAsi, setBaseScores,
   startingEquipment, type DecisionResult, type Question,
@@ -100,8 +100,13 @@ export function autoComplete(ch: Character, rs: Ruleset, opts: { scores?: Scores
     const q = allQuestions(cur, rs).find((x) => !x.complete && !x.disabled);
     if (!q) break;
     if (q.kind === "abilityIncrease") {
-      const allowed = q.asi!.allowed;
-      const draft: Partial<Record<Ability, number>> = q.asi!.mode === "background" ? { [allowed[0]!]: 2, [allowed[1]!]: 1 } : q.asi!.mode === "asi" ? { [allowed[0]!]: 2 } : { [allowed[0]!]: 1 };
+      // solo caratteristiche che hanno ancora posto sotto il tetto (i test portano i personaggi fino al 20°)
+      const sc = buildCtx(cur, rs).scores, cap = q.asi!.cap;
+      const room = (n: number) => q.asi!.allowed.filter((a) => sc[a] + n <= cap);
+      const allowed = q.asi!.mode === "background" ? q.asi!.allowed : room(1);
+      const two = room(2)[0];
+      const draft: Partial<Record<Ability, number>> = q.asi!.mode === "background" ? { [allowed[0]!]: 2, [allowed[1]!]: 1 }
+        : q.asi!.mode === "asi" ? (two ? { [two]: 2 } : { [allowed[0]!]: 1, [allowed[1]!]: 1 }) : allowed[0] ? { [allowed[0]]: 1 } : {};
       const r = applyAsiDraft(cur, rs, q.key, draft);
       if (!r.ok) throw new Error(`autoComplete: ${q.key}: ${r.errors.join("; ")}`);
       cur = r.character; continue;

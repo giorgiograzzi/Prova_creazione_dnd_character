@@ -118,10 +118,10 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
 }
 
 // bozza iniziale = aumenti già applicati
-const draftOf = (q: Question): Partial<Record<Ability, number>> =>
+export const draftOf = (q: Question): Partial<Record<Ability, number>> =>
   Object.fromEntries(q.selected.map((s) => { const [a, n] = s.split("+"); return [a, Number(n)]; }));
 
-function AsiBlock({ q, ch, rs, draft, onDraft, onApply }: {
+export function AsiBlock({ q, ch, rs, draft, onDraft, onApply }: {
   q: Question; ch: Character; rs: Ruleset; draft: Partial<Record<Ability, number>>; onDraft: (d: Partial<Record<Ability, number>>) => void;
   onApply: (r: ReturnType<typeof applyAsiDraft>) => void;
 }) {

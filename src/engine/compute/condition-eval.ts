@@ -17,6 +17,7 @@ export interface CondCtx {
   feats: Set<string>;
   activeStates?: Record<string, string[]>; // privilegi attivati (state.active): id → scelte fatte all'attivazione
   attackAbility?: Ability; // caratteristica usata dall'attacco considerato
+  classSaves?: Set<Ability>; // TS della classe di partenza
 }
 
 const cmp = (a: number, op: Cmp, b: number) =>
@@ -40,6 +41,7 @@ export function evalCondition(c: Condition, x: CondCtx): boolean {
     case "hasFeat": return x.feats.has(c.value);
     case "active": return !!x.activeStates?.[c.value];
     case "attackAbility": return x.attackAbility === c.value;
+    case "saveProficient": return !!x.classSaves?.has(c.value);
     case "level": return cmp(x.totalLevel, c.cmp, c.n);
     case "classLevel": return cmp(x.classLevels[c.key ?? ""] ?? 0, c.cmp, c.n);
     case "ability": return cmp(x.scores[c.key as Ability] ?? 0, c.cmp, c.n);

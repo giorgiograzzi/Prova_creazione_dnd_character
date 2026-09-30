@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     // Config base: manifest e offline completo si rifiniscono allo step 19
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       manifest: {
         name: "Personaggi D&D",
         short_name: "D&D PG",

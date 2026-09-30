@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1 completato.** Prossimo: step 2 (schema dati ed effetti, da approvare prima di proseguire).
+Stato: **Step 1 completato. Step 2 fatto, in attesa di approvazione dello schema effetti** (vedi ARCHITECTURE.md).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -10,14 +10,15 @@ Cartella `data/rules/` (NON `docs/rules/` come da brief):
 |---|---|---|
 | `01_Dati_Gioco_DnD2024.pdf` | 64 | Abilità, linguaggi, PX/competenza, 9 specie, 16 background, 12 classi con tabelle 1-20 e sottoclassi, talenti (origine/generali/stili/doni epici), armi + maestrie, armature, strumenti, equipaggiamento, dotazioni, monete. Descrizioni già riassunte, ogni voce ha l'id inglese. |
 | `02_Regole_Creazione_Personaggio.pdf` | 5 | Ordine di creazione, generazione punteggi, formule (PF, CA, attacco, CD...), equipaggiamento iniziale, livello iniziale > 1, multiclasse. |
+| `04_Incantesimi_DnD2024.pdf` | 42 | 390 incantesimi (livello, scuola, classi, tempo, gittata, componenti, durata, effetto riassunto, livelli superiori), liste per classe, tabelle slot, regole di lancio. |
 | `03_Modificatori_Scelte_e_Tiri.pdf` | 6 | Grafo delle dipendenze, scelte → effetti, formule CA, attacco/danno, vincoli ed esclusioni, elenco delle `op` degli effetti. **Base diretta per lo schema effetti.** |
 
 Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno script mio (nessun lettore PDF installato). Le regole le leggo da lì.
 
 ### Cosa manca o non torna (da decidere, una cosa alla volta)
 
-1. **SRD 5.2 (`IT_SRD_CC_v5.2.1.pdf`) non c'è più**: è stato cancellato dalla repo (commit `b9aa9a3`). Senza non posso né leggere la dicitura di attribuzione CC-BY per `ATTRIBUTION.md` né estrarre gli **incantesimi**.
-2. **Incantesimi: non ci sono i dati.** Il file 01 li esclude ("solo nomi dove servono"). Mancano: descrizioni, scuola, livello, gittata, componenti, durata, liste per classe. Serve una fonte (SRD o manuale).
+1. **SRD 5.2 (`IT_SRD_CC_v5.2.1.pdf`) non c'è più** (resta aperto solo per la dicitura CC-BY di `ATTRIBUTION.md`): è stato cancellato dalla repo (commit `b9aa9a3`). Senza non posso né leggere la dicitura di attribuzione CC-BY per `ATTRIBUTION.md` né estrarre gli **incantesimi**.
+2. ~~Incantesimi: non ci sono i dati.~~ **Risolto: aggiunto `04_Incantesimi_DnD2024.pdf` (step 8 sbloccato).** Restano fuori solo i testi completi. Il file 01 li esclude ("solo nomi dove servono"). Mancano: descrizioni, scuola, livello, gittata, componenti, durata, liste per classe. Serve una fonte (SRD o manuale).
 3. **Manuale del giocatore italiano**: non presente (solo i 3 riepiloghi). Per condizioni ed Esaurimento (effetti), Morte/salvezze, riposi, tempi di cambio arma, oggetti magici, Doni epici, invocazioni del Warlock: dove il file 01 non dà i numeri li marco `needsReview` in `DATA_TODO.md`, non li invento.
 4. **Percorso**: brief dice `docs/rules/`, i file sono in `data/rules/`. Propongo di spostarli in `docs/rules/` e metterli in `.gitignore` (già tracciati: vanno tolti dall'indice; restano nella cronologia git).
 5. Il file 03 dice che "cambiare arma costa 1 azione" è già la regola della casa scelta; il default ufficiale (estrarre/riporre come parte dell'attacco) resta in Impostazioni come da brief.
@@ -37,7 +38,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - **File**: `package.json`, `vite.config.ts`, `tsconfig.json`, `src/**` (vuote), `.gitignore`, doc.
 - **Fatto**: `npm run dev/build/test` funzionano; niente contenuto protetto tracciato.
 
-### 2. Schema dati ed effetti (`types.ts`, `schema/`)
+### 2. Schema dati ed effetti (`types.ts`, `schema/`) ✅ (da approvare)
 - **Obiettivo**: tipi `Character`, `Effect`, `Condition`, `Choice`, `Option`; schemi Zod per specie, background, classe, sottoclasse, talento, arma, armatura, oggetto, incantesimo, homebrew (con `schemaVersion`); parser delle condizioni (`equipped:`, `wearingArmor:`, `weaponProperty:`, `hasFeature:`, `level>=N`...); effetti minimi del brief (le `op` del file 03: modifier, grantProficiency, grantFeature/Feat/Spell/Equipment, setSpeed, grantSense, grantResistance, acFormula, abilityScoreIncrease, prerequisite/restriction, risorse con ricarica). Loader del ruleset tollerante se `private/` manca.
 - **Fatto**: schema documentato in `ARCHITECTURE.md`; test di validazione su esempi minimi; **schema effetti da te approvato prima di andare avanti.**
 
@@ -62,7 +63,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - Tabelle 1-20 (PF, privilegi, colonne, slot), scelte al 1° livello, equipaggiamento A/B(/C), sottoclassi, multiclasse (solo annotato).
 - **Fatto**: come step 4 per ciascun batch.
 
-### 8. Dati cap. E — Incantesimi (BLOCCATO da punti 1-2)
+### 8. Dati cap. E — Incantesimi (fonte: file 04)
 - Elenco, livello, scuola, lista di classe, testo breve. **Serve la fonte**; fino ad allora solo gli id citati nei dati (validati come "riferimento noto").
 - **Fatto**: come step 4, oppure rinviato a tua decisione.
 

@@ -124,6 +124,9 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 - **Rifiniture dopo la prova sul telefono**: le finestre (`Dialog`) stanno in un portale sul `body` sopra intestazione e barra in basso, con altezza massima dello schermo e corpo scorrevole (la × è sempre raggiungibile); il negozio ha il filtro **Homebrew** diviso per tipo (anche oggetti a costo 0, "Gratis") e scorre per intero; nello zaino eliminare un oggetto (✕, o − sull'ultimo) chiede conferma.
 
+### 18b. Stampa scheda (PDF) ✅
+- Pulsante **Stampa scheda (PDF)** nel passo ★ Riepilogo del wizard (creazione e modifica): scrive il personaggio sulla scheda ufficiale 2024 in italiano (`public/forms/scheda-2024-it.pdf`) e la scarica. Dati dal motore (`src/export/sheetData.ts`), posizioni fisse (`sheetPdf.ts`), caricamento a richiesta e cache per l'offline. Test: dati, scrittura sul modello, caratteri fuori dal set e testi lunghissimi.
+
 ### 19. PWA e Docker
 - Installabilità e offline completo, promemoria backup; `Dockerfile` multi-stage + nginx (fallback SPA, cache service worker), `docker-compose.yml`, `.env.example`. **Ti chiedo la porta prima di fissarla.**
 - **Note dalla prova sul server (bunker)**: oggi l'app gira con `npx vite preview --host --port 4173` a mano; se il terminale si chiude (o si preme Ctrl+C) il server si ferma e Safari dice "il server ha smesso di rispondere". Con Docker: `restart: unless-stopped`. Da casa l'indirizzo è `http://192.168.1.13:4173` (Wi-Fi), da fuori serve Tailscale (`http://100.112.127.25:4173`) o il dominio HTTPS via Cloudflare Tunnel (vedi skill infra-bunker). L'icona in Home è legata a un solo indirizzo. Il service worker (autoUpdate) e `Cache-Control: no-cache` vanno verificati anche in nginx.

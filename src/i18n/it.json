@@ -187,6 +187,14 @@
         "veryRare": "{n} Molto raro"
       },
       "next": "Avanti: scegli la classe"
+    },
+    "sheet": {
+      "button": "Stampa scheda (PDF)",
+      "busy": "Preparo il PDF…",
+      "open": "Apri il PDF",
+      "done": "Scheda di {name} pronta: la trovi tra i download.",
+      "error": "Non riesco a creare il PDF: {e}",
+      "help": "Scrive i dati del personaggio sulla scheda ufficiale 2024 in italiano, pronta da stampare."
     }
   },
   "play": {

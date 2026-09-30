@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     // Config base: manifest e offline completo si rifiniscono allo step 19
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       // La scheda PDF (5 MB) non entra nell'installazione: si tiene in cache la prima volta che serve, poi funziona anche offline
       workbox: { runtimeCaching: [{ urlPattern: ({ url }) => url.pathname.endsWith(".pdf"), handler: "CacheFirst", options: { cacheName: "forms", expiration: { maxEntries: 2 } } }] },
       manifest: {

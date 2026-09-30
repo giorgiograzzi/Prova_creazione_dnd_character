@@ -8,6 +8,7 @@ import type { ImportPreview } from "./db/backup";
 import { SectionBar, TabBar, icons, type IconName, type TabDef } from "./ui/xp";
 import { SHEET_SECTIONS, type SheetView } from "./sheet/sections";
 import { isFinalized } from "./wizard/logic";
+import { ReloadPrompt } from "./ui/ReloadPrompt";
 import { useApp } from "./ui/useApp";
 
 const SECTION_ICONS: Record<(typeof SHEET_SECTIONS)[number], IconName> = { status: "heart", features: "star", stats: "chart", attacks: "sword", equip: "equip", magic: "magic", misc: "notes" };
@@ -81,6 +82,7 @@ export function App() {
             onSelect={(id) => { setSettings(false); setSection(id as SheetView); }} onBack={() => { setSettings(false); setTab("characters"); }} />
         : <TabBar tabs={tabs} current={shown} onSelect={(id) => { setSettings(false); setTab(id as TabId); }} />}
       {importing && <ImportDialog preview={importing} onClose={() => setImporting(null)} onDone={() => setImporting(null)} />}
+      <ReloadPrompt />
     </div>
   );
 }

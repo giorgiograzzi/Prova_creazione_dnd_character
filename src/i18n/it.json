@@ -927,5 +927,12 @@
     "proceed": "Procedi",
     "missing": "Questo personaggio usa contenuti Homebrew che qui non ci sono (spenti, eliminati o mai importati): {list}. Riattivali o importali dalla scheda Homebrew.",
     "kindsGroup": "Tipo di contenuto"
+  },
+  "pwa": {
+    "updateAvailable": "È disponibile una nuova versione dell'app.",
+    "update": "Aggiorna e reinstalla",
+    "later": "Più tardi",
+    "offlineReady": "L'app è pronta per l'uso offline.",
+    "close": "Chiudi"
   }
 }

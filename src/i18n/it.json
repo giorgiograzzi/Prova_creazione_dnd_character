@@ -1,3 +1,10 @@
 {
-  "app": { "title": "Personaggi D&D" }
+  "app": { "title": "Personaggi D&D" },
+  "pwa": {
+    "updateAvailable": "È disponibile una nuova versione dell'app.",
+    "update": "Aggiorna e reinstalla",
+    "later": "Più tardi",
+    "offlineReady": "L'app è pronta per l'uso offline.",
+    "close": "Chiudi"
+  }
 }

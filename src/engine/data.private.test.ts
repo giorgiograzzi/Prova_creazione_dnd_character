@@ -208,4 +208,135 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
       expect(valor.proficiencies.weapons).toContain("martial");
     });
   });
+
+  describe("classi 7b: Guerriero, Monaco, Paladino, Ranger, Ladro, Stregone, Warlock, Mago", () => {
+    const R = fullRuleset();
+    const cls = (classId: string, level: number, extra: object = {}) => ({ classId, level, hpRolls: [], ...extra });
+    const mk = (classes: ReturnType<typeof cls>[], over: object = {}) => testCharacter({ classes, ...over });
+    const scores = (o: Partial<Record<string, number>>) => ({ baseScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, ...o } });
+    const active = (ch: ReturnType<typeof mk>) => buildCtx(ch, R).active.map((a) => a.effect);
+    const spells = (ch: ReturnType<typeof mk>) => active(ch).flatMap((e) => (e.op === "grantSpell" ? [e.spell] : []));
+
+    it("12 classi, 48 sottoclassi (3-4 per classe), tabelle 1-20 complete", () => {
+      expect(R.classes.size).toBe(12);
+      expect(R.subclasses.size).toBe(48);
+      for (const c of R.classes.values()) {
+        for (const col of Object.values(c.table)) expect(col, c.id).toHaveLength(20);
+        expect(c.features.length, c.id).toBeGreaterThan(10);
+        expect([...R.subclasses.values()].filter((sc) => sc.classId === c.id).length, c.id).toBeGreaterThanOrEqual(3);
+      }
+    });
+    it("Guerriero: usi da tabella (Recupero energie, Azione impetuosa) e Campione con critico 19-20 / 18-20", () => {
+      expect(computeCharacter(mk([cls("fighter", 1)]), R).resources.second_wind?.max.value).toBe(2);
+      expect(computeCharacter(mk([cls("fighter", 2)]), R).resources.action_surge?.max.value).toBe(1);
+      expect(computeCharacter(mk([cls("fighter", 17)]), R).resources.action_surge?.max.value).toBe(2);
+      const crit = (l: number) => active(mk([cls("fighter", l, { subclassId: "champion" })])).flatMap((e) => (e.op === "critRange" ? [e.min] : []));
+      expect(crit(3)).toEqual([19]);
+      expect(crit(15)).toEqual([19, 18]);
+    });
+    it("Maestro di battaglia: dadi di superiorità dalla tabella della sottoclasse (4 → 5 al 7°)", () => {
+      const r = (l: number) => computeCharacter(mk([cls("fighter", l, { subclassId: "battle_master" })]), R).resources.superiority_dice?.max.value;
+      expect([r(3), r(7), r(15)]).toEqual([4, 5, 6]);
+      expect(R.subclasses.get("battle_master")!.choices.find((c) => c.id === "battle_master_maneuvers")!.options).toHaveLength(20);
+    });
+    it("Cavaliere mistico e Mistificatore arcano: terzo incantatore con slot e trucchetti propri", () => {
+      const ek = R.subclasses.get("eldritch_knight")!, at = R.subclasses.get("arcane_trickster")!;
+      expect([ek.caster, ek.spellAbility, ek.spellList, ek.spellSlots![2], ek.spellSlots![19]]).toEqual(["third", "int", "wizard", [2], [4, 3, 3, 1]]);
+      expect(at.table.trucchetti![2]).toBe(3);
+    });
+    it("Monaco: CA 10 + Des + Sag, Movimento senza armatura a scaglioni, Arti marziali d6→d8", () => {
+      const b = scores({ dex: 14, wis: 14 });
+      expect(computeCharacter(mk([cls("monk", 1)], b), R).ac.value).toBe(14);
+      const sp = (l: number, inv: object[] = []) => computeCharacter(mk([cls("monk", l)], { ...b, inventory: inv }), R).speed.walk.value;
+      expect([sp(1), sp(2), sp(6), sp(18)]).toEqual([30, 40, 45, 60]);
+      expect(sp(6, [{ itemId: "shield", qty: 1, state: "worn" }])).toBe(30); // niente scudo
+      const dice = (l: number) => active(mk([cls("monk", l)], b)).flatMap((e) => (e.op === "unarmedDie" ? [e.die] : []));
+      expect(dice(4)).toEqual(["d6"]);
+      expect(dice(5)).toEqual(["d6", "d8"]);
+      expect(computeCharacter(mk([cls("monk", 2)], b), R).resources.monks_focus?.max.value).toBe(2);
+    });
+    it("Monaco 14°: competenza in tutti i TS; 20°: Des e Sag +4 (max 25)", () => {
+      const d = computeCharacter(mk([cls("monk", 14)]), R);
+      expect(Object.values(d.saves).every((x) => x.proficient)).toBe(true);
+      expect(computeCharacter(mk([cls("monk", 20)], scores({ dex: 18, wis: 18 })), R).scores.dex.value).toBe(22);
+    });
+    it("Paladino: Imposizione delle mani = 5 × livello; Aura di protezione = mod Car ai TS dal 6°", () => {
+      expect(computeCharacter(mk([cls("paladin", 3)]), R).resources.lay_on_hands?.max.value).toBe(15);
+      const b = scores({ cha: 16, dex: 10 });
+      expect(computeCharacter(mk([cls("paladin", 5)], b), R).saves.dex.bonus.value).toBe(0);
+      expect(computeCharacter(mk([cls("paladin", 6)], b), R).saves.dex.bonus.value).toBe(3);
+      expect(R.classes.get("paladin")!.spellSlots![4]).toEqual([4, 2]);
+      expect(R.classes.get("paladin")!.choices.some((c) => c.id === "paladin_cantrips")).toBe(false); // il Paladino non ha trucchetti
+      expect(spells(mk([cls("paladin", 2)]))).toContain("divine_smite");
+    });
+    it("Paladino dei Sacri Antichi: resistenze dell'aura dal 7° livello", () => {
+      const r = (l: number) => computeCharacter(mk([cls("paladin", l, { subclassId: "ancients" })]), R).resistances;
+      expect(r(6)).toEqual([]);
+      expect(r(7)).toEqual(["necrotic", "psychic", "radiant"]);
+    });
+    it("Ranger: Marchio del cacciatore sempre preparato, Vagabondo, Sensi ferini, Cacciatore delle tenebre", () => {
+      expect(spells(mk([cls("ranger", 1)]))).toContain("hunters_mark");
+      expect(computeCharacter(mk([cls("ranger", 1)]), R).resources.favored_enemy?.max.value).toBe(2);
+      expect(computeCharacter(mk([cls("ranger", 6)]), R).speed.walk.value).toBe(40);
+      expect(computeCharacter(mk([cls("ranger", 18)]), R).senses.blindsight?.value).toBe(30);
+      const gs = computeCharacter(mk([cls("ranger", 3, { subclassId: "gloom_stalker" })], scores({ wis: 16 })), R);
+      expect(gs.initiative.value).toBe(3); // Des +0, Sag +3
+    });
+    it("Ladro: 4 abilità, due Maestrie (1° e 6°), Mente sfuggente al 15°", () => {
+      const c = R.classes.get("rogue")!;
+      expect(c.skillChoices.count).toBe(4);
+      expect(c.toolProficiency).toEqual(["thieves_tools"]);
+      expect(c.weaponProficiency).toEqual(["simple", "martial[finesse|light]"]);
+      const d = computeCharacter(mk([cls("rogue", 6)], { decisions: { rogue_skills: ["stealth", "acrobatics", "perception", "investigation"], rogue_expertise_1: ["stealth", "perception"], rogue_expertise_6: ["acrobatics", "investigation"] } }), R);
+      expect(["stealth", "perception", "acrobatics", "investigation"].map((s) => d.skills[s as "stealth"].proficiency)).toEqual(Array(4).fill("expertise"));
+      const d15 = computeCharacter(mk([cls("rogue", 15)]), R);
+      expect([d15.saves.wis.proficient, d15.saves.cha.proficient, d15.saves.dex.proficient]).toEqual([true, true, true]);
+      expect(R.classes.get("rogue")!.table.attacco_furtivo![10]).toBe("6d6");
+    });
+    it("Stregone: punti stregoneria = livello, Stregoneria innata 2 usi, Metamagia con costi", () => {
+      expect(computeCharacter(mk([cls("sorcerer", 5)]), R).resources.font_of_magic?.max.value).toBe(5);
+      expect(computeCharacter(mk([cls("sorcerer", 1)]), R).resources.innate_sorcery?.max.value).toBe(2);
+      const meta = R.classes.get("sorcerer")!.choices.find((c) => c.id === "sorcerer_metamagic")!;
+      expect(meta.options).toHaveLength(10);
+      expect(meta.options!.every((o) => o.cost === 1 || o.cost === 2)).toBe(true);
+      expect(meta.countFrom).toBe("metamagie_note");
+    });
+    it("Stregone draconico: CA 10 + Des + Car e +1 PF per livello da Stregone", () => {
+      const b = scores({ dex: 14, cha: 16, con: 10 });
+      expect(computeCharacter(mk([cls("sorcerer", 3, { subclassId: "draconic" })], b), R).ac.value).toBe(10 + 2 + 3);
+      const plain = computeCharacter(mk([cls("sorcerer", 3, { subclassId: "wild_magic" })], b), R).hp.max.value;
+      expect(computeCharacter(mk([cls("sorcerer", 3, { subclassId: "draconic" })], b), R).hp.max.value - plain).toBe(3);
+    });
+    it("Warlock: slot del patto separati (3 slot di 5° al 11°), 28 invocazioni con prerequisiti", () => {
+      const w = R.classes.get("warlock")!;
+      expect(w.caster).toBe("pact");
+      expect(w.spellSlots).toBeUndefined();
+      expect(w.pactSlots![10]).toEqual({ count: 3, level: 5 });
+      const inv = w.choices.find((c) => c.id === "warlock_invocations")!;
+      expect(inv.options).toHaveLength(28);
+      const blade = inv.options!.find((o) => o.id === "devouring_blade")!;
+      expect(blade.requires).toBe("classLevel:warlock>=12 && hasFeature:thirsting_blade");
+      // scegliere un'invocazione la rende "posseduta" per i prerequisiti di quelle successive
+      const ctx = buildCtx(mk([cls("warlock", 5)], { decisions: { warlock_invocations: ["pact_of_the_blade"] } }), R);
+      expect(ctx.features.has("pact_of_the_blade")).toBe(true);
+    });
+    it("Warlock Celestiale/Grande Antico: resistenze; Astuzia magica e Luce guaritrice come risorse", () => {
+      expect(computeCharacter(mk([cls("warlock", 6, { subclassId: "celestial" })]), R).resistances).toEqual(["radiant"]);
+      expect(computeCharacter(mk([cls("warlock", 10, { subclassId: "great_old_one" })]), R).resistances).toEqual(["psychic"]);
+      expect(computeCharacter(mk([cls("warlock", 3, { subclassId: "celestial" })]), R).resources.healing_light?.max.value).toBe(4);
+      expect(computeCharacter(mk([cls("warlock", 2)]), R).resources.magical_cunning?.max.value).toBe(1);
+    });
+    it("Mago: libro degli incantesimi (6), Recupero arcano, Studioso; 6 incantesimi di partenza", () => {
+      const w = R.classes.get("wizard")!;
+      expect(w.features.find((f) => f.id === "spellcasting")!.choices[0]).toMatchObject({ id: "wizard_spellbook", count: 6 });
+      expect(computeCharacter(mk([cls("wizard", 1)]), R).resources.arcane_recovery?.max.value).toBe(1);
+      const d = computeCharacter(mk([cls("wizard", 2)], { decisions: { wizard_skills: ["arcana", "history"], wizard_scholar: ["arcana"] } }), R);
+      expect(d.skills.arcana.proficiency).toBe("expertise");
+      expect(w.spellSlots![16]).toEqual([4, 3, 3, 3, 2, 1, 1, 1, 1]);
+    });
+    it("classi con lista di incantesimi: colonne trucchetti/preparati (tranne Paladino e Ranger)", () => {
+      for (const id of ["bard", "cleric", "druid", "sorcerer", "warlock", "wizard"]) expect(R.classes.get(id)!.table.trucchetti, id).toBeDefined();
+      for (const id of ["paladin", "ranger"]) expect(R.classes.get(id)!.table.trucchetti, id).toBeUndefined();
+    });
+  });
 });

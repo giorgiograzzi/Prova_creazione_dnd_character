@@ -53,6 +53,12 @@ export const featSchema = z.object({
 
 export const subclassSchema = z.object({
   ...base, classId: id, features: z.array(featureSchema).default([]),
+  // Tabelle proprie della sottoclasse (dadi di superiorità, terzo incantatore...): 20 valori, 0/"" prima del 3° livello
+  table: z.record(z.string(), z.array(z.union([z.number(), z.string()])).length(20)).default({}),
+  caster: z.enum(["none", "third"]).default("none"),
+  spellAbility: ability.optional(),
+  spellList: id.optional(),
+  spellSlots: z.array(z.array(z.number().int())).length(20).optional(),
 });
 
 export const classSchema = z.object({
@@ -68,6 +74,7 @@ export const classSchema = z.object({
   spellAbility: ability.optional(),
   spellList: id.optional(), // lista di incantesimi della classe (es. "cleric")
   spellSlots: z.array(z.array(z.number().int())).length(20).optional(), // per livello di classe: slot di 1°, 2°, ...
+  pactSlots: z.array(z.object({ count: z.number().int(), level: z.number().int() })).length(20).optional(), // Warlock
   multiclassRequirement: z.string().optional(), // solo annotato (step 17)
   equipment: z.partialRecord(z.enum(["A", "B", "C"]), equipmentSet),
   features: z.array(featureSchema),

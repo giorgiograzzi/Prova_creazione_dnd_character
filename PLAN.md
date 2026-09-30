@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-7a completati.** Prossimo: step 7b (Guerriero→Mago). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-7 completati** (12 classi, 48 sottoclassi). Prossimo: step 8 (incantesimi). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -59,7 +59,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - 10 specie con scelte interne (ascendenza, lignaggio, retaggio, taglia, caratteristica incantatore) e tratti sbloccati a livello 3/5.
 - **Fatto**: come step 4.
 
-### 7. Dati cap. D — Classi (in due batch: 7a Barbaro→Druido ✅, 7b Guerriero→Mago)
+### 7. Dati cap. D — Classi (in due batch: 7a Barbaro→Druido ✅, 7b Guerriero→Mago ✅)
 - Tabelle 1-20 (PF, privilegi, colonne, slot), scelte al 1° livello, equipaggiamento A/B(/C), sottoclassi, multiclasse (solo annotato).
 - **Fatto**: come step 4 per ciascun batch.
 
@@ -90,6 +90,17 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 ### 14. Scheda giocabile
 - PF (danno/cura rapidi, temporanei, salvezze contro morte, dadi vita), riposo breve/lungo, stat con lancio d20 (vant./svant.), attacchi, condizioni ed Esaurimento 2024, ispirazione, monete, note, "da dove viene" (sources) su ogni numero, override visibili e rimovibili.
 - **Fatto**: test motore riposi/PF + prova manuale UI.
+
+### 14b. Privilegi giocabili (nuovo)
+- **Perché**: molti privilegi, tratti e talenti hanno effetti solo a parole (Attacco irruento, Colpo brutale, Bagliore protettivo...): devono essere descritti, contabili e attivabili dall'app, non da ricordare a mente.
+- **Obiettivo**:
+  1. **Elenco privilegi** nella scheda: descrizione completa, filtri per fonte (specie, classe, sottoclasse, talento) e livello.
+  2. **Contatori generici** per ogni privilegio a usi limitati, anche solo testo ("1 volta per Riposo Lungo", "usi = mod Sag"), con reset al riposo breve/lungo.
+  3. **Stati attivabili** (Ira, Forma selvatica, Rivelazione celestiale, Concentrazione...): campo `activatable` + condizione `active:<id>`; accesi applicano i loro effetti (bonus Danno ira, resistenze, velocità di volo) e consumano un uso.
+  4. **Scelte per attivazione** (Orso/Aquila/Lupo dell'Ira, elemento, forma) salvate nello stato di gioco e mostrate sulla scheda.
+  5. Dati: marcare nei dati quali privilegi sono attivabili / a usi, con `needsReview` dove il testo è ambiguo.
+- **File**: schema (`activatable`, `active:`), `compute/` (stati attivi), `store` (stato di gioco), UI Scheda.
+- **Fatto**: Ira attivabile con bonus danno e resistenze corretti; contatore su un privilegio solo testo; scelta per attivazione salvata; test del motore per ogni tipo.
 
 ### 15. Tab Equip (UI)
 - Inventario, quantità/peso/valore, Estrai/Riponi/Indossa/Togli, selettore arma impugnata, negozio interno, sintonia.

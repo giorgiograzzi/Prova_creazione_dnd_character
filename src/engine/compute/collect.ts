@@ -70,7 +70,11 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
   const addChoice = (c: Choice, o: Owner) => {
     const picked = ch.decisions[c.id] ?? [];
     if (c.options) {
-      for (const opt of c.options) if (picked.includes(opt.id)) opt.effects.forEach((e) => add(e, o));
+      for (const opt of c.options) {
+        if (!picked.includes(opt.id)) continue;
+        out.features.add(opt.id); // l'opzione scelta conta come posseduta (prerequisiti: hasFeature:pact_of_the_blade)
+        opt.effects.forEach((e) => add(e, o));
+      }
     } else if (c.source) sourceEffects(c.source, picked).forEach((e) => add(e, o));
   };
   const addFeat = (id: string) => {

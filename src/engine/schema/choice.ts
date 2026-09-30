@@ -6,6 +6,7 @@ export const optionSchema = z.object({
   id,
   name: text,
   description: z.string().optional(),
+  cost: z.number().optional(), // es. punti stregoneria della Metamagia
   requires: condition.optional(), // opzione visibile ma disattivata (con motivo) se non vale
   effects: z.array(effectSchema).default([]),
 });

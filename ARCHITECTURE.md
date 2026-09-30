@@ -109,3 +109,10 @@ Convenzioni:
 - "Sempre preparati: <incantesimi>" nel privilegio → `grantSpell alwaysPrepared`; "Incantesimi sempre preparati — liv. N: ..." della sottoclasse → `grantSpell` con `when: classLevel:<classe>>=N`.
 - Scelte automatiche di classe: `<classe>_skills` (options o `source: skills`), `<classe>_tools`, `<classe>_weapon_mastery`, `<classe>_cantrips`, `<classe>_prepared` con `countFrom`.
 - `toolProficiency` (strumenti fissi) vale solo per la prima classe, come TS, armi e armature.
+
+### Classi 7b — novità dello schema
+- `pactSlots` (Warlock: `{count, level}` × 20). Sottoclassi: `table`, `caster: third`, `spellAbility`, `spellList`, `spellSlots` (tabelle proprie).
+- Elenchi di opzioni: `OptionList` in `class-rules.ts` (Metamagia, Suppliche occulte, Manovre); `Option.cost`, `Option.requires` (livello e invocazione richiesta).
+- Un'opzione scelta conta come posseduta per `hasFeature:` (es. `hasFeature:pact_of_the_blade`).
+- Le regole possono derivare gli effetti dalla tabella (`effects: (table) => ...`): scaglioni di velocità e dado di Arti marziali del Monaco.
+- Armi con filtro nelle competenze di classe: `martial[light]`, `martial[finesse|light]`.

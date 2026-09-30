@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-14b completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Prossimo: step 15 (tab Equip). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-15 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Prossimo: step 16 (Magie). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -104,7 +104,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 ### 15. Tab Equip (UI)
 - Inventario, quantità/peso/valore, Estrai/Riponi/Indossa/Togli, selettore arma impugnata, negozio interno, sintonia.
-- **Fatto**: CA e attacchi si aggiornano subito e sono spiegabili.
+- **Fatto**: 10 test su monete, negozio, quantità e sintonia; prova nel browser (Guerriero): impugnare lo Spadone aggiunge l'attacco (2d6 +2, +4), indossare/togliere l'armatura cambia la CA, mani/peso/sintonia in tempo reale, costo dell'azione mostrato (regola della casa o ufficiale), acquisto dal negozio con le monete detratte. Niente vendita: non c'è una regola nei dati.
 
 ### 16. Magie (motore + UI)
 - Slot usati/rimanenti, conosciuti/preparati, CD/attacco, filtri, concentrazione, lancio con livello superiore. (Dipende dallo step 8.)

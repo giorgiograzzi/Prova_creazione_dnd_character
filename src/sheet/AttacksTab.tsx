@@ -22,12 +22,16 @@ export function AttacksTab({ rs, d }: TabProps) {
           </button></li>
         ))}
       </ul>
-      {sel && (
-        <RollDialog title={`${sel.label} — ${t.attackRoll}`} bonus={sel.toHit} mode={sel.mode} modeSources={sel.modeSources}
-          note={[...sel.notes, ...sel.riders].join(" · ") || undefined} onClose={() => setSel(null)}
-          extra={<DamageSection a={sel} rs={rs} />} />
-      )}
+      {sel && <AttackRollDialog a={sel} rs={rs} onClose={() => setSel(null)} />}
     </>
+  );
+}
+
+// Tiro per colpire e per il danno di un attacco (usato dalla scheda e dalla tab Equip)
+export function AttackRollDialog({ a, rs, onClose }: { a: AttackOption; rs: TabProps["rs"]; onClose: () => void }) {
+  return (
+    <RollDialog title={`${a.label} — ${t.attackRoll}`} bonus={a.toHit} mode={a.mode} modeSources={a.modeSources}
+      note={[...a.notes, ...a.riders].join(" · ") || undefined} onClose={onClose} extra={<DamageSection a={a} rs={rs} />} />
   );
 }
 

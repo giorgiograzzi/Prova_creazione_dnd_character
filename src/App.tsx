@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import it from "./i18n/it.json";
 import { Characters } from "./pages/Characters";
+import { Equip } from "./pages/Equip";
 import { Placeholder } from "./pages/Placeholder";
 import { Sheet } from "./pages/Sheet";
 import { ImportDialog, Settings, exportNow } from "./pages/Settings";
@@ -75,7 +76,7 @@ export function App() {
           <>
             {shown === "characters" && <Characters onOpened={() => setTab("sheet")} />}
             {shown === "sheet" && <Sheet section={section} />}
-            {shown === "equip" && <Placeholder title={it.tabs.equip} text={it.soon.equip} />}
+            {shown === "equip" && <Equip />}
             {shown === "magic" && <Placeholder title={it.tabs.magic} text={it.soon.magic} />}
             {shown === "homebrew" && <Placeholder title={it.tabs.homebrew} text={it.soon.homebrew} />}
           </>

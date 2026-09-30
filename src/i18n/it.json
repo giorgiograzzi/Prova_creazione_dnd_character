@@ -291,5 +291,50 @@
       "collapse": "Nascondi"
     },
     "back": "Menu"
+  },
+  "equip": {
+    "title": "Equipaggiamento",
+    "needCreation": "Termina la creazione del personaggio: l'equipaggiamento iniziale si assegna alla chiusura.",
+    "hands": "Mani",
+    "weight": "Peso",
+    "attune": "Sintonia",
+    "ac": "Classe Armatura",
+    "attacks": "Attacchi",
+    "noAttacks": "Nessun attacco.",
+    "inventory": "Zaino",
+    "empty": "Lo zaino è vuoto: compra qualcosa dal negozio.",
+    "shop": "Negozio",
+    "funds": "Monete disponibili",
+    "buy": "Compra",
+    "bought": "Comprato: {n}",
+    "wield": "Impugna",
+    "stow": "Riponi",
+    "wear": "Indossa",
+    "remove": "Togli",
+    "oneHand": "1 mano",
+    "twoHands": "2 mani",
+    "attuned": "Sintonizzato",
+    "attuneOn": "Sintonizza",
+    "attuneOff": "Togli sintonia",
+    "discard": "Elimina",
+    "qtyMinus": "Meno",
+    "qtyPlus": "Più",
+    "state": {
+      "stowed": "Nello zaino",
+      "wielded": "Impugnato",
+      "worn": "Indossato",
+      "dropped": "A terra"
+    },
+    "last": "Ultima azione",
+    "search": "Cerca…",
+    "all": "Tutti",
+    "more": "Mostrati i primi {n}: affina la ricerca.",
+    "noResults": "Nessun oggetto.",
+    "lb": "lb",
+    "time": {
+      "minutes": "{n} min",
+      "action": "1 azione",
+      "free": "nessun costo"
+    }
   }
 }

@@ -102,7 +102,7 @@ describe("store: backup e impostazioni", () => {
     await store.getState().init();
     await store.getState().updateSettings({ weaponSwap: "official", backupReminderDays: 7 });
     expect(await repo.getSetting("app")).toMatchObject({ weaponSwap: "official", backupReminderDays: 7 });
-    expect(normalizeSettings({ weaponSwap: "boh", backupReminderDays: -3, lastBackupAt: "x" })).toEqual(DEFAULT_APP_SETTINGS);
+    expect(normalizeSettings({ weaponSwap: "boh", hand: 3, allowReroll: "sì", backupReminderDays: -3, lastBackupAt: "x" })).toEqual(DEFAULT_APP_SETTINGS);
     expect(normalizeSettings(null)).toEqual(DEFAULT_APP_SETTINGS);
   });
   it("promemoria backup", () => {

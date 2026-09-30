@@ -1,0 +1,64 @@
+import type { ReactNode } from "react";
+import { icons, type IconName } from "./icons";
+import "./xp.css";
+
+export function Button({ variant, className = "", ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "danger" }) {
+  return <button type="button" {...rest} className={`xp-btn ${variant ?? ""} ${className}`} />;
+}
+
+export function Field({ label, help, children }: { label: string; help?: string; children: ReactNode }) {
+  return (
+    <div className="xp-field">
+      <span className="xp-label">{label}</span>
+      {help && <span className="xp-help">{help}</span>}
+      {children}
+    </div>
+  );
+}
+
+export function Segmented<T extends string>({ value, options, onChange, label }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; label: string }) {
+  return (
+    <div className="xp-seg" role="group" aria-label={label}>
+      {options.map((o) => (
+        <button key={o.value} type="button" aria-pressed={o.value === value} onClick={() => onChange(o.value)}>{o.label}</button>
+      ))}
+    </div>
+  );
+}
+
+export function Check({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode }) {
+  return (
+    <label className="xp-check">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <span>{children}</span>
+    </label>
+  );
+}
+
+export interface TabDef { id: string; label: string; icon: IconName; disabled?: boolean }
+export function TabBar({ tabs, current, onSelect }: { tabs: TabDef[]; current: string; onSelect: (id: string) => void }) {
+  return (
+    <nav className="xp-tabs" role="tablist">
+      {tabs.map((t) => {
+        const Icon = icons[t.icon];
+        return (
+          <button key={t.id} type="button" role="tab" className="xp-tab" aria-selected={t.id === current} disabled={t.disabled} onClick={() => onSelect(t.id)}>
+            <Icon /><span>{t.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function Dialog({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
+  return (
+    <div className="xp-overlay" onClick={onClose}>
+      <div className="xp-dialog" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
+        <header>{title}</header>
+        <div className="xp-body">{children}</div>
+      </div>
+    </div>
+  );
+}
+export { icons };

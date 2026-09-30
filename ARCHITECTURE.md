@@ -181,3 +181,11 @@ Convenzioni:
 - **Store** (`store/app.ts`, Zustand vanilla, iniettabili repo/scheduler/orologio): `update(fn)` → stato `pending` → salvataggio automatico dopo 800 ms di pausa (una sola scrittura per raffica); `flush()` salva subito (usato prima di cambiare/esportare); `saveStatus` = saved | pending | saving | error.
 - **Impostazioni** (`store/settings.ts`): `AppSettings` = regole (`weaponSwap`) + `backupReminderDays` (30, 0 = spento) + `lastBackupAt`; `normalizeSettings` tollerante, `backupDue` per il promemoria.
 - Test con `fake-indexeddb`: migrazioni, CRUD, round-trip export/import, conflitti, autosave, errore di scrittura.
+
+## Interfaccia e tema (step 12) — `src/ui/`, `src/pages/`
+- **Tema XP** (`ui/xp/xp.css`): colori come variabili CSS (`--xp-*`), Tahoma con fallback, testo ≥16px, bersagli ≥48px (`--tap`), safe area, `prefers-reduced-motion`, niente glow/brightness. `contrast.test.ts` legge il CSS e verifica i contrasti WCAG AA (4.5), il minimo 16px/48px e l'assenza di effetti vietati.
+- **Componenti** (`ui/xp/index.tsx`): `Button` (primary/danger), `Field`, `Segmented`, `Check`, `TabBar`, `Dialog`; icone SVG originali in `icons.tsx`. Hook `useApp(selettore)` sullo store (selettori singoli, mai oggetti nuovi: con Zustand 5 causerebbero loop).
+- **Struttura**: barra del titolo (nome personaggio, stato di salvataggio, menu ☰ → Impostazioni / Esporta / Importa), corpo, tab bar in basso (Eroi, Scheda, Equip, Magie, Homebrew; Scheda/Equip/Magie disattivate senza personaggio aperto).
+- **Mano di gioco** (`AppSettings.hand`): la classe `hand-left|center|right` sulla radice sposta i comandi principali (`.xp-actions`).
+- **Impostazioni**: mano, cambio arma, rifare i tiri (`allowReroll`, usato dal wizard), promemoria backup, Esporta ora / Importa con anteprima e scelta sui conflitti (`ImportDialog`).
+- Il salvataggio parte anche su `visibilitychange`/`pagehide`. Testi in `i18n/it.json`.

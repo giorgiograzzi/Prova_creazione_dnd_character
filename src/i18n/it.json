@@ -1,3 +1,27 @@
 {
-  "app": { "title": "Personaggi D&D" }
+  "app": { "title": "Personaggi D&D" },
+  "tabs": { "characters": "Eroi", "sheet": "Scheda", "equip": "Equip", "magic": "Magie", "homebrew": "Homebrew" },
+  "menu": { "open": "Menu", "settings": "Impostazioni", "export": "Esporta backup", "import": "Importa backup" },
+  "characters": {
+    "title": "I tuoi personaggi", "empty": "Nessun personaggio ancora. Creane uno!", "new": "Nuovo personaggio",
+    "unnamed": "Senza nome", "open": "Apri", "delete": "Elimina", "confirmDelete": "Eliminare definitivamente questo personaggio?",
+    "creationSoon": "La creazione guidata arriva con il prossimo passo: per ora il personaggio è vuoto."
+  },
+  "soon": { "sheet": "La scheda giocabile arriva allo step 14.", "equip": "L'equipaggiamento arriva allo step 15.", "magic": "Le magie arrivano allo step 16.", "homebrew": "L'homebrew arriva allo step 18.", "needCharacter": "Apri o crea un personaggio dalla scheda Personaggi." },
+  "settings": {
+    "title": "Impostazioni", "back": "Indietro",
+    "hand": "Mano di gioco", "handHelp": "Sposta i pulsanti principali dove il pollice arriva meglio.",
+    "right": "Destra", "left": "Sinistra", "center": "Centro",
+    "weaponSwap": "Cambio arma", "house": "Regola della casa (costa 1 azione)", "official": "Ufficiale (fa parte dell'Attacco)",
+    "allowReroll": "Permetti di rifare i tiri dei punteggi",
+    "backup": "Backup", "reminder": "Promemoria backup", "reminderOff": "Spento", "reminderDays": "ogni {n} giorni",
+    "lastBackup": "Ultimo backup", "never": "mai", "exportNow": "Esporta ora", "importFile": "Importa da file", "backupDue": "È ora di fare un backup!",
+    "saveStatus": { "saved": "Salvato", "pending": "Modifiche in attesa…", "saving": "Salvataggio…", "error": "Errore di salvataggio" }
+  },
+  "import": {
+    "title": "Anteprima importazione", "error": "File non valido", "apply": "Importa", "cancel": "Annulla", "nothing": "Niente da importare.",
+    "status": { "new": "Nuovo", "same": "Già presente (identico)", "conflict": "Conflitto: esiste già con lo stesso id", "invalid": "Non valido" },
+    "resolve": { "copy": "Tieni entrambi", "replace": "Sostituisci", "skip": "Salta" },
+    "done": "Importati {n} personaggi."
+  }
 }

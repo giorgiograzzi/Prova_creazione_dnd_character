@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-11 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Prossimo: step 12 (tema XP, tab bar, Impostazioni). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-12 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Prossimo: step 13 (wizard di creazione). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -81,7 +81,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 ### 12. Tema Windows XP, tab bar, Impostazioni
 - Componenti `ui/xp/` solo CSS/SVG originali, Tahoma, AA, testo ≥16px, target ≥48px, niente glow/brightness, `prefers-reduced-motion`; tab bar in basso (Personaggi, Scheda, Equip, Magie, Homebrew); Impostazioni dal menu barra titolo (Mano dx/sx/centro, regole cambio arma, rifare tiri, promemoria backup); safe area.
-- **Fatto**: contrasti verificati, layout controllato su viewport telefono nei 3 orientamenti "mano", screenshot.
+- **Fatto**: contrasti verificati con test (WCAG AA 4.5), layout controllato su viewport telefono (390×844 e 844×390) nei 3 orientamenti "mano", screenshot, nessun bersaglio <48px né scroll orizzontale. Nota: la tab "Personaggi" si chiama "Eroi" (la label lunga non entrava in 390px).
 
 ### 13. Wizard di creazione (UI)
 - 7 passi in ordine ufficiale, barra avanzamento, opzioni escluse visibili e disattivate con motivo, bozza salvata, riepilogo con anteprima.

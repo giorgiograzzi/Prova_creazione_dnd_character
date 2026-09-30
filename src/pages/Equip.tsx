@@ -11,8 +11,7 @@ import { fmt } from "../ui/format";
 import { Button, Dialog, Segmented } from "../ui/xp";
 import { useApp } from "../ui/useApp";
 import { AttackRollDialog } from "../sheet/AttacksTab";
-import { RegainButton, SourcesDialog } from "../sheet/dialogs";
-import { useResource } from "../engine/play";
+import { ChargeControls, SourcesDialog } from "../sheet/dialogs";
 import { sign } from "../sheet/util";
 import { isFinalized } from "../wizard/logic";
 
@@ -86,17 +85,7 @@ export function Equip() {
                 </span>
               </div>
               <div className="pl-row" style={{ padding: "0 12px 8px" }}>
-                {(() => {
-                  const cg = d?.resources[`item:${e.itemId}`];
-                  return cg && (
-                    <>
-                      <span className="pl-sub">{it.play.charges} {cg.remaining}/{cg.max.value}</span>
-                      <Button aria-label={`${it.play.use} ${def?.name.it ?? e.itemId}`} disabled={cg.remaining <= 0} onClick={() => update((c) => useResource(c, `item:${e.itemId}`, cg.max.value, 1))}>{it.play.use}</Button>
-                      <Button aria-label={`${it.play.restore} ${def?.name.it ?? e.itemId}`} disabled={cg.used <= 0} onClick={() => update((c) => useResource(c, `item:${e.itemId}`, cg.max.value, -1))}>+</Button>
-                      {cg.regain && <RegainButton id={`item:${e.itemId}`} max={cg.max.value} used={cg.used} regain={cg.regain} update={update} />}
-                    </>
-                  );
-                })()}
+                {d?.resources[`item:${e.itemId}`] && <ChargeControls id={`item:${e.itemId}`} name={def?.name.it ?? e.itemId} r={d.resources[`item:${e.itemId}`]!} update={update} />}
                 {f?.kind === "weapon" && (e.state === "wielded"
                   ? <Button onClick={() => equip(e.itemId, "stowed")}>{t.stow}</Button>
                   : <Button variant="primary" onClick={() => equip(e.itemId, "wielded")}>{t.wield}</Button>)}
@@ -129,7 +118,7 @@ export function Equip() {
         </Dialog>
       )}
       {ac && <SourcesDialog title={t.ac} value={d.ac} onClose={() => setAc(false)} />}
-      {attack && <AttackRollDialog a={attack} rs={rs} onClose={() => setAttack(null)} />}
+      {attack && <AttackRollDialog a={attack} rs={rs} resources={d?.resources} update={update} onClose={() => setAttack(null)} />}
       {shop && <Shop ch={ch} onBuy={(id) => { const r = buyItem(ch, rs, id); if (r.ok) update(() => r.character); return r; }} onClose={() => setShop(false)} />}
     </>
   );

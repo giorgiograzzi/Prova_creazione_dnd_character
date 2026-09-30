@@ -339,5 +339,87 @@
       "action": "1 azione",
       "free": "nessun costo"
     }
+  },
+  "magic": {
+    "title": "Magie",
+    "none": "Questo personaggio non ha incantesimi.",
+    "dc": "CD incantesimi",
+    "attack": "Attacco con incantesimi",
+    "ability": "Caratteristica",
+    "slots": "Slot",
+    "pact": "Slot del Patto ({n}° livello)",
+    "use": "Usa",
+    "restore": "+",
+    "concentration": "Concentrazione",
+    "concentrating": "Concentrazione: {n}",
+    "endConc": "Termina",
+    "broken": "La Concentrazione termina: sei Incapacitato o morto.",
+    "prepare": "Prepara",
+    "recoveries": "Recuperi",
+    "filters": {
+      "all": "Tutti",
+      "prepared": "Preparati",
+      "ritual": "Rituali",
+      "conc": "Concentrazione"
+    },
+    "search": "Cerca…",
+    "empty": "Nessun incantesimo con questi filtri.",
+    "cantrips": "Trucchetti",
+    "levelN": "{n}° livello",
+    "statusTags": {
+      "always": "Sempre preparato",
+      "prepared": "Preparato",
+      "book": "Nel libro",
+      "cantrip": "Trucchetto",
+      "granted": "Concesso"
+    },
+    "cast": "Lancia",
+    "castCantrip": "Lancia (a volontà)",
+    "castSlot": "Slot {n}° ({r})",
+    "castPact": "Slot del Patto {n}° ({r})",
+    "castFree": "Gratis ({r}/{m})",
+    "castRitual": "Rituale (+10 minuti, senza slot)",
+    "cantCast": "Nessun modo per lanciarlo ora.",
+    "school": {
+      "abjuration": "Abiurazione",
+      "conjuration": "Evocazione",
+      "divination": "Divinazione",
+      "enchantment": "Ammaliamento",
+      "evocation": "Invocazione",
+      "illusion": "Illusione",
+      "necromancy": "Necromanzia",
+      "transmutation": "Trasmutazione"
+    },
+    "time": {
+      "action": "Azione",
+      "bonus_action": "Azione Bonus",
+      "reaction": "Reazione",
+      "minute": "minuti",
+      "hour": "ore"
+    },
+    "range": "Gittata",
+    "components": "Componenti",
+    "duration": "Durata",
+    "castingTime": "Tempo di lancio",
+    "higher": "Livelli superiori",
+    "resolution": {
+      "save": "TS {a} CD {dc}",
+      "melee": "Attacco in mischia {b}",
+      "ranged": "Attacco a distanza {b}",
+      "none": ""
+    },
+    "prepareTitle": "Prepara incantesimi",
+    "prepareWhen": "Quando cambiano: {w}",
+    "prepareFocus": "Focus: {f}",
+    "prepared": "Fatto: elenco aggiornato.",
+    "noPrepare": "Nessuna scelta di incantesimi da modificare.",
+    "arcane": "Recupero arcano / naturale",
+    "arcaneHelp": "Recuperi slot per un totale di livelli fino a {n} (nessuno di 6° o più). 1 volta per Riposo Lungo, dopo un Riposo Breve.",
+    "recover": "Recupera",
+    "cunning": "Astuzia magica (recupera metà degli slot del Patto)",
+    "done": "Fatto.",
+    "damageConc": "Concentrazione su {n}: TS Costituzione CD {dc}.",
+    "damageConcAdv": " Vantaggio (Incantatore da guerra).",
+    "concEnded": "La Concentrazione termina."
   }
 }

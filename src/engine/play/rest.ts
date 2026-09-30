@@ -16,16 +16,15 @@ export function spendHitDie(ch: Character, d: Pick<Derived, "hp" | "mods">, roll
   return { character: applyHealing(spent, d.hp.max.value, healed), healed };
 }
 
-// Un riposo termina gli stati attivi (Ira, Forma selvatica...)
-const noActive = (s: Character["state"]): Character["state"] => { const { active: _drop, ...rest } = s; void _drop; return rest; };
+// Un riposo termina gli stati attivi (Ira, Forma selvatica...), la Concentrazione e ripristina gli slot del Patto
+const noActive = (s: Character["state"]): Character["state"] => { const { active: _a, concentration: _c, pactUsed: _p, ...rest } = s; void _a; void _c; void _p; return rest; };
 const without = <T,>(o: Record<string, T>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
 const rechargeOn = (d: Pick<Derived, "resources">, when: string[]) => Object.entries(d.resources).filter(([, r]) => when.includes(r.recharge)).map(([id]) => id);
 
 // Riposo breve: si ricaricano le risorse "short_rest" e gli slot del Patto (Warlock)
 export function shortRest(ch: Character, d: Pick<Derived, "resources" | "spellSlots">): Character {
-  const slots = { ...ch.state.slotsUsed };
-  if (d.spellSlots.pact) delete slots[d.spellSlots.pact.level];
-  return { ...ch, state: { ...noActive(ch.state), resourcesUsed: without(ch.state.resourcesUsed, rechargeOn(d, ["short_rest"])), slotsUsed: slots } };
+  // gli slot del Patto (Warlock) tornano con un riposo breve; gli altri slot solo con il lungo
+  return { ...ch, state: { ...noActive(ch.state), resourcesUsed: without(ch.state.resourcesUsed, rechargeOn(d, ["short_rest"])), pactUsed: undefined } };
 }
 
 // Riposo lungo: PF al massimo, PF temporanei a zero, metà dei Dadi Vita (minimo 1), tutte le risorse e gli slot,

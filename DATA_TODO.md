@@ -8,10 +8,11 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 - Niente per ora. (Le condizioni sono arrivate con la spec `05_conditions.json`, vedi in fondo.)
 
 ## 2. Da fare in uno step già in piano
-- **Step 16 (Magie)**
-  - Uso in gioco: slot spesi (`state.slotsUsed` c'è già), Riposo Breve/Lungo, rituali (+10 minuti, nessuno slot), regola "uno slot per turno", concentrazione.
-  - Arcani firma del Mago (20°), Arcanum mistico, Maestria degli incantesimi (18°): scelte di incantesimi con ricarica particolare, non codificate.
-  - Slot del patto: ricarica con Riposo Breve; Astuzia magica (recupero metà).
+- **Step 16 (Magie)** — fatto: slot spesi/rimasti, slot del Patto (`state.pactUsed`), lancio con livello superiore, rituali, lanci gratuiti (un contatore per incantesimo), Concentrazione (una alla volta, CD dei danni), Recupero arcano/naturale, Astuzia magica, preparazione con le stesse regole della creazione. Restano:
+  - Arcani firma del Mago (20°), Arcanum mistico (Warlock 11°+), Maestria degli incantesimi (Mago 18°: un 1° e un 2° a volontà), Memorizzare (Mago 5°): scelte con ricarica particolare, non codificate.
+  - Punti stregoneria: conversione slot ↔ punti e Ripristino stregonesco; Rinascita selvatica (Druido 5°); Incantesimi potenti e Metamagia sui lanci.
+  - La regola "un solo slot per turno" è solo un promemoria (non c'è il tracciamento dei turni); i componenti con costo (materiali) sono un promemoria, non si controlla l'inventario.
+  - Restrizioni di componenti (V/S: Silenzio, mani occupate; Incantatore da guerra) e Svantaggio degli attacchi a distanza con incantesimo con un nemico entro 5 ft: solo testo.
 - **Step 14b (attacchi in gioco)**
   - Bonus che dipendono da uno stato attivo: Danno ira (serve "Ira attiva"), Punizione divina, Colpo brutale, Furia, Sacro Simbolo ecc. Nelle schede degli attacchi ci sono solo gli extra sempre validi (Attacco furtivo, come promemoria).
   - Proprietà di maestria: il motore dice quale è attiva e la CD di Rovesciare; l'effetto (Spingere, Fiaccare...) è solo testo della regola.

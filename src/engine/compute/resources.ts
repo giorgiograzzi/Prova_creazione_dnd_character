@@ -19,5 +19,15 @@ export function computeResources(x: Ctx): Derived["resources"] {
       used, remaining: max - used, recharge: e.recharge,
     };
   }
+  // Lanci gratuiti di incantesimi (specie, talenti, privilegi): un contatore per incantesimo, id `spell:<incantesimo>`
+  for (const { effect: e, label } of x.active) {
+    if (e.op !== "grantSpell" || !e.freeCast) continue;
+    const id = `spell:${e.spell}`;
+    const max = Math.max(0, evalValue(e.freeCast.uses, x));
+    if ((out[id]?.max.value ?? -1) >= max) continue;
+    const used = Math.min(x.ch.state.resourcesUsed[id] ?? 0, max);
+    const name = x.rs.spells.get(e.spell)?.name.it ?? e.spell;
+    out[id] = { max: { value: max, sources: [{ label: `${label} — ${name}`, value: max }] }, used, remaining: max - used, recharge: e.freeCast.recharge };
+  }
   return out;
 }

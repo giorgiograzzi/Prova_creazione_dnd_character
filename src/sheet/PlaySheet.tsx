@@ -5,12 +5,12 @@ import type { Character } from "../engine/types";
 import { AttacksTab } from "./AttacksTab";
 import { ConditionsTab } from "./ConditionsTab";
 import { FeaturesTab } from "./FeaturesTab";
+import { MagicTab } from "./MagicTab";
 import { MiscTab } from "./MiscTab";
 import { StatsTab } from "./StatsTab";
 import { StatusTab } from "./StatusTab";
 import type { SheetView } from "./sections";
 import { Equip } from "../pages/Equip";
-import { Placeholder } from "../pages/Placeholder";
 import it from "../i18n/it.json";
 
 // Scheda giocabile: ogni numero viene dal motore (computeCharacter); qui si cambia solo lo stato di gioco
@@ -27,7 +27,7 @@ export function PlaySheet({ ch, rs, update, onReopen, tab, onSection }: { ch: Ch
       {tab === "attacks" && <AttacksTab {...props} />}
       {tab === "conditions" && <ConditionsTab {...props} onBack={() => onSection("status")} />}
       {tab === "equip" && <Equip />}
-      {tab === "magic" && <Placeholder title={it.play.tabs.magic} text={it.soon.magic} />}
+      {tab === "magic" && <MagicTab {...props} />}
       {tab === "misc" && <MiscTab {...props} onReopen={onReopen} />}
     </>
   );

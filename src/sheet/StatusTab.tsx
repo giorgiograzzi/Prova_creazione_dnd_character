@@ -7,6 +7,7 @@ import type { Sourced } from "../engine/types";
 import it from "../i18n/it.json";
 import { fmt } from "../ui/format";
 import { Button, Check, Dialog } from "../ui/xp";
+import { concentrationDc, endConcentration } from "../engine/magic";
 import { RollDialog, SourcesDialog } from "./dialogs";
 import type { TabProps } from "./types";
 import { num, sign } from "./util";
@@ -44,7 +45,17 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
         {note && <p className="xp-muted" role="status">{note}</p>}
         <div className="pl-row">
           <input className="wz-num" style={{ width: 120 }} type="number" inputMode="numeric" min={0} aria-label={t.amount} placeholder={t.amount} value={amount} onChange={(e) => setAmount(e.target.value)} />
-          <Button variant="danger" disabled={!amt || dead} onClick={() => { const r = applyDamage(ch, max, amt, { crit }); update(() => r.character); setNote(r.note ?? (r.downed ? "PF a zero." : "")); done(); }}>{t.damage}</Button>
+          <Button variant="danger" disabled={!amt || dead} onClick={() => {
+            const r = applyDamage(ch, max, amt, { crit });
+            let next = r.character, msg = r.note ?? (r.downed ? "PF a zero." : "");
+            const conc = ch.state.concentration;
+            if (conc) {
+              // a 0 PF o morto si è Incapacitati: la Concentrazione termina; altrimenti TS Costituzione (file 04)
+              if (r.downed || r.dead) { next = endConcentration(next); msg += ` ${it.magic.concEnded}`; }
+              else msg += ` ${fmt(it.magic.damageConc, { n: rs.spells.get(conc)?.name.it ?? conc, dc: concentrationDc(amt) })}${d.feats.includes("war_caster") ? it.magic.damageConcAdv : ""}`;
+            }
+            update(() => next); setNote(msg.trim()); done();
+          }}>{t.damage}</Button>
           <Button variant="primary" disabled={!amt || dead} onClick={() => { update((c) => applyHealing(c, max, amt)); setNote(""); done(); }}>{t.heal}</Button>
           <Button disabled={!amt} onClick={() => { update((c) => setTempHp(c, amt)); done(); }}>{t.setTemp}</Button>
         </div>

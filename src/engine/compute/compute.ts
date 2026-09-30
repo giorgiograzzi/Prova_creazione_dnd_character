@@ -45,7 +45,9 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   const hp = computeHp(x);
   const o = ch.overrides;
   const spellcasting = ch.classes.flatMap((c) => {
-    const ability = rs.classes.get(c.classId)?.spellAbility;
+    const cdef = rs.classes.get(c.classId);
+    const sdef = c.subclassId && cdef && c.level >= cdef.subclassLevel ? rs.subclasses.get(c.subclassId) : undefined;
+    const ability = cdef?.spellAbility ?? (sdef?.caster === "third" ? sdef.spellAbility : undefined);
     if (!ability) return [];
     const m = x.mods[ability];
     return [{

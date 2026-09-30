@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-15 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Prossimo: step 16 (Magie). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-16 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Step 16 completato (magie). Prossimo: step 17 (avanzamento di livello). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -109,7 +109,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 ### 16. Magie (motore + UI)
 - Slot usati/rimanenti, conosciuti/preparati, CD/attacco, filtri, concentrazione, lancio con livello superiore. (Dipende dallo step 8.)
-- **Fatto**: test slot e recuperi; UI provata.
+- **Fatto**: 20 test (mini ruleset e dati veri): registro delle fonti, lancio con slot/livello superiore/Patto/gratuito/rituale, Concentrazione (CD e interruzioni), Recupero arcano, Astuzia magica, riposi, preparazione, terzo incantatore; UI provata nel browser (Mago: CD/attacco, slot, elenco per livello, lancio con esito, preparazione, recuperi). Le regole di lancio vengono dal file 04 dell'utente (§1).
 
 ### 17. Level-up 1→20
 - `levelUp` su `classes[]` (PF media/tiro, sottoclasse al 3, ASI/talento ai livelli previsti, Dono epico, slot, maestrie...), anteprima differenze; commenti dove servirà il multiclasse (slot combinati, prerequisiti).

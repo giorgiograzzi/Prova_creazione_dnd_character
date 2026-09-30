@@ -11,3 +11,4 @@ export * from "./settings";
 export * from "./creation";
 export * from "./character";
 export * from "./play";
+export * from "./magic";

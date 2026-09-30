@@ -52,6 +52,17 @@ export function TabBar({ tabs, current, onSelect }: { tabs: TabDef[]; current: s
 }
 
 // Popup: finestra "Prompt di MS-DOS" di Windows 95 (barra blu con _ □ ×; solo × funziona). Esc chiude.
+// Barra in basso della scheda: al posto delle tab principali, con "Indietro" per tornare al menu principale
+export function SectionBar({ items, current, onSelect, onBack, backLabel }: { items: { id: string; label: string }[]; current: string; onSelect: (id: string) => void; onBack: () => void; backLabel: string }) {
+  return (
+    <nav className="xp-sections" aria-label="Sezioni della scheda">
+      <button type="button" className="back" onClick={onBack}>← {backLabel}</button>
+      {items.map((s) => <button key={s.id} type="button" aria-current={s.id === current ? "page" : undefined} onClick={() => onSelect(s.id)}>{s.label}</button>)}
+    </nav>
+  );
+}
+
+// Popup: finestra "Prompt di MS-DOS" di Windows 95 (barra blu con _ □ ×; solo × funziona). Esc chiude.
 export function Dialog({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };

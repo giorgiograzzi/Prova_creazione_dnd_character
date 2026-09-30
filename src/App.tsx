@@ -5,7 +5,9 @@ import { Placeholder } from "./pages/Placeholder";
 import { Sheet } from "./pages/Sheet";
 import { ImportDialog, Settings, exportNow } from "./pages/Settings";
 import type { ImportPreview } from "./db/backup";
-import { TabBar, icons, type TabDef } from "./ui/xp";
+import { SectionBar, TabBar, icons, type TabDef } from "./ui/xp";
+import { SHEET_SECTIONS, type SheetSection } from "./sheet/sections";
+import { isFinalized } from "./wizard/logic";
 import { useApp } from "./ui/useApp";
 
 type TabId = "characters" | "sheet" | "equip" | "magic" | "homebrew";
@@ -20,6 +22,7 @@ export function App() {
   const exportAll = useApp((s) => s.exportAll);
   const previewImport = useApp((s) => s.previewImport);
   const [tab, setTab] = useState<TabId>("characters");
+  const [section, setSection] = useState<SheetSection>("status");
   const [menu, setMenu] = useState(false);
   const [settings, setSettings] = useState(false);
   const [importing, setImporting] = useState<ImportPreview | null>(null);
@@ -42,6 +45,8 @@ export function App() {
     { id: "homebrew", label: it.tabs.homebrew, icon: "homebrew" },
   ];
   const shown: TabId = need && (tab === "sheet" || tab === "equip" || tab === "magic") ? "characters" : tab;
+  // scheda giocabile aperta: la barra in basso mostra le sue sezioni invece delle tab principali
+  const inSheet = shown === "sheet" && !!current && isFinalized(current);
   const Menu = icons.menu;
   const pickFile = () => {
     const input = Object.assign(document.createElement("input"), { type: "file", accept: "application/json,.json" });
@@ -68,14 +73,17 @@ export function App() {
         {settings ? <Settings onBack={() => setSettings(false)} /> : (
           <>
             {shown === "characters" && <Characters onOpened={() => setTab("sheet")} />}
-            {shown === "sheet" && <Sheet />}
+            {shown === "sheet" && <Sheet section={section} />}
             {shown === "equip" && <Placeholder title={it.tabs.equip} text={it.soon.equip} />}
             {shown === "magic" && <Placeholder title={it.tabs.magic} text={it.soon.magic} />}
             {shown === "homebrew" && <Placeholder title={it.tabs.homebrew} text={it.soon.homebrew} />}
           </>
         )}
       </main>
-      <TabBar tabs={tabs} current={shown} onSelect={(id) => { setSettings(false); setTab(id as TabId); }} />
+      {inSheet
+        ? <SectionBar items={SHEET_SECTIONS.map((id) => ({ id, label: it.play.tabs[id] }))} current={section} backLabel={it.play.back}
+            onSelect={(id) => { setSettings(false); setSection(id as SheetSection); }} onBack={() => { setSettings(false); setTab("characters"); }} />
+        : <TabBar tabs={tabs} current={shown} onSelect={(id) => { setSettings(false); setTab(id as TabId); }} />}
       {importing && <ImportDialog preview={importing} onClose={() => setImporting(null)} onDone={() => setImporting(null)} />}
     </div>
   );

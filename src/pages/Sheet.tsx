@@ -4,11 +4,12 @@ import it from "../i18n/it.json";
 import { Button, Dialog } from "../ui/xp";
 import { useApp } from "../ui/useApp";
 import { PlaySheet } from "../sheet/PlaySheet";
+import type { SheetSection } from "../sheet/sections";
 import { Wizard } from "../wizard/Wizard";
 import { isFinalized, reopenCreation } from "../wizard/logic";
 
 // Scheda: finché la creazione non è chiusa mostra il wizard; poi il riepilogo (la scheda giocabile arriva allo step 14)
-export function Sheet() {
+export function Sheet({ section }: { section: SheetSection }) {
   const rs = useRuleset();
   const ch = useApp((s) => s.current);
   const update = useApp((s) => s.update);
@@ -23,7 +24,7 @@ export function Sheet() {
   }
   return (
     <>
-      <PlaySheet ch={ch} rs={rs} update={update} onReopen={() => setReopen(true)} />
+      <PlaySheet ch={ch} rs={rs} update={update} onReopen={() => setReopen(true)} tab={section} />
       {reopen && (
         <Dialog title={it.wizard.sum.reopen} onClose={() => setReopen(false)}>
           <p>{it.wizard.sum.reopenConfirm}</p>

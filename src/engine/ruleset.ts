@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import {
-  armorSchema, backgroundSchema, classSchema, featSchema, itemSchema, speciesSchema,
+  armorSchema, backgroundSchema, classSchema, conditionDefSchema, featSchema, itemSchema, speciesSchema,
   spellSchema, subclassSchema, termSchema, toolSchema, weaponSchema,
 } from "./schema";
 
@@ -10,7 +10,7 @@ const KINDS = {
   armors: armorSchema, items: itemSchema, spells: spellSchema, tools: toolSchema,
   // glossario (tutti con termSchema)
   skills: termSchema, languages: termSchema, sizes: termSchema, damageTypes: termSchema,
-  conditions: termSchema, weaponProperties: termSchema, masteries: termSchema, coins: termSchema,
+  conditions: conditionDefSchema, weaponProperties: termSchema, masteries: termSchema, coins: termSchema,
 } as const;
 
 export type Kind = keyof typeof KINDS;

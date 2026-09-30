@@ -128,6 +128,48 @@ export const toolSchema = z.object({
   cost: z.number().default(0),
 });
 
+// Condizioni (Appendice C del PHB 2024). Gli effetti sono oggetti con `type` (vocabolario in ARCHITECTURE.md):
+// il motore interpreta quelli che non dipendono da fonte o situazione, gli altri restano come testo.
+export const CONDITION_EFFECT_TYPES = [
+  "cant_see", "cant_hear", "cant_speak", "no_actions", "break_concentration", "unaware_of_surroundings", "concealed",
+  "auto_fail_ability_check", "auto_fail_saving_throw", "saving_throw_mode", "own_ability_checks", "own_attack_rolls",
+  "attack_rolls_against_self", "auto_critical_hit_against_self", "initiative_mode", "speed_zero", "speed_modifier",
+  "d20_test_modifier", "death_at_level", "damage_resistance", "condition_immunity", "cant_harm_source",
+  "social_advantage_for_source", "cant_move_closer_to_source", "movable_by_source", "movement_restriction",
+  "drop_held_items", "remains_prone_after_end", "transformed_to_inanimate",
+] as const;
+export const conditionEffectSchema = z.object({
+  type: z.enum(CONDITION_EFFECT_TYPES),
+  mode: z.enum(["advantage", "disadvantage"]).optional(),
+  when: z.string().optional(), // situazione (fonte in vista, attaccante entro 5 ft...): non calcolabile, resta testo
+  unless: z.string().optional(),
+  requires: z.enum(["sight", "hearing"]).optional(),
+  abilities: z.array(ability).optional(),
+  formula: z.string().optional(), // es. "-2 * exhaustion_level"
+  level: z.number().int().optional(),
+  attackerWithinFt: z.number().optional(),
+  damageTypes: z.union([z.literal("all"), z.array(z.string())]).optional(),
+  conditions: z.array(id).optional(),
+}).catchall(z.unknown());
+
+export const conditionDefSchema = z.object({
+  id,
+  name: text,
+  description: z.string().default(""), // riassunto in italiano
+  notes: z.string().default(""),
+  origin: z.enum(["srd", "private", "homebrew"]).default("private"),
+  needsReview: z.boolean().default(false),
+  bookPage: z.number().int().optional(),
+  stackable: z.boolean().default(false), // solo Esaurimento
+  requiresSource: z.boolean().default(false), // serve tracciare chi causa la condizione (Affascinato, Spaventato, Afferrato)
+  grantsConditions: z.array(id).default([]), // condizioni incluse (risolte ricorsivamente)
+  levels: z.object({ min: z.number().int(), max: z.number().int(), deathAt: z.number().int().optional() }).optional(),
+  effects: z.array(conditionEffectSchema).default([]),
+  removal: z.object({ on: z.string(), levelsRemoved: z.number().int(), endsAtLevel: z.number().int() }).optional(),
+  endConditions: z.array(z.string()).default([]),
+  escape: z.object({ action: z.boolean(), check: z.array(z.object({ ability, skill })), vs: z.string() }).optional(),
+});
+
 // Voce di glossario: abilità, linguaggi, taglie, danni, condizioni, proprietà, maestrie, monete
 export const termSchema = z.object({
   id,

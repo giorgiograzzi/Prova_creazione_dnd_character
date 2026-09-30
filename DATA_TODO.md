@@ -5,8 +5,7 @@ Fonte dei dati: i riepiloghi in `docs/rules/` (non il Manuale del giocatore): ne
 Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 
 ## 1. Serve una fonte che non abbiamo
-- **Condizioni** (15, `needsReview`): i PDF danno solo i nomi. Effetti e regole (incluso Indebolimento/Esaurimento 2024) vanno forniti
-  (testo del manuale o decisione tua) prima dello step 14; non li scrivo a memoria.
+- Niente per ora. (Le condizioni sono arrivate con la spec `05_conditions.json`, vedi in fondo.)
 
 ## 2. Da fare in uno step già in piano
 - **Step 8 (incantesimi)**
@@ -34,7 +33,9 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
     potenti, "usi = mod Sag" delle sottoclassi (Bagliore protettivo, Sacerdote di guerra), Presagio del Divinatore, Protezione arcana,
     compagni del Signore delle bestie (nella descrizione della sottoclasse), effetti delle invocazioni (es. Deflagrazione agonizzante),
     Aura di protezione sugli alleati.
-  - **Immunità alle condizioni** (es. Protezione della natura, Aura di coraggio): non c'è ancora un effetto `immunity`.
+  - **Immunità alle condizioni** dei privilegi (es. Protezione della natura, Aura di coraggio): il motore sa applicare l'immunità (Pietrificato → Avvelenato), ma i privilegi non hanno ancora un effetto `immunity`.
+  - **Condizioni con fonte** (Affascinato, Spaventato, Afferrato) e situazionali (linea di vista, distanza): il motore le mostra come testo, con la fonte se indicata in `state.conditionSources`; il tracciamento delle fonti è della scheda (step 14).
+  - Un Riposo Lungo toglie 1 livello di Esaurimento (`removal` nei dati): da applicare nella scheda (step 14).
 
 ## Chiuso in questa revisione
 - Id dei privilegi nei prerequisiti dei talenti (`spellcasting`, `pact_magic`, `fighting_style`): ora `validate:data` controlla ogni `hasFeature:`/`hasFeat:` in tutte le condizioni.
@@ -51,3 +52,6 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 - Terreno del Circolo della Terra: resistenza di Protezione della natura dal 10°.
 - Scurovisione "60 ft o +60" (Cacciatore delle tenebre, Ombra): effetto `sense` additivo.
 - Recuperi parziali (Ira, Incanalare divinità, Forma selvatica, Recupero energie).
+- **Condizioni** (15): dati veri dalla spec `docs/rules/05_conditions.json` (PHB 2024 App. C) con effetti tipizzati, condizioni incluse, immunità,
+  Esaurimento a livelli (-2 × livello ai Tiri D20, -5 ft × livello, morte al 6°) e vincoli di fuga. Il motore le applica a velocità, TS, prove, iniziativa,
+  tiri per colpire, resistenze e azioni (`Derived.conditions`). Le voci non sono più `needsReview`; il testo ufficiale fa fede il manuale (pagina in `bookPage`).

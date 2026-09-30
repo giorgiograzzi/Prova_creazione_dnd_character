@@ -125,3 +125,14 @@ Convenzioni:
 - `sense.additive`: si somma al senso già posseduto. `grantSkillProficiency.upgradeToExpertise`: Maestria se già competente.
 - Talenti: `Character.feats[i].choices` ha la precedenza su `decisions` per quell'acquisizione; un talento non ripetibile conta una volta sola.
 - `validate:data` controlla `hasFeature:` / `hasFeat:` in prerequisiti, `requires` e `when`.
+
+## Condizioni (spec 05_conditions.json)
+- Dati: `docs/rules/05_conditions.json` → `scripts/extract-conditions.ts` → `data/private/conditions.json` (chiavi in camelCase, caratteristiche in minuscolo).
+  Schema `conditionDefSchema`: `grantsConditions` (incluse), `stackable`/`levels`/`removal` (Esaurimento), `requiresSource`, `endConditions`, `escape`, `effects[]` con `type`.
+- Tipi di effetto: `own_attack_rolls`, `own_ability_checks`, `initiative_mode`, `saving_throw_mode`, `auto_fail_saving_throw`, `auto_fail_ability_check`,
+  `attack_rolls_against_self`, `auto_critical_hit_against_self`, `speed_zero`, `speed_modifier`, `d20_test_modifier`, `death_at_level`, `damage_resistance`,
+  `condition_immunity`, `no_actions`, `break_concentration`, `cant_*`, e quelli legati a fonte/movimento/oggetti (restano testo).
+- `compute/conditions.ts`: risolve `state.conditions` (+ `state.exhaustion` 0-6) ricorsivamente e senza duplicati, toglie le condizioni a cui si è immuni,
+  combina Vantaggio/Svantaggio (si annullano) e restituisce `Derived.conditions`. Applicazioni: bonus d20 di TS, prove e iniziativa (Esaurimento; la Percezione passiva no),
+  modi di TS e prove, `autoFail` dei TS, Velocità (0 o -5 ft × livello), resistenza a tutti i danni (`"all"`), azioni negate.
+- Un effetto con `when`/`unless` (fonte in vista, attaccante entro 5 ft, ...) non è calcolabile: va in `conditions.situational` come testo, con la fonte da `state.conditionSources`.

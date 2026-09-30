@@ -49,7 +49,6 @@ function fundamentals(lines: string[]) {
     return [...text.matchAll(/([^,[\]]+?) \[([a-z_]+)\]/g)].map((m) => term(m[2]!, m[1]!.trim(), undefined));
   };
   out.damageTypes = list("Tipi di danno:", "Condizioni:");
-  out.conditions = list("Condizioni:", "2. Specie");
   out.coins = [...section(lines, "Monete").matchAll(/(Rame|Argento|Electrum|Oro|Platino) (cp|sp|ep|gp|pp) ([\d.]+)/g)].map((m) =>
     term(({ cp: "copper", sp: "silver", ep: "electrum", gp: "gold", pp: "platinum" } as Record<string, string>)[m[2]!]!, m[1]!, undefined,
       { abbr: m[2]!, valueGp: Number(m[3]) }));
@@ -198,9 +197,6 @@ const propText = section(lines, "Proprietà delle armi", "Proprietà di maestria
 out.weaponProperties = rules(propText, ["Munizioni", "Accurata", "Pesante", "Leggera", "Ricarica", "Gittata", "Portata", "Da lancio", "A due mani", "Versatile"]);
 out.masteries = rules(section(lines, "Proprietà di maestria", "Munizioni, colpo senz'armi, armi improvvisate"),
   ["Fendere", "Sfiorare", "Intaccare", "Spingere", "Fiaccare", "Rallentare", "Rovesciare", "Tormentare"]);
-
-// Il PDF dà solo i nomi delle condizioni, senza regole: da verificare sul manuale (DATA_TODO.md)
-for (const c of out.conditions as { needsReview?: boolean }[]) c.needsReview = true;
 
 mkdirSync(OUT, { recursive: true });
 for (const [kind, entries] of Object.entries(out)) {

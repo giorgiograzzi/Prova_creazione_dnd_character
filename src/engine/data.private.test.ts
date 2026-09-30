@@ -449,4 +449,80 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
       expect(left).toEqual(["dueling"]); // solo Duellare (dipende dalle armi, step 9)
     });
   });
+
+  describe("condizioni (spec PHB 2024, App. C)", () => {
+    const R = fullRuleset();
+    const base = testCharacter({ classes: [{ classId: "fighter", level: 1, hpRolls: [] }] });
+    const run = (state: object) => computeCharacter({ ...base, state: { ...base.state, ...state } }, R);
+
+    it("15 condizioni con id, pagina del manuale e riferimenti coerenti", () => {
+      expect(R.conditions.size).toBe(15);
+      expect(checkReferences(R)).toEqual([]);
+      expect([...R.conditions.values()].filter((c) => c.stackable).map((c) => c.id)).toEqual(["exhaustion"]);
+      expect([...R.conditions.values()].filter((c) => c.requiresSource).map((c) => c.id).sort()).toEqual(["charmed", "frightened", "grappled"]);
+      for (const c of R.conditions.values()) { expect(c.bookPage, c.id).toBeGreaterThan(300); expect(c.description, c.id).not.toBe(""); }
+      const g = R.conditions.get("grappled")!;
+      expect(g.escape).toMatchObject({ action: true, check: [{ ability: "str", skill: "athletics" }, { ability: "dex", skill: "acrobatics" }] });
+      expect(R.conditions.get("exhaustion")!.levels).toEqual({ min: 1, max: 6, deathAt: 6 });
+    });
+    it("Privo di sensi: include Incapacitato e Prono; Velocità 0; TS For/Des falliti; colpi critici entro 5 ft", () => {
+      const d = run({ conditions: ["unconscious"] });
+      expect(d.conditions.active.sort()).toEqual(["incapacitated", "prone", "unconscious"]);
+      expect(d.speed.walk.value).toBe(0);
+      expect(d.saves.str.autoFail.length + d.saves.dex.autoFail.length).toBe(2);
+      expect(d.conditions.attacksAgainstYou.advantage).toContain("Privo di sensi");
+      expect(d.conditions.attacksAgainstYou.autoCritical).toHaveLength(1);
+      expect(d.conditions.attackRolls.mode).toBe("disadvantage"); // Prono: Svantaggio ai tuoi tiri per colpire
+      expect(d.conditions.cannot).toEqual(expect.arrayContaining(["compiere azione", "parlare"]));
+    });
+    it("Pietrificato: include Incapacitato, immune ad Avvelenato, resistenza a tutti i danni", () => {
+      const d = run({ conditions: ["petrified", "poisoned"] });
+      expect(d.conditions.active).not.toContain("poisoned");
+      expect(d.resistances).toContain("all");
+      expect(d.conditions.active).toContain("incapacitated");
+    });
+    it("Trattenuto: Velocità 0, Svantaggio ai tuoi attacchi e ai TS Des", () => {
+      const d = run({ conditions: ["restrained"] });
+      expect(d.speed.walk.value).toBe(0);
+      expect(d.conditions.attackRolls.mode).toBe("disadvantage");
+      expect(d.saves.dex.mode).toBe("disadvantage");
+      expect(d.saves.str.mode).toBe("normal");
+    });
+    it("Accecato: Vantaggio a chi ti attacca e Svantaggio ai tuoi; prove di vista fallite", () => {
+      const d = run({ conditions: ["blinded"] });
+      expect(d.conditions.attacksAgainstYou.advantage).toEqual(["Accecato"]);
+      expect(d.conditions.attackRolls.mode).toBe("disadvantage");
+      expect(d.conditions.autoFailChecks[0]).toMatch(/vista/);
+      expect(d.conditions.cannot).toContain("vedere");
+    });
+    it("Afferrato e Spaventato: fonte tracciata, effetti situazionali in testo", () => {
+      const d = run({ conditions: ["grappled", "frightened"], conditionSources: { grappled: "Ogre", frightened: "Lich" } });
+      expect(d.speed.walk.value).toBe(0);
+      expect(d.conditions.situational.join(" ")).toMatch(/Ogre/);
+      expect(d.conditions.situational.join(" ")).toMatch(/Lich/);
+      expect(d.conditions.attackRolls.mode).toBe("normal"); // Svantaggio solo se non attacchi chi ti afferra / fonte in vista
+    });
+    it("Prono e Invisibile: gli effetti che dipendono dalla distanza o da chi ti vede restano testo", () => {
+      const p = run({ conditions: ["prone"] });
+      expect(p.conditions.attackRolls.mode).toBe("disadvantage");
+      expect(p.conditions.attacksAgainstYou.advantage).toEqual([]); // dipende dalla distanza
+      expect(p.conditions.situational.length).toBeGreaterThan(0);
+      const i = run({ conditions: ["invisible"] });
+      expect(i.conditions.initiativeMode.mode).toBe("advantage");
+    });
+    it("Esaurimento 1-6 con i dati veri", () => {
+      const at = (l: number) => run({ exhaustion: l });
+      expect(at(0).speed.walk.value).toBe(30);
+      expect([1, 2, 5].map((l) => at(l).speed.walk.value)).toEqual([25, 20, 5]);
+      expect(at(2).skills.acrobatics.bonus.value - at(0).skills.acrobatics.bonus.value).toBe(-4);
+      expect(at(5).conditions.dead).toBe(false);
+      expect(at(6).conditions.dead).toBe(true);
+    });
+    it("Avvelenato e Assordato: Svantaggio alle prove, prove di udito fallite", () => {
+      const d = run({ conditions: ["poisoned", "deafened"] });
+      expect(d.skills.perception.mode).toBe("disadvantage");
+      expect(d.conditions.autoFailChecks.join()).toMatch(/udito/);
+    });
+  });
 });
+

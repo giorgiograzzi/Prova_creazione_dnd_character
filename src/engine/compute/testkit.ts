@@ -8,6 +8,20 @@ const feat = (id: string, effects: unknown[] = [], extra: object = {}) =>
 const armor = (id: string, category: string, baseAc: number, dexCap: number | null, extra: object = {}) =>
   ({ id, name: t(id), category, baseAc, dexCap, ...extra });
 
+const cond = (id: string, name: string, effects: object[], extra: object = {}) =>
+  ({ id, name: t(name), description: `${name}: riassunto`, effects, ...extra });
+// Condizioni di prova con la stessa forma dei dati veri (scritte a mano, parole nostre)
+const TEST_CONDITIONS = [
+  cond("poisoned", "Avvelenato", [{ type: "own_attack_rolls", mode: "disadvantage" }, { type: "own_ability_checks", mode: "disadvantage" }]),
+  cond("incapacitated", "Incapacitato", [{ type: "no_actions", blocks: ["action", "bonus_action", "reaction"] }, { type: "break_concentration" }, { type: "cant_speak" }, { type: "initiative_mode", mode: "disadvantage", when: "incapacitated_when_rolling_initiative" }]),
+  cond("paralyzed", "Paralizzato", [{ type: "speed_zero" }, { type: "auto_fail_saving_throw", abilities: ["str", "dex"] }, { type: "attack_rolls_against_self", mode: "advantage" }, { type: "auto_critical_hit_against_self", attackerWithinFt: 5 }], { grantsConditions: ["incapacitated"] }),
+  cond("petrified", "Pietrificato", [{ type: "speed_zero" }, { type: "damage_resistance", damageTypes: "all" }, { type: "condition_immunity", conditions: ["poisoned"] }], { grantsConditions: ["incapacitated"] }),
+  cond("restrained", "Trattenuto", [{ type: "speed_zero" }, { type: "own_attack_rolls", mode: "disadvantage" }, { type: "saving_throw_mode", abilities: ["dex"], mode: "disadvantage" }]),
+  cond("frightened", "Spaventato", [{ type: "own_attack_rolls", mode: "disadvantage", when: "source_in_line_of_sight" }, { type: "own_ability_checks", mode: "disadvantage", when: "source_in_line_of_sight" }], { requiresSource: true }),
+  cond("invisible", "Invisibile", [{ type: "initiative_mode", mode: "advantage", when: "invisible_when_rolling_initiative" }, { type: "own_attack_rolls", mode: "advantage", unless: "target_can_see_you" }]),
+  cond("exhaustion", "Esaurimento", [{ type: "d20_test_modifier", formula: "-2 * exhaustion_level" }, { type: "speed_modifier", formula: "-5 * exhaustion_level" }, { type: "death_at_level", level: 6 }], { stackable: true }),
+];
+
 // Dati minimi in memoria (i veri dati arrivano dagli step 4-7)
 export function testRuleset(): Ruleset {
   const cls = (id: string, hitDie: number, extra: object = {}) => ({
@@ -53,6 +67,7 @@ export function testRuleset(): Ruleset {
       feat("epic_boon", [{ op: "abilityScoreIncrease", abilities: ["str"], amount: 2, cap: 30 }]),
       feat("fleet", [{ op: "speedBonus", value: 10 }]),
     ] },
+    { kind: "conditions", entries: TEST_CONDITIONS },
     { kind: "armors", entries: [
       armor("leather", "light", 11, null),
       armor("scale_mail", "medium", 14, 2, { stealthDisadvantage: true }),

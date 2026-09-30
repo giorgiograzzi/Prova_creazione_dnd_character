@@ -270,6 +270,77 @@ describe("meccanismi nuovi (senza dati privati)", () => {
   });
 });
 
+describe("condizioni", () => {
+  const withState = (over: object) => testCharacter({ asi: asiStd, state: { ...testCharacter().state, ...over } });
+  const run = (over: object) => computeCharacter(withState(over), rs);
+
+  it("Paralizzato include Incapacitato (ricorsivo, senza duplicati) e azzera velocità, TS For/Des, azioni", () => {
+    const d = run({ conditions: ["paralyzed", "incapacitated", "paralyzed"] });
+    expect(d.conditions.active.sort()).toEqual(["incapacitated", "paralyzed"]);
+    expect(d.speed.walk.value).toBe(0);
+    expect(d.saves.str.autoFail).toEqual(["Paralizzato"]);
+    expect(d.saves.dex.autoFail).toHaveLength(1);
+    expect(d.saves.wis.autoFail).toEqual([]);
+    expect(d.conditions.cannot).toEqual(expect.arrayContaining(["compiere azione", "compiere reazione", "parlare", "concentrarsi"]));
+    expect(d.conditions.attacksAgainstYou.advantage).toEqual(["Paralizzato"]);
+    expect(d.conditions.attacksAgainstYou.autoCritical[0]).toMatch(/entro 5 ft/);
+    expect(d.spellcastingBlocked).toBe(true);
+    expect(d.conditions.initiativeMode.mode).toBe("disadvantage");
+  });
+  it("Pietrificato: immune ad Avvelenato (la condizione cade), resistenza a tutti i danni", () => {
+    const d = run({ conditions: ["petrified", "poisoned"] });
+    expect(d.conditions.active).toEqual(expect.arrayContaining(["petrified", "incapacitated"]));
+    expect(d.conditions.active).not.toContain("poisoned");
+    expect(d.conditions.immune).toEqual(["poisoned"]);
+    expect(d.resistances).toContain("all");
+    expect(d.skills.athletics.mode).toBe("normal"); // niente Svantaggio da Avvelenato
+  });
+  it("Avvelenato: Svantaggio a tiri per colpire e prove; si annulla con un Vantaggio", () => {
+    const d = run({ conditions: ["poisoned"] });
+    expect(d.conditions.attackRolls).toEqual({ mode: "disadvantage", modeSources: ["Avvelenato"] });
+    expect(d.skills.stealth.mode).toBe("disadvantage");
+    expect(d.saves.dex.mode).toBe("normal"); // i TS non sono prove di caratteristica
+    // Trattenuto: TS Des con Svantaggio, ma un Vantaggio dello stesso TS li annulla
+    const rs2 = testRuleset();
+    rs2.feats.set("adv", { id: "adv", name: { it: "V" }, description: "", origin: "private", needsReview: false, category: "general", prerequisites: [], repeatable: false, choices: [], effects: [{ op: "saveAdvantage", abilities: ["dex"] }] } as never);
+    const both = computeCharacter(testCharacter({ asi: asiStd, feats: [{ featId: "adv" }], state: { ...testCharacter().state, conditions: ["restrained"] } }), rs2);
+    expect(both.saves.dex.mode).toBe("normal");
+    expect(computeCharacter(withState({ conditions: ["restrained"] }), rs).saves.dex.mode).toBe("disadvantage");
+  });
+  it("Esaurimento a livelli: -2 × livello ai Tiri D20, -5 ft × livello, 6 = morte", () => {
+    const base = run({});
+    const d = run({ exhaustion: 3 });
+    expect(d.conditions.active).toEqual(["exhaustion"]);
+    expect(d.skills.athletics.bonus.value).toBe(base.skills.athletics.bonus.value - 6);
+    expect(d.saves.con.bonus.value).toBe(base.saves.con.bonus.value - 6);
+    expect(d.initiative.value).toBe(base.initiative.value - 6);
+    expect(d.speed.walk.value).toBe(30 - 15);
+    expect(d.passivePerception.value).toBe(base.passivePerception.value); // non è un Tiro D20
+    expect(d.conditions.dead).toBe(false);
+    const dead = run({ exhaustion: 6 });
+    expect(dead.conditions.dead).toBe(true);
+    expect(dead.speed.walk.value).toBe(0);
+    expect(run({ exhaustion: 9 }).conditions.exhaustion).toBe(6); // tetto al livello massimo
+  });
+  it("effetti che dipendono dalla fonte/situazione restano testo (Spaventato), con la fonte tracciata", () => {
+    const d = run({ conditions: ["frightened"], conditionSources: { frightened: "Drago rosso" } });
+    expect(d.conditions.attackRolls.mode).toBe("normal");
+    expect(d.conditions.situational).toEqual(["Spaventato (da Drago rosso): Spaventato: riassunto"]);
+    expect(d.skills.stealth.mode).toBe("normal");
+  });
+  it("Invisibile: Vantaggio all'Iniziativa; il resto (dipende da chi ti vede) è testo", () => {
+    const d = run({ conditions: ["invisible"] });
+    expect(d.conditions.initiativeMode.mode).toBe("advantage");
+    expect(d.conditions.attackRolls.mode).toBe("normal");
+    expect(d.conditions.situational).toHaveLength(1);
+  });
+  it("condizioni sconosciute si ignorano; senza dati non cambia nulla", () => {
+    const d = run({ conditions: ["boh"] });
+    expect(d.conditions.active).toEqual([]);
+    expect(d.speed.walk.value).toBe(30);
+  });
+});
+
 describe("formule", () => {
   it("valutazione con arrotondamento per difetto", () => {
     const c = { pb: 3, level: 5, classLevels: {}, scores: { str: 8, dex: 10, con: 10, int: 10, wis: 8, cha: 10 } };

@@ -1,7 +1,7 @@
 import type { z } from "zod";
 import type {
   armorSchema, backgroundSchema, classSchema, featSchema, itemSchema, speciesSchema,
-  spellSchema, subclassSchema, termSchema, toolSchema, weaponSchema,
+  conditionDefSchema, spellSchema, subclassSchema, termSchema, toolSchema, weaponSchema,
 } from "./schema";
 import type { Ability } from "./schema";
 
@@ -16,6 +16,7 @@ export type Armor = z.infer<typeof armorSchema>;
 export type Item = z.infer<typeof itemSchema>;
 export type Spell = z.infer<typeof spellSchema>;
 export type Tool = z.infer<typeof toolSchema>;
+export type ConditionDef = z.infer<typeof conditionDefSchema>;
 export type Term = z.infer<typeof termSchema>;
 
 export type EquipState = "stowed" | "wielded" | "worn" | "dropped";
@@ -39,7 +40,8 @@ export interface Character {
     deathSaves: { successes: number; failures: number };
     resourcesUsed: Record<string, number>;
     slotsUsed: Record<number, number>;
-    conditions: string[]; exhaustion: number; inspiration: boolean;
+    conditions: string[]; exhaustion: number; inspiration: boolean; // conditions: id (Esaurimento: livello in `exhaustion`)
+    conditionSources?: Record<string, string>; // chi causa Affascinato / Spaventato / Afferrato
   };
   overrides: Record<string, number>; // valori forzati a mano, visibili e rimovibili
   notes: string;

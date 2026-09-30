@@ -9,7 +9,7 @@ Node 22 o più recente consigliato (i test con Vitest 5 lo richiedono). `extract
 - `npm run dev` — sviluppo
 - `npm run build` — build di produzione (typecheck + Vite + PWA)
 - `npm test` — test (Vitest)
-- `npm run extract:data` — estrae i dati dai PDF in `docs/rules/` verso `data/private/` (entrambi non tracciati)
+- `npm run extract:data` — estrae i dati dai PDF in `docs/rules/` (PDF e `05_conditions.json`) verso `data/private/` (entrambi non tracciati)
 - `npm run validate:data` — valida i JSON in `data/` (schema + riferimenti incrociati)
 
 ## Struttura

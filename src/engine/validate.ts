@@ -41,6 +41,12 @@ export function checkReferences(rs: Ruleset): string[] {
   for (const f of rs.feats.values())
     for (const e of f.effects)
       if (e.op === "grantFeat") need(`feats/${f.id}`, "talento concesso", e.feat, rs.feats, "feats");
+  for (const c of rs.conditions.values()) {
+    for (const g of c.grantsConditions) need(`conditions/${c.id}`, "condizione inclusa", g, rs.conditions, "conditions");
+    for (const e of c.effects) for (const i of e.conditions ?? []) need(`conditions/${c.id}`, "immunità a", i, rs.conditions, "conditions");
+    if (c.stackable && !c.levels) errs.push(`conditions/${c.id}: cumulativa senza livelli`);
+    if (c.requiresSource && !c.effects.length) errs.push(`conditions/${c.id}: richiede la fonte ma non ha effetti`);
+  }
   // hasFeature / hasFeat nelle condizioni (prerequisiti, requires, when) devono riferirsi a privilegi e talenti che esistono
   const featureIds = new Set<string>();
   const choicesOf = (h: { choices: Choice[] }) => h.choices.flatMap((c) => c.options ?? []);

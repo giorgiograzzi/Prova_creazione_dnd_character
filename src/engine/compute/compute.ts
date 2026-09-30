@@ -2,6 +2,7 @@ import type { Character } from "../types";
 import type { Ruleset } from "../ruleset";
 import { computeScores } from "./abilities";
 import { computeAc } from "./ac";
+import { applyConditionSpeed, resolveConditions } from "./conditions";
 import { buildCtx } from "./context";
 import { evalValue } from "./formula-eval";
 import { computeHp } from "./hp";
@@ -20,22 +21,24 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   const notes: string[] = [];
   const warnings: string[] = [];
   const { scores, mods } = computeScores(x);
-  const { saves, skills } = computeRolls(x, profs, notes);
+  const cs = resolveConditions(x.ch, x.rs);
+  const { saves, skills } = computeRolls(x, profs, notes, cs);
 
   const initiative = sum([
     { label: "Mod Des", value: x.mods.dex },
+    ...(cs.d20Penalty ? [{ label: "Esaurimento", value: cs.d20Penalty }] : []),
     ...x.active.flatMap(({ effect: e, label }) => (e.op === "initiativeBonus" ? [{ label, value: evalValue(e.value, x) }] : [])),
   ]);
   const perc = skills.perception;
   const percMode = perc.mode;
   const passive = sum([
     { label: "Base", value: 10 },
-    { label: "Percezione", value: perc.bonus.value },
+    { label: "Percezione", value: perc.bonus.value - cs.d20Penalty }, // la Percezione passiva non è un Tiro D20: niente Esaurimento
     { label: percMode === "advantage" ? "Vantaggio" : "Svantaggio", value: percMode === "advantage" ? 5 : percMode === "disadvantage" ? -5 : 0 },
   ]);
 
   const ac = computeAc(x, profs, warnings);
-  const speed = computeSpeed(x);
+  const speed = applyConditionSpeed(computeSpeed(x), cs);
   const hp = computeHp(x);
   const o = ch.overrides;
   const spellcasting = ch.classes.flatMap((c) => {
@@ -59,7 +62,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     ac: { ...withOverride(ac, o.ac), formula: ac.formula },
     speed: { ...speed, walk: withOverride(speed.walk, o["speed.walk"]) },
     senses: computeSenses(x),
-    resistances: computeResistances(x),
+    resistances: cs.resistAll.length ? [...new Set([...computeResistances(x), "all"])].sort() : computeResistances(x),
     resources: computeResources(x),
     spellcasting,
     grantedSpells: computeGrantedSpells(x),
@@ -68,6 +71,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     features: [...x.collected.features].sort(),
     feats: [...x.collected.feats].sort(),
     notes, warnings,
-    spellcastingBlocked: untrainedArmor(x, profs),
+    spellcastingBlocked: untrainedArmor(x, profs) || cs.cannot.includes("compiere azione"),
+    conditions: cs,
   };
 }

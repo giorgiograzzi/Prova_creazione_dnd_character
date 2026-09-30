@@ -298,3 +298,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .hb-feature { margin-bottom: 14px; }
 .xp-dialog .xp-group { background: transparent; border-color: var(--dos-text); }
 .xp-dialog .xp-group legend { color: var(--dos-bright); }
+
+/* Avviso della PWA (nuova versione / pronta offline): sopra la barra in basso, sempre visibile */
+.pwa-toast { position: fixed; z-index: 900; left: 12px; right: 12px; bottom: calc(var(--tap) + var(--safe-b) + 16px); max-width: 420px; margin: 0 auto;
+  padding: 10px 12px 2px; background: var(--xp-face); color: var(--xp-text, #000); border: 2px solid var(--xp-border); border-radius: 6px; box-shadow: 3px 3px 0 rgba(0,0,0,.35); }
+.pwa-toast p { margin: 0 0 8px; }

@@ -4,6 +4,7 @@ import it from "../i18n/it.json";
 import { backupDue } from "../store";
 import { Button, Check, Dialog, Field, Segmented } from "../ui/xp";
 import { fmt, formatDate } from "../ui/format";
+import { InstallHint } from "../ui/InstallHint";
 import { useApp } from "../ui/useApp";
 
 const t = it.settings;
@@ -52,6 +53,8 @@ export function Settings({ onBack }: { onBack: () => void }) {
         </Field>
         <Check checked={s.allowReroll} onChange={(allowReroll) => void updateSettings({ allowReroll })}>{t.allowReroll}</Check>
       </fieldset>
+
+      <InstallHint />
 
       <fieldset className="xp-group">
         <legend>{t.backup}</legend>

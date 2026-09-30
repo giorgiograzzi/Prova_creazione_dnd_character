@@ -21,7 +21,8 @@
     "open": "Apri",
     "delete": "Elimina",
     "confirmDelete": "Eliminare definitivamente questo personaggio?",
-    "creationSoon": "La creazione guidata arriva con il prossimo passo: per ora il personaggio è vuoto."
+    "creationSoon": "La creazione guidata arriva con il prossimo passo: per ora il personaggio è vuoto.",
+    "backupDue": "È passato un po' dall'ultimo backup: esportalo adesso, così i personaggi sono al sicuro."
   },
   "soon": {
     "sheet": "La scheda giocabile arriva allo step 14.",
@@ -55,6 +56,15 @@
       "pending": "Modifiche in attesa…",
       "saving": "Salvataggio…",
       "error": "Errore di salvataggio"
+    },
+    "install": {
+      "title": "App",
+      "button": "Installa l'app",
+      "installed": "App installata: stai usando la versione a schermo intero.",
+      "ios": "Su iPhone e iPad: tocca Condividi, poi «Aggiungi alla schermata Home».",
+      "other": "Dal menu del browser scegli «Installa app» oppure «Aggiungi alla schermata Home».",
+      "offline": "Dopo il primo caricamento l'app funziona anche senza rete; i personaggi restano sul tuo dispositivo.",
+      "done": "Installazione avviata."
     }
   },
   "import": {
@@ -930,7 +940,7 @@
   },
   "pwa": {
     "updateAvailable": "È disponibile una nuova versione dell'app.",
-    "update": "Aggiorna e reinstalla",
+    "update": "Aggiorna",
     "later": "Più tardi",
     "offlineReady": "L'app è pronta per l'uso offline.",
     "close": "Chiudi"

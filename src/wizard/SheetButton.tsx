@@ -8,7 +8,7 @@ import { fmt } from "../ui/format";
 import { Button } from "../ui/xp";
 
 const t = it.wizard.sheet;
-// Il modello sta in public/forms: si scarica solo quando serve (e il service worker lo tiene per l'uso offline)
+// Il modello sta in public/forms: lo legge il service worker dalla cache (anche offline), altrimenti dalla rete solo quando serve
 const TEMPLATE = `${import.meta.env.BASE_URL}forms/scheda-2024-it.pdf`;
 
 // "Stampa scheda": scrive il personaggio sulla scheda ufficiale 2024 in italiano e la scarica come PDF

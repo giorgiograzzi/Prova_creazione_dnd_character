@@ -3,6 +3,8 @@ import it from "../i18n/it.json";
 import { Button, Dialog } from "../ui/xp";
 import { formatDate } from "../ui/format";
 import { useApp } from "../ui/useApp";
+import { backupDue } from "../store";
+import { exportNow } from "./Settings";
 
 export function Characters({ onOpened }: { onOpened: () => void }) {
   const list = useApp((s) => s.list);
@@ -11,6 +13,8 @@ export function Characters({ onOpened }: { onOpened: () => void }) {
   const create = useApp((s) => s.create);
   const open = useApp((s) => s.open);
   const remove = useApp((s) => s.remove);
+  const settings = useApp((s) => s.settings);
+  const exportAll = useApp((s) => s.exportAll);
   const [toDelete, setToDelete] = useState<string | null>(null);
   const t = it.characters;
 
@@ -18,6 +22,12 @@ export function Characters({ onOpened }: { onOpened: () => void }) {
     <>
       <h2>{t.title}</h2>
       {error && <div className="xp-error" role="alert">{error}</div>}
+      {list.length > 0 && backupDue(settings) && (
+        <div className="xp-banner" role="alert">
+          {t.backupDue}
+          <div className="xp-actions" style={{ justifyContent: "flex-start" }}><Button variant="primary" onClick={() => void exportNow(exportAll)}>{it.settings.exportNow}</Button></div>
+        </div>
+      )}
       <div className="xp-actions">
         <Button variant="primary" onClick={() => void create().then(onOpened)}>+ {t.new}</Button>
       </div>

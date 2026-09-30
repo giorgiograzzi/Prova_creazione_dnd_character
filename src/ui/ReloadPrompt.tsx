@@ -1,8 +1,10 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
 import it from "../i18n/it.json";
+import { Button } from "./xp";
 
 const CHECK_INTERVAL_MS = 60 * 60 * 1000;
 
+// Avviso dell'app installata: c'è una versione nuova (Aggiorna ricarica), oppure l'app è pronta per l'uso offline
 export function ReloadPrompt() {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
@@ -23,28 +25,12 @@ export function ReloadPrompt() {
   };
 
   return (
-    <div
-      role="alert"
-      style={{
-        position: "fixed",
-        right: 16,
-        bottom: 16,
-        zIndex: 1000,
-        maxWidth: 320,
-        padding: 12,
-        background: "#ece9d8",
-        color: "#000",
-        border: "2px solid #0a246a",
-        boxShadow: "2px 2px 6px rgba(0,0,0,.4)",
-      }}
-    >
-      <p style={{ margin: "0 0 8px" }}>
-        {needRefresh ? it.pwa.updateAvailable : it.pwa.offlineReady}
-      </p>
-      {needRefresh && (
-        <button onClick={() => void updateServiceWorker(true)}>{it.pwa.update}</button>
-      )}{" "}
-      <button onClick={close}>{needRefresh ? it.pwa.later : it.pwa.close}</button>
+    <div className="pwa-toast" role="alert">
+      <p>{needRefresh ? it.pwa.updateAvailable : it.pwa.offlineReady}</p>
+      <div className="xp-actions" style={{ justifyContent: "flex-start", flexWrap: "wrap" }}>
+        {needRefresh && <Button variant="primary" onClick={() => void updateServiceWorker(true)}>{it.pwa.update}</Button>}
+        <Button onClick={close}>{needRefresh ? it.pwa.later : it.pwa.close}</Button>
+      </div>
     </div>
   );
 }

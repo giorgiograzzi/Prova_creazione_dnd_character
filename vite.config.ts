@@ -8,16 +8,26 @@ export default defineConfig({
     react(),
     // Config base: manifest e offline completo si rifiniscono allo step 19
     VitePWA({
+      // "prompt": l'app installata non si aggiorna da sola a metà uso, chiede (ReloadPrompt)
       registerType: "prompt",
-      // La scheda PDF (5 MB) non entra nell'installazione: si tiene in cache la prima volta che serve, poi funziona anche offline
-      workbox: { runtimeCaching: [{ urlPattern: ({ url }) => url.pathname.endsWith(".pdf"), handler: "CacheFirst", options: { cacheName: "forms", expiration: { maxEntries: 2 } } }] },
+      includeAssets: ["icons/icon.svg", "icons/apple-touch-icon.png"],
       manifest: {
-        name: "Personaggi D&D",
-        short_name: "D&D PG",
-        lang: "it",
-        display: "standalone",
-        background_color: "#ece9d8",
-        theme_color: "#0a3fb5",
+        id: "./", name: "Personaggi D&D", short_name: "D&D PG", description: "Crea e gestisci personaggi di D&D 5.5 (2024), in italiano, anche senza rete.",
+        lang: "it", dir: "ltr", start_url: "./", scope: "./", display: "standalone", orientation: "any", categories: ["games", "entertainment"],
+        background_color: "#ece9d8", theme_color: "#0a3fb5",
+        icons: [
+          { src: "icons/icon-192.png", sizes: "192x192", type: "image/png" },
+          { src: "icons/icon-512.png", sizes: "512x512", type: "image/png" },
+          { src: "icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+        ],
+      },
+      workbox: {
+        // Offline completo: tutto ciò che serve (anche i dati di gioco, che stanno dentro i file JS) entra nella cache del primo caricamento.
+        // Il limite predefinito (2 MB) lascerebbe fuori i file grandi: senza dati di gioco nel bundle l'app non parte offline.
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,webmanifest,woff2}", "forms/*.pdf"], // la scheda PDF (5 MB) c'è dal primo caricamento: si stampa anche offline
+        maximumFileSizeToCacheInBytes: 30 * 1024 * 1024,
+        navigateFallback: "index.html",
+        cleanupOutdatedCaches: true,
       },
     }),
   ],

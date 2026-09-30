@@ -68,7 +68,7 @@ export function optionStates(slot: Slot, ch: Character, rs: Ruleset, selected: s
       case "feats": {
         const cat = arg === "general" ? "general" : arg;
         list = [...rs.feats.values()].filter((f) => f.category === cat).map((f) => {
-          const o = opt(f.id, f.name.it, { description: f.description });
+          const o = opt(f.id, f.origin === "homebrew" ? `${f.name.it} · Homebrew` : f.name.it, { description: f.description });
           const unmet = f.prerequisites.find((p) => !cond(p));
           if (unmet) return off(o, `Richiede ${describeCondition(unmet, rs)}`);
           if (!f.repeatable && ctx.collected.feats.has(f.id)) return off(o, "Già posseduto");

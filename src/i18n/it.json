@@ -516,6 +516,9 @@
       "spells": "Incantesimi"
     },
     "badge": "Homebrew",
+    "wizardIntro": "Aggiungi al personaggio le tue creazioni Homebrew attive: talenti (anche di Origine), incantesimi, armi, armature e oggetti.",
+    "wizardEmpty": "Nessuna creazione Homebrew attiva. Creale o attivale dalla scheda Homebrew, poi torna qui.",
+    "wizardAdd": "Aggiungi al personaggio",
     "off": "Disattivata",
     "on": "Attiva",
     "empty": "Ancora nessuna voce. Creane una o importa un pacchetto.",

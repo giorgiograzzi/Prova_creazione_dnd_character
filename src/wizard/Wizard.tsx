@@ -10,12 +10,13 @@ import { fmt } from "../ui/format";
 import { Button, Dialog, Field } from "../ui/xp";
 import { AsiView, QuestionView } from "./QuestionView";
 import { ScoresStep } from "./ScoresStep";
+import { HomebrewStep } from "./HomebrewStep";
 import { Summary } from "./Summary";
 import { applyAsiDraft, choose, finalizeCharacter, gamingSetsNeeded } from "./logic";
 
 const t = it.wizard;
-type View = StepId | "summary";
-const VIEWS: View[] = [...STEPS, "summary"];
+type View = StepId | "homebrew" | "summary";
+const VIEWS: View[] = [...STEPS, "homebrew", "summary"];
 
 export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
   ch: Character; rs: Ruleset; allowReroll: boolean; onChange: (c: Character) => void; onDone: (c: Character) => void;
@@ -42,7 +43,7 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
   });
 
   const stepQuestions = (s: StepId): Question[] => questions.filter((q) => q.step === s);
-  const status = (s: StepId) => progress.steps.find((x) => x.step === s);
+  const status = (s: View) => progress.steps.find((x) => x.step === (s as StepId));
 
   const body = () => {
     if (view === "summary") {
@@ -75,6 +76,7 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
         }} />
       </>
     );
+    if (view === "homebrew") return <HomebrewStep ch={ch} rs={rs} onChange={onChange} />;
     if (view === "scores") return <ScoresStep ch={ch} rs={rs} allowReroll={allowReroll} onChange={onChange} onError={setErrors} />;
     const qs = stepQuestions(view);
     return (
@@ -94,19 +96,19 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
   };
 
   const done = STEPS.filter((s) => status(s)?.complete).length;
-  const problems = view !== "summary" ? status(view)?.problems ?? [] : [];
+  const problems = view !== "summary" && view !== "homebrew" ? status(view)?.problems ?? [] : [];
   return (
     <>
       <div className="wz-steps" role="tablist" aria-label={t.title}>
         {VIEWS.map((v, i) => (
-          <button key={v} type="button" role="tab" aria-current={v === view ? "step" : undefined} aria-label={v === "summary" ? t.summary : `${i}. ${t.steps[v]}`}
-            className={v !== "summary" && status(v)?.complete ? "done" : ""} onClick={() => go(v)}>
-            {v === "summary" ? "★" : status(v)?.complete ? "✓" : i}
+          <button key={v} type="button" role="tab" aria-current={v === view ? "step" : undefined} aria-label={v === "summary" ? t.summary : v === "homebrew" ? it.homebrew.title : `${i}. ${t.steps[v]}`}
+            className={v !== "summary" && v !== "homebrew" && status(v)?.complete ? "done" : ""} onClick={() => go(v)}>
+            {v === "summary" ? "★" : v === "homebrew" ? "⚗" : status(v)?.complete ? "✓" : i}
           </button>
         ))}
       </div>
       <div className="wz-bar" role="progressbar" aria-valuemin={0} aria-valuemax={STEPS.length} aria-valuenow={done}><div style={{ width: `${(done / STEPS.length) * 100}%` }} /></div>
-      <h2>{view === "summary" ? t.summary : `${fmt(t.step, { n: idx, t: STEPS.length - 1 })}: ${t.steps[view]}`}</h2>
+      <h2>{view === "summary" ? t.summary : view === "homebrew" ? it.homebrew.title : `${fmt(t.step, { n: idx, t: STEPS.length - 1 })}: ${t.steps[view]}`}</h2>
       {!rs.creation.get("creation") && <div className="xp-error" role="alert">{t.noCreation}</div>}
       {errors.length > 0 && <div className="xp-error" role="alert">{errors.map((e) => <div key={e}>{e}</div>)}</div>}
       {problems.length > 0 && view !== "scores" && <div className="xp-banner">{problems.join(" · ")}</div>}

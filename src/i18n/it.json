@@ -366,6 +366,11 @@
     "all": "Tutti",
     "more": "Mostrati i primi {n}: affina la ricerca.",
     "noResults": "Nessun oggetto.",
+    "noHomebrew": "Nessuna creazione homebrew attiva in questa sezione.",
+    "showHomebrew": "Mostra le creazioni Homebrew",
+    "showManual": "Torna al Manuale del Giocatore",
+    "sourceManual": "Manuale del Giocatore",
+    "sourceHomebrew": "Creazioni Homebrew",
     "lb": "lb",
     "time": {
       "minutes": "{n} min",

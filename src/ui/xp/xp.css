@@ -139,6 +139,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .dos-name { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dos-btn { display: grid; place-items: center; width: 32px; height: 32px; background: var(--dos-face); color: var(--dos-dark); font-weight: 700; line-height: 1; cursor: default;
   border: 2px solid; border-color: var(--dos-hi) var(--dos-dark) var(--dos-dark) var(--dos-hi); box-shadow: inset -1px -1px var(--dos-shadow); padding: 0; }
+.dos-btn.action { width: 48px; height: 48px; cursor: pointer; }
+.dos-btn.action svg { width: 26px; height: 26px; stroke: currentColor; }
+.dos-btn.action[aria-pressed="true"] { background: var(--dos-accent); border-color: var(--dos-dark) var(--dos-hi) var(--dos-hi) var(--dos-dark); box-shadow: inset 1px 1px var(--dos-shadow); }
 .dos-btn.close { width: 48px; height: 48px; margin-left: 4px; cursor: pointer; font-size: 24px; }
 .dos-btn.close:active { border-color: var(--dos-dark) var(--dos-hi) var(--dos-hi) var(--dos-dark); box-shadow: inset 1px 1px var(--dos-shadow); }
 .xp-dialog > .xp-body { flex: 1; min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin-top: 3px; background: var(--dos-bg); color: var(--dos-text); border: 2px solid; border-color: var(--dos-shadow) var(--dos-hi) var(--dos-hi) var(--dos-shadow); }

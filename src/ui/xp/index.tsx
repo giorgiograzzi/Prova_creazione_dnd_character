@@ -69,7 +69,9 @@ export function SectionBar({ items, current, onSelect, onBack, backLabel }: { it
 }
 
 // Popup: finestra "Prompt di MS-DOS" di Windows 95 (barra blu con _ □ ×; solo × funziona). Esc chiude.
-export function Dialog({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
+// `titleAction` (opzionale) prende il posto del pulsante "_" nella barra: un interruttore con simbolo, es. Homebrew / Manuale
+export function Dialog({ title, children, onClose, titleAction }: { title: string; children: ReactNode; onClose: () => void; titleAction?: { label: string; icon: IconName; pressed: boolean; onClick: () => void } }) {
+  const ActionIcon = titleAction ? icons[titleAction.icon] : null;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
@@ -84,7 +86,9 @@ export function Dialog({ title, children, onClose }: { title: string; children: 
             <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" fill="#000" stroke="#c0c0c0" strokeWidth="2" /><path d="M5 9l3 3-3 3M10 15h5" fill="none" stroke="#c0c0c0" strokeWidth="1.6" /></svg>
           </span>
           <span className="dos-name">{title}</span>
-          <span className="dos-btn" aria-hidden="true">_</span>
+          {titleAction && ActionIcon
+            ? <button type="button" className="dos-btn action" aria-label={titleAction.label} title={titleAction.label} aria-pressed={titleAction.pressed} onClick={titleAction.onClick}><ActionIcon /></button>
+            : <span className="dos-btn" aria-hidden="true">_</span>}
           <span className="dos-btn" aria-hidden="true">□</span>
           <button type="button" className="dos-btn close" aria-label="Chiudi" onClick={onClose}>×</button>
         </header>

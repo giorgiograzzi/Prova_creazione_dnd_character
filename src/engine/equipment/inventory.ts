@@ -43,16 +43,15 @@ export function payCoins(coins: Coins, costCp: number): { ok: true; coins: Coins
   return { ok: true, coins: c };
 }
 
-export interface CatalogEntry { id: string; name: string; kind: Found["kind"]; group: string; cost: number; weight: number }
+export interface CatalogEntry { id: string; name: string; kind: Found["kind"]; group: string; homebrew: boolean; cost: number; weight: number }
 const GROUP: Record<string, string> = { weapon: "Armi", armor: "Armature", tool: "Strumenti", item: "Oggetti" };
-export const HOMEBREW_GROUP = "Homebrew";
-// Tutto ciò che si può comprare (ha un costo). Le creazioni homebrew stanno in un gruppo a parte, anche se costano 0 (oggetti magici, doni).
+// Tutto ciò che si può comprare (ha un costo). Le creazioni homebrew hanno gli stessi gruppi del manuale ma il flag `homebrew` (anche a costo 0: oggetti magici, doni).
 export function shopCatalog(rs: Ruleset): CatalogEntry[] {
   const out: CatalogEntry[] = [];
   const add = (kind: Found["kind"], defs: Iterable<{ id: string; name: { it: string }; cost: number; weight: number; origin?: string }>) => {
     for (const d of defs) {
       const hb = d.origin === "homebrew";
-      if (d.cost > 0 || hb) out.push({ id: d.id, name: d.name.it, kind, group: hb ? HOMEBREW_GROUP : GROUP[kind]!, cost: d.cost, weight: d.weight });
+      if (d.cost > 0 || hb) out.push({ id: d.id, name: d.name.it, kind, group: GROUP[kind]!, homebrew: hb, cost: d.cost, weight: d.weight });
     }
   };
   add("weapon", rs.weapons.values()); add("armor", rs.armors.values()); add("tool", rs.tools.values()); add("item", rs.items.values());

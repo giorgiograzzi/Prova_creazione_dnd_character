@@ -126,33 +126,35 @@ export function Equip() {
 function Shop({ ch, onBuy, onClose }: { ch: Character; onBuy: (id: string) => { ok: boolean; errors: string[] }; onClose: () => void }) {
   const rs = useRuleset();
   const catalog = useMemo(() => shopCatalog(rs), [rs]);
-  const groups = [...new Set(catalog.map((c) => c.group))];
+  // Interruttore nella barra del titolo: stesse sezioni, ma solo voci homebrew oppure solo voci del Manuale
+  const [hb, setHb] = useState(false);
+  const source = useMemo(() => catalog.filter((c) => c.homebrew === hb), [catalog, hb]);
+  const groups = [...new Set(source.map((c) => c.group))];
   const [group, setGroup] = useState("all");
   const [q, setQ] = useState("");
   const [msg, setMsg] = useState("");
-  const rows = catalog.filter((c) => (group === "all" || c.group === group) && (!q || c.name.toLowerCase().includes(q.toLowerCase())));
+  const current = group === "all" || groups.includes(group) ? group : "all";
+  const rows = source.filter((c) => (current === "all" || c.group === current) && (!q || c.name.toLowerCase().includes(q.toLowerCase())));
   const LIMIT = 80;
-  // nel gruppo Homebrew le voci sono divise per tipo (Armi, Armature, Oggetti...)
-  const KIND_LABEL: Record<string, string> = { weapon: "Armi", armor: "Armature", item: "Oggetti", tool: "Strumenti" };
-  const KIND_ORDER = Object.keys(KIND_LABEL);
-  const shown = (group === "Homebrew" ? [...rows].sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind)) : rows).slice(0, LIMIT);
+  const shown = rows.slice(0, LIMIT);
   return (
-    <Dialog title={t.shop} onClose={onClose}>
+    <Dialog title={t.shop} onClose={onClose}
+      titleAction={{ label: hb ? t.showManual : t.showHomebrew, icon: "homebrew", pressed: hb, onClick: () => setHb(!hb) }}>
       <p>{t.funds}: <b>{formatCost(walletCp(ch.coins))}</b></p>
+      <p className="xp-muted" role="status">{hb ? t.sourceHomebrew : t.sourceManual}</p>
       <div className="pl-tabs" role="group" aria-label={t.shop}>
-        <button type="button" aria-pressed={group === "all"} onClick={() => setGroup("all")}>{t.all}</button>
-        {groups.map((g) => <button key={g} type="button" aria-pressed={group === g} onClick={() => setGroup(g)}>{g}</button>)}
+        <button type="button" aria-pressed={current === "all"} onClick={() => setGroup("all")}>{t.all}</button>
+        {groups.map((g) => <button key={g} type="button" aria-pressed={current === g} onClick={() => setGroup(g)}>{g}</button>)}
       </div>
       <input className="xp-input" style={{ marginBottom: 8 }} type="search" placeholder={t.search} aria-label={t.search} value={q} onChange={(e) => setQ(e.target.value)} />
       {msg && <p role="status"><b>{msg}</b></p>}
-      {rows.length === 0 && <p className="xp-muted">{t.noResults}</p>}
+      {rows.length === 0 && <p className="xp-muted">{hb ? t.noHomebrew : t.noResults}</p>}
       <ul className="xp-list">
-        {shown.map((c, i) => (
+        {shown.map((c) => (
           <li key={`${c.kind}-${c.id}`} style={{ display: "block" }}>
-            {group === "Homebrew" && (i === 0 || shown[i - 1]!.kind !== c.kind) && <h3 style={{ margin: "4px 0" }}>{KIND_LABEL[c.kind]}</h3>}
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div className="grow"><div className="name">{c.name}</div><div className="xp-muted">{c.group} · {c.cost > 0 ? formatCost(c.cost) : t.free} · {c.weight} {t.lb}</div></div>
-            <Button disabled={walletCp(ch.coins) < c.cost} onClick={() => { const r = onBuy(c.id); setMsg(r.ok ? fmt(t.bought, { n: c.name }) : r.errors.join(" ")); }}>{t.buy}</Button>
+              <div className="grow"><div className="name">{c.name}</div><div className="xp-muted">{c.group} · {c.cost > 0 ? formatCost(c.cost) : t.free} · {c.weight} {t.lb}</div></div>
+              <Button disabled={walletCp(ch.coins) < c.cost} onClick={() => { const r = onBuy(c.id); setMsg(r.ok ? fmt(t.bought, { n: c.name }) : r.errors.join(" ")); }}>{t.buy}</Button>
             </div>
           </li>
         ))}

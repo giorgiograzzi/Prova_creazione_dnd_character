@@ -125,7 +125,7 @@ describe("homebrew: nel ruleset e nel personaggio", () => {
   it("il negozio ha il gruppo Homebrew, anche per le voci a costo 0, e si comprano", () => {
     const free = extendRuleset(rs, entryFiles([E("items", { id: "hb_zaino", name: t("Zaino"), category: "Oggetto magico", weight: 5, cost: 0 })]));
     const shop = shopCatalog(free);
-    expect(shop.filter((c) => c.group === "Homebrew").map((c) => c.id).sort()).toEqual(["hb_lama", "hb_zaino"]);
+    expect(shop.filter((c) => c.homebrew).map((c) => c.id).sort()).toEqual(["hb_lama", "hb_zaino"]);
     expect(shop.some((c) => c.id === "rope")).toBe(false); // gli altri oggetti gratuiti restano fuori
     const r = buyItem(testCharacter(), free, "hb_zaino");
     expect(r.ok && r.character.inventory.map((i) => i.itemId)).toEqual(["hb_zaino"]);

@@ -1,8 +1,8 @@
 import type { Choice } from "../schema";
 import type { Ability } from "../schema";
 
-// I 7 passi in ordine ufficiale (file 02): Classe, Origine (background, specie, linguaggi), Punteggi, Allineamento, Dettagli
-export const STEPS = ["class", "background", "species", "languages", "scores", "alignment", "details"] as const;
+// Passo 0 (Livello) + i 7 passi in ordine ufficiale (file 02): Classe, Origine (background, specie, linguaggi), Punteggi, Allineamento, Dettagli
+export const STEPS = ["level", "class", "background", "species", "languages", "scores", "alignment", "details"] as const;
 export type StepId = (typeof STEPS)[number];
 
 export interface OptionState {

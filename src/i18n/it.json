@@ -85,6 +85,7 @@
     "next": "Avanti",
     "finish": "Termina creazione",
     "steps": {
+      "level": "Livello",
       "class": "Classe",
       "background": "Background",
       "species": "Specie",
@@ -104,7 +105,7 @@
     "confirmText": "Se continui, verranno tolte:",
     "confirmYes": "Continua",
     "confirmNo": "Annulla",
-    "level1": "Si parte dal livello 1: i livelli successivi si aggiungono con l'avanzamento.",
+    "level1": "Livello {n}: tutti i privilegi e le scelte fino a questo livello si fanno qui (il livello si cambia al passo 0).",
     "name": "Nome del personaggio",
     "namePlaceholder": "Come si chiama?",
     "asi": {
@@ -158,7 +159,36 @@
       "progress": "Livello e avanzamento"
     },
     "noCreation": "Mancano le regole di creazione (file creation.json in data/private): allineamenti, array standard e acquisto a punti non sono disponibili. Sul server lancia «npm run extract:data» (servono i PDF in docs/rules), poi rifai la build.",
-    "stepMissing": "Passo «{s}»: mancano delle scelte"
+    "stepMissing": "Passo «{s}»: mancano delle scelte",
+    "levelStep": {
+      "level": "Livello del personaggio",
+      "help": "Scegli da che livello parte il personaggio: avrà tutti i privilegi, i talenti e le scelte dei livelli da 1 a quello scelto. Poi scegli la classe.",
+      "pb": "Bonus di competenza: +{n}",
+      "xp": "PX minimi del livello: {n}",
+      "hp": "Punti Ferita ai livelli 2–{n}",
+      "hpAvg": "Valore fisso",
+      "hpRoll": "Tira i dadi",
+      "hpAvgHelp": "Ogni livello dopo il 1° dà il valore fisso del dado (d6=4, d8=5, d10=6, d12=7) + mod Cos; il 1° livello è sempre il massimo del dado.",
+      "hpRollHelp": "Tiri effettuati: {r}",
+      "hpReroll": "Rifai i tiri",
+      "hpNeedClass": "Scegli prima la classe per tirare i Punti Ferita.",
+      "wealth": "Monete e oggetti",
+      "wealthBase": "{g} mo fisse",
+      "wealthDice": " + {c}d{s} × {m} mo",
+      "wealthNormal": "più l'equipaggiamento iniziale normale",
+      "wealthNone": "Equipaggiamento iniziale normale.",
+      "wealthRoll": "Tira le monete",
+      "wealthDone": "Monete iniziali: {g} mo",
+      "wealthPending": "Non hai ancora tirato: verranno assegnate solo le mo fisse ({g}).",
+      "magic": "Oggetti magici da concordare col DM: {items}",
+      "magicItem": {
+        "common": "{n} Comune",
+        "uncommon": "{n} Non comune",
+        "rare": "{n} Raro",
+        "veryRare": "{n} Molto raro"
+      },
+      "next": "Avanti: scegli la classe"
+    }
   },
   "play": {
     "tabs": {

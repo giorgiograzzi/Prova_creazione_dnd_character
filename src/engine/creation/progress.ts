@@ -20,6 +20,7 @@ export function creationProgress(ch: Character, rs: Ruleset): { steps: StepStatu
     if (step === "scores") problems.push(...scoreProblems(ch, rs));
     if (step === "details" && !ch.name.trim()) problems.push("Dai un nome al personaggio");
     if (step === "class" && !ch.classes.length) problems.push("Scegli una classe");
+    // il livello (passo 0) parte da 1: non manca mai nulla
     return { step, complete: !missing.length && !problems.length, missing, problems };
   });
   const next = steps.find((s) => !s.complete)?.step;

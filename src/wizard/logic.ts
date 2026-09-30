@@ -1,7 +1,7 @@
 import it from "../i18n/it.json";
 import { buildCtx, computeCharacter } from "../engine/compute";
 import {
-  allQuestions, creationProgress, fillHpRolls, pointBuyCost, previewDecision, recommendedArray, rollAbilityScores, setAsi, setBaseScores,
+  allQuestions, creationProgress, fillHpRolls, levelStartingGold, pointBuyCost, previewDecision, recommendedArray, rollAbilityScores, setAsi, setBaseScores,
   startingEquipment, type DecisionResult, type Question,
 } from "../engine/creation";
 import type { Ruleset } from "../engine/ruleset";
@@ -92,7 +92,7 @@ export function finalizeCharacter(ch: Character, rs: Ruleset, opts: { gaming_set
   const eq = startingEquipment(ch, rs, opts);
   const still = eq.pending.filter((p) => p !== "$gaming_set" || !opts.gaming_set);
   if (still.length) return { ok: false, errors: [`Manca una scelta per l'equipaggiamento: ${still.join(", ")}`], character: ch };
-  const base = fillHpRolls({ ...ch, inventory: eq.inventory, coins: { ...ch.coins, gp: eq.gp }, editing: false, created: true }, rs, "avg");
+  const base = fillHpRolls({ ...ch, inventory: eq.inventory, coins: { ...ch.coins, gp: eq.gp + levelStartingGold(ch, rs) }, editing: false, created: true }, rs, "avg");
   const hp = computeCharacter(base, rs).hp.max.value;
   return { ok: true, errors: [], character: { ...base, state: { ...base.state, hp, tempHp: 0, hitDiceUsed: 0 } } };
 }

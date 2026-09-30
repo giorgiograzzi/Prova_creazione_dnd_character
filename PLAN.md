@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-17 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Step 16 completato (magie). Step 17 completato (avanzamento di livello). Prossimo: step 18 (Homebrew v1). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-17 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Step 16 completato (magie). Step 17 completato (avanzamento di livello). Prossimo: step 18 (Homebrew v1). Passo 0 (livello di partenza) aggiunto al wizard. Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -113,6 +113,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 ### 17. Level-up 1→20
 - `levelUp` su `classes[]` (PF media/tiro, sottoclasse al 3, ASI/talento ai livelli previsti, Dono epico, slot, maestrie...), anteprima differenze; commenti dove servirà il multiclasse (slot combinati, prerequisiti).
+- **Cambio di impostazione (scelta di Giorgio)**: niente pulsanti "Sali di livello" in gioco; il livello si sceglie al **Passo 0** della creazione (e si cambia in modifica). Il multiclasse resta nel motore ma senza interfaccia.
 - **Fatto**: **test golden** con i dati veri: un personaggio per ognuna delle 12 classi a liv. 1, 5, 11, 20 (48 casi), portato al livello con `levelUp` e le scelte di ogni livello: bonus di competenza (+2/+3/+4/+6), PF (dado massimo al 1° + valore fisso + Cos per livello), Dadi Vita, privilegi sbloccati, slot dei tre tipi di incantatore (completo, mezzo, terzo) e del Patto secondo le tabelle del file 04, sottoclasse al livello previsto, nessun avviso. Più: multiclasse con competenze parziali (Guerriero↔Mago), Mente di ferro, Attacchi per azione e Ira. Le tabelle sono quelle del tuo file 04/02, non il manuale.
 
 ### 18. Homebrew v1

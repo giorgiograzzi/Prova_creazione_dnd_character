@@ -40,6 +40,7 @@ export const characterSchema = z.object({
   overrides: z.record(z.string(), z.number()),
   notes: z.string(),
   xp: int.min(0).optional(),
+  startLevel: int.min(1).max(20).optional(), startingGold: int.min(0).optional(),
   editing: z.boolean().optional(), created: z.boolean().optional(),
   creation: z.object({ method: z.enum(["array", "roll", "pointbuy", "manual"]), rolls: z.array(int).optional() }).optional(),
   pactWeapon: z.string().optional(),

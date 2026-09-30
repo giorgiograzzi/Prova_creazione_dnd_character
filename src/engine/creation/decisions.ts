@@ -14,7 +14,7 @@ function setKey(ch: Character, key: string, picked: string[]): Character {
   if (key === "pick:class") {
     const old = ch.classes[0];
     const classes = ch.classes.slice();
-    if (picked[0]) classes[0] = { classId: picked[0], level: old?.level ?? 1, hpRolls: [] };
+    if (picked[0]) classes[0] = { classId: picked[0], level: ch.startLevel ?? old?.level ?? 1, hpRolls: [] };
     return { ...ch, classes };
   }
   if (key === "pick:background") return { ...ch, backgroundId: picked[0] ?? "" };

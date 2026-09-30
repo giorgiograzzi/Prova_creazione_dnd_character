@@ -3,7 +3,8 @@ import { allQuestions, creationProgress, type DecisionResult, type Question } fr
 import type { Ruleset } from "../engine/ruleset";
 import type { Ability } from "../engine/schema";
 import type { Character } from "../engine/types";
-import { STEPS, type StepId } from "../engine/creation";
+import { STEPS, setStartLevel, type StepId } from "../engine/creation";
+import { HpField, LevelStep } from "./LevelStep";
 import it from "../i18n/it.json";
 import { fmt } from "../ui/format";
 import { Button, Dialog, Field } from "../ui/xp";
@@ -11,9 +12,6 @@ import { AsiView, QuestionView } from "./QuestionView";
 import { ScoresStep } from "./ScoresStep";
 import { Summary } from "./Summary";
 import { applyAsiDraft, choose, finalizeCharacter, gamingSetsNeeded } from "./logic";
-import { MAX_LEVEL, levelFromXp, totalLevel, xpForLevel } from "../engine/levelup";
-import { LevelUpDialog } from "../sheet/LevelUpDialog";
-import { num } from "../sheet/util";
 
 const t = it.wizard;
 type View = StepId | "summary";
@@ -24,12 +22,11 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
 }) {
   const progress = useMemo(() => creationProgress(ch, rs), [ch, rs]);
   const questions = useMemo(() => allQuestions(ch, rs), [ch, rs]);
-  const [view, setView] = useState<View>(progress.next ?? "summary");
+  const [view, setView] = useState<View>(!ch.classes.length ? "level" : progress.next ?? "summary");
   const [errors, setErrors] = useState<string[]>([]);
   const [confirm, setConfirm] = useState<DecisionResult | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Partial<Record<Ability, number>>>>({});
   const [gaming, setGaming] = useState("");
-  const [lvl, setLvl] = useState(false);
   const idx = VIEWS.indexOf(view);
   const go = (v: View) => { setErrors([]); setView(v); };
 
@@ -53,22 +50,8 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
       const needGaming = progress.complete && gamingSetsNeeded(ch, rs);
       return (
         <>
+          <HpField ch={ch} rs={rs} allowReroll={allowReroll} onChange={onChange} />
           <Summary ch={fin.ok ? fin.character : ch} rs={rs} />
-          <h3>{t.sum.progress}</h3>
-          <p>{it.levelup.total}: <b>{totalLevel(ch)}</b></p>
-          <div className="pl-row">
-            <label style={{ display: "grid", gap: 2 }}>{it.levelup.xp}
-              <input className="wz-num" style={{ width: 140 }} type="number" inputMode="numeric" min={0} value={ch.xp ?? ""} placeholder="—"
-                onChange={(e) => { const { xp: _x, ...rest } = ch; void _x; onChange(e.target.value === "" ? rest : { ...rest, xp: Math.max(0, num(e.target.value)) }); }} />
-            </label>
-          </div>
-          {ch.xp !== undefined && (() => { const lv = levelFromXp(rs, ch.xp); return (
-            <p className="xp-muted">{lv >= MAX_LEVEL ? it.levelup.xpMax : fmt(it.levelup.xpHelp, { xp: ch.xp, lv, next: xpForLevel(rs, lv + 1) ?? "—" })}{lv > totalLevel(ch) ? ` ${fmt(it.levelup.xpReady, { n: lv })}` : ""}</p>
-          ); })()}
-          <div className="xp-actions" style={{ justifyContent: "flex-start" }}>
-            <Button disabled={totalLevel(ch) >= MAX_LEVEL || !ch.classes.length} onClick={() => setLvl(true)}>{totalLevel(ch) >= MAX_LEVEL ? it.levelup.max : it.levelup.button}</Button>
-          </div>
-          {lvl && <LevelUpDialog ch={ch} rs={rs} onApply={onChange} onClose={() => setLvl(false)} />}
           {needGaming && (
             <Field label={t.gamingSet}>
               <select className="xp-select" value={gaming} onChange={(e) => setGaming(e.target.value)}>
@@ -82,11 +65,21 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
         </>
       );
     }
+    if (view === "level") return (
+      <>
+        <LevelStep ch={ch} rs={rs} onChange={onChange} onLevel={(n) => {
+          const r = setStartLevel(ch, rs, n);
+          if (!r.ok) { setErrors(r.errors); return; }
+          setErrors([]);
+          if (r.removed.length) setConfirm(r); else onChange(r.character);
+        }} />
+      </>
+    );
     if (view === "scores") return <ScoresStep ch={ch} rs={rs} allowReroll={allowReroll} onChange={onChange} onError={setErrors} />;
     const qs = stepQuestions(view);
     return (
       <>
-        {view === "class" && <p className="xp-muted">{t.level1}</p>}
+        {view === "class" && <p className="xp-muted">{fmt(t.level1, { n: ch.startLevel ?? ch.classes[0]?.level ?? 1 })}</p>}
         {qs.map((q) => q.kind === "abilityIncrease"
           ? <AsiBlock key={q.key} q={q} ch={ch} rs={rs} draft={drafts[q.key] ?? draftOf(q)} onDraft={(d) => setDrafts({ ...drafts, [q.key]: d })}
               onApply={(r) => { if (r.ok) { setErrors([]); onChange(r.character); setDrafts({ ...drafts, [q.key]: {} }); } else setErrors(r.errors); }} />
@@ -106,14 +99,14 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
     <>
       <div className="wz-steps" role="tablist" aria-label={t.title}>
         {VIEWS.map((v, i) => (
-          <button key={v} type="button" role="tab" aria-current={v === view ? "step" : undefined} aria-label={v === "summary" ? t.summary : `${i + 1}. ${t.steps[v]}`}
+          <button key={v} type="button" role="tab" aria-current={v === view ? "step" : undefined} aria-label={v === "summary" ? t.summary : `${i}. ${t.steps[v]}`}
             className={v !== "summary" && status(v)?.complete ? "done" : ""} onClick={() => go(v)}>
-            {v === "summary" ? "★" : status(v)?.complete ? "✓" : i + 1}
+            {v === "summary" ? "★" : status(v)?.complete ? "✓" : i}
           </button>
         ))}
       </div>
       <div className="wz-bar" role="progressbar" aria-valuemin={0} aria-valuemax={STEPS.length} aria-valuenow={done}><div style={{ width: `${(done / STEPS.length) * 100}%` }} /></div>
-      <h2>{view === "summary" ? t.summary : `${fmt(t.step, { n: idx + 1, t: STEPS.length })}: ${t.steps[view]}`}</h2>
+      <h2>{view === "summary" ? t.summary : `${fmt(t.step, { n: idx, t: STEPS.length - 1 })}: ${t.steps[view]}`}</h2>
       {!rs.creation.get("creation") && <div className="xp-error" role="alert">{t.noCreation}</div>}
       {errors.length > 0 && <div className="xp-error" role="alert">{errors.map((e) => <div key={e}>{e}</div>)}</div>}
       {problems.length > 0 && view !== "scores" && <div className="xp-banner">{problems.join(" · ")}</div>}

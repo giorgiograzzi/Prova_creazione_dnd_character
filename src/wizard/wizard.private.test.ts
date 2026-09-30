@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { computeCharacter } from "../engine/compute";
-import { classOptions, creationProgress } from "../engine/creation";
+import { classOptions, creationProgress, hpIsRolled, levelBand, levelStartingGold, previewDecision, rollStartingGold, setHpMode, setStartLevel } from "../engine/creation";
 import { buildRuleset } from "../engine/ruleset";
 import { emptyCharacter } from "../engine/character";
 import { autoComplete, finalizeCharacter, isFinalized, reopenCreation } from "./logic";
@@ -82,5 +82,88 @@ describe.skipIf(!existsSync(`${DIR}/creation.json`))("creazione completa con i d
     expect(d.level).toBe(2);
     expect(done.character.state.hp).toBe(d.hp.max.value);
     expect(done.character.classes[0]!.hpRolls).toEqual([6, "avg"]);
+  });
+});
+
+describe.skipIf(!existsSync(`${DIR}/creation.json`))("passo 0: livello di partenza (step 17)", () => {
+  const R = buildRuleset(readdirSync(DIR).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(`${DIR}/${f}`, "utf8"))));
+  const start = (classId: string, level: number) => {
+    const s = setStartLevel({ ...emptyCharacter(`s-${classId}-${level}`), name: `${classId} ${level}`, speciesId: "human", backgroundId: "soldier" }, R, level);
+    expect(s.ok).toBe(true);
+    const pick = previewDecision(s.character, R, "pick:class", [classId]);
+    expect(pick.ok).toBe(true);
+    return autoComplete(pick.character, R);
+  };
+  it("il livello scelto prima della classe vale per la classe; PX minimi del livello", () => {
+    const c = start("cleric", 5);
+    expect(c.classes[0]!.level).toBe(5);
+    expect(c.startLevel).toBe(5);
+    expect(c.xp).toBe(6500);
+    expect(creationProgress(c, R).complete).toBe(true);
+  });
+  it("le 12 classi si creano complete a livello 1, 5, 11 e 20 direttamente dal passo 0", () => {
+    for (const cid of R.classes.keys()) for (const L of [1, 5, 11, 20]) {
+      const c = start(cid, L);
+      const prog = creationProgress(c, R);
+      expect(prog.complete, `${cid} ${L}: ${JSON.stringify(prog.steps.filter((s) => !s.complete))}`).toBe(true);
+      const fin = finalizeCharacter(c, R, { gaming_set: [...R.tools.values()].find((t) => t.group === "gaming")?.id });
+      expect(fin.errors, `${cid} ${L}`).toEqual([]);
+      const d = computeCharacter(fin.character, R);
+      expect(d.level).toBe(L);
+      expect(d.hp.hitDice[0]!.total).toBe(L);
+      expect(fin.character.classes[0]!.hpRolls).toHaveLength(L);
+    }
+  });
+  it("PF: valore fisso o tiri (memorizzati), il 1° livello è sempre il massimo", () => {
+    const c = start("fighter", 5);
+    const avg = setHpMode(c, R, "avg");
+    expect(avg.classes[0]!.hpRolls).toEqual([10, "avg", "avg", "avg", "avg"]);
+    expect(hpIsRolled(avg)).toBe(false);
+    const rolled = setHpMode(c, R, "roll", () => 0.5); // d10 → 6
+    expect(rolled.classes[0]!.hpRolls).toEqual([10, 6, 6, 6, 6]);
+    expect(hpIsRolled(rolled)).toBe(true);
+    const fin = finalizeCharacter(rolled, R).character;
+    expect(fin.classes[0]!.hpRolls).toEqual([10, 6, 6, 6, 6]); // la chiusura non li cambia
+    const con = computeCharacter(fin, R).mods.con.value;
+    expect(computeCharacter(fin, R).hp.max.value).toBe(10 + 4 * (6 + con) + con); // 1° livello: dado massimo + Cos; poi tiro (6) + Cos per livello
+  });
+  it("monete della fascia di livello: fisse + dado, tirate una volta; senza tiro solo le fisse", () => {
+    const c = start("fighter", 5); // 500 mo + 1d10 × 25 mo
+    expect(levelBand(R, 5)).toMatchObject({ gold: 500 });
+    const base = finalizeCharacter(c, R).character;
+    const rolled = rollStartingGold(c, R, () => 0.5); // 1d10 = 6 → 150
+    expect(rolled.startingGold).toBe(650);
+    const withRoll = finalizeCharacter(rolled, R).character;
+    expect(withRoll.coins.gp - base.coins.gp).toBe(650 - 500);
+    expect(base.coins.gp).toBeGreaterThanOrEqual(500);
+    expect(levelStartingGold(start("fighter", 1), R)).toBe(0);
+  });
+  it("cambiare fascia di livello annulla il tiro delle monete; abbassare il livello annulla le scelte dei livelli persi", () => {
+    const c = rollStartingGold(start("fighter", 5), R, () => 0);
+    expect(c.startingGold).toBeDefined();
+    const same = setStartLevel(c, R, 8); // stessa fascia (5-10)
+    expect(same.character.startingGold).toBeDefined();
+    const other = setStartLevel(c, R, 12);
+    expect(other.character.startingGold).toBeUndefined();
+    const high = start("fighter", 8);
+    expect(Object.keys(high.decisions).some((k) => /asi_fighter_8/.test(k))).toBe(true);
+    const down = setStartLevel(high, R, 3);
+    expect(down.ok).toBe(true);
+    expect(down.character.classes[0]!.level).toBe(3);
+    expect(Object.keys(down.character.decisions).some((k) => /asi_fighter_(4|6|8)/.test(k))).toBe(false);
+    expect(down.removed.length).toBeGreaterThan(0);
+    expect(setStartLevel(c, R, 0).ok).toBe(false);
+    expect(setStartLevel(c, R, 21).ok).toBe(false);
+  });
+  it("modifica: cambiare il livello di un personaggio già creato tiene equipaggiamento, monete e PF", () => {
+    const fin = finalizeCharacter(start("wizard", 3), R).character;
+    const edited = reopenCreation({ ...fin, coins: { ...fin.coins, gp: 99 }, state: { ...fin.state, hp: 5 } });
+    const up = setStartLevel(edited, R, 5);
+    const done = finalizeCharacter(autoComplete(up.character, R), R);
+    expect(done.errors).toEqual([]);
+    expect(done.character.classes[0]!.level).toBe(5);
+    expect(done.character.coins.gp).toBe(99);
+    expect(done.character.inventory.length).toBe(fin.inventory.length);
+    expect(done.character.state.hp).toBe(5);
   });
 });

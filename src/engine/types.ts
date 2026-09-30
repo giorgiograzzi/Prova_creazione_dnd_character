@@ -55,6 +55,8 @@ export interface Character {
   notes: string;
   // true = creazione in corso o riaperta per modifiche (livello, scelte): la scheda giocabile non si apre; false = creazione chiusa.
   // Assente nei salvataggi vecchi: allora vale "chiusa" se la prima classe ha i PF per livello.
+  startLevel?: number; // livello scelto al passo 0 della creazione (vale per la classe di partenza)
+  startingGold?: number; // mo iniziali per il livello di partenza (fisse + dado), tirate al passo 0
   editing?: boolean;
   created?: boolean; // la creazione è già stata chiusa almeno una volta (equipaggiamento e monete iniziali assegnati)
   xp?: number; // punti esperienza (opzionale: molti gruppi salgono di livello a discrezione del DM)

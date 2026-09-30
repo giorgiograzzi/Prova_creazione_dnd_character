@@ -20,6 +20,20 @@
   --xp-select: #316ac5;
   --xp-select-text: #ffffff;
   --xp-desk: #245edb;       /* sfondo desktop */
+  /* popup: finestra "Prompt di MS-DOS" di Windows 95 */
+  --dos-face: #c0c0c0;
+  --dos-hi: #ffffff;
+  --dos-shadow: #808080;
+  --dos-dark: #000000;
+  --dos-bg: #000000;
+  --dos-text: #c0c0c0;
+  --dos-bright: #ffffff;
+  --dos-dim: #a8a8a8;
+  --dos-accent: #ffff55;
+  --dos-danger: #ff6666;
+  --dos-title-a: #000080;
+  --dos-title-b: #0a6cc0;
+  --dos-title-text: #ffffff;
   --tap: 48px;
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
@@ -51,9 +65,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .xp-title-btn:active, .xp-title-btn[aria-expanded="true"] { background: #1a3e9a; }
 .xp-title-btn svg { width: 26px; height: 26px; }
 
-.xp-menu { position: absolute; z-index: 30; right: 8px; top: calc(var(--tap) + var(--safe-t)); min-width: 220px; background: var(--xp-face); border: 2px solid var(--xp-border); border-radius: 4px; padding: 4px; box-shadow: 3px 3px 0 rgba(0,0,0,.35); }
-.xp-menu button { display: block; width: 100%; min-height: var(--tap); text-align: left; padding: 0 12px; background: transparent; border: 0; cursor: pointer; }
-.xp-menu button:active, .xp-menu button:focus-visible { background: var(--xp-select); color: var(--xp-select-text); }
+/* menu ☰: menu grigio di Windows 95 con bordo in rilievo */
+.xp-menu { position: absolute; z-index: 30; right: 8px; top: calc(var(--tap) + var(--safe-t)); min-width: 220px; background: var(--dos-face); color: var(--dos-dark); padding: 3px;
+  border: 2px solid; border-color: var(--dos-hi) var(--dos-dark) var(--dos-dark) var(--dos-hi); box-shadow: inset -1px -1px var(--dos-shadow), 3px 3px 0 rgba(0,0,0,.35); }
+.xp-menu button { display: block; width: 100%; min-height: var(--tap); text-align: left; padding: 0 16px; background: transparent; color: var(--dos-dark); border: 0; cursor: pointer; }
+.xp-menu button:active, .xp-menu button:focus-visible { background: var(--dos-title-a); color: var(--dos-title-text); }
 
 .xp-body { flex: 1; overflow-y: auto; padding: 12px; -webkit-overflow-scrolling: touch; }
 .xp-body h2 { margin: 0 0 12px; font-size: 20px; }
@@ -114,10 +130,46 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @media (max-width: 720px) { .xp-app { border-left: 0; border-right: 0; } }
 
 /* finestre di dialogo */
-.xp-overlay { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.45); display: grid; place-items: center; padding: 12px; }
-.xp-dialog { width: 100%; max-width: 520px; max-height: 90dvh; display: flex; flex-direction: column; background: var(--xp-face); border: 2px solid var(--xp-border); border-radius: 8px 8px 4px 4px; }
-.xp-dialog > header { padding: 8px 12px; min-height: var(--tap); display: flex; align-items: center; background: linear-gradient(180deg, var(--xp-title-b), var(--xp-title-a)); color: var(--xp-title-text); font-weight: 700; border-radius: 6px 6px 0 0; }
-.xp-dialog > .xp-body { flex: 1; }
+.xp-overlay { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.5); display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 12px; }
+/* Finestra "Prompt di MS-DOS" (Windows 95): cornice grigia in rilievo, barra del titolo blu con _ □ ×, corpo nero in monospazio */
+.xp-dialog { width: 100%; min-width: 0; max-width: 520px; max-height: 90dvh; display: flex; flex-direction: column; padding: 3px; background: var(--dos-face);
+  border: 2px solid; border-color: var(--dos-hi) var(--dos-dark) var(--dos-dark) var(--dos-hi); box-shadow: inset -1px -1px var(--dos-shadow), 4px 4px 0 rgba(0,0,0,.45);
+  font-family: "Courier New", "DejaVu Sans Mono", "Liberation Mono", monospace; }
+.dos-title { display: flex; align-items: center; gap: 4px; min-height: 52px; padding: 2px 3px 2px 6px; background: linear-gradient(90deg, var(--dos-title-a), var(--dos-title-b)); color: var(--dos-title-text); font-family: Tahoma, Verdana, "DejaVu Sans", sans-serif; }
+.dos-icon svg { width: 24px; height: 24px; display: block; }
+.dos-name { flex: 1; min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dos-btn { display: grid; place-items: center; width: 32px; height: 32px; background: var(--dos-face); color: var(--dos-dark); font-weight: 700; line-height: 1; cursor: default;
+  border: 2px solid; border-color: var(--dos-hi) var(--dos-dark) var(--dos-dark) var(--dos-hi); box-shadow: inset -1px -1px var(--dos-shadow); padding: 0; }
+.dos-btn.close { width: 48px; height: 48px; margin-left: 4px; cursor: pointer; font-size: 24px; }
+.dos-btn.close:active { border-color: var(--dos-dark) var(--dos-hi) var(--dos-hi) var(--dos-dark); box-shadow: inset 1px 1px var(--dos-shadow); }
+.xp-dialog > .xp-body { flex: 1; min-width: 0; margin-top: 3px; background: var(--dos-bg); color: var(--dos-text); border: 2px solid; border-color: var(--dos-shadow) var(--dos-hi) var(--dos-hi) var(--dos-shadow); }
+/* dentro la finestra tutto prende i colori del prompt */
+.xp-dialog h3, .xp-dialog h2, .xp-dialog b { color: var(--dos-bright); }
+.xp-dialog .xp-muted, .xp-dialog .pl-sub, .xp-dialog .xp-help { color: var(--dos-dim); }
+.xp-dialog .xp-btn { max-width: 100%; white-space: normal; overflow-wrap: anywhere; background: var(--dos-bg); color: var(--dos-bright); border: 2px solid var(--dos-text); border-radius: 0; font-weight: 700; }
+.xp-dialog .xp-btn::before { content: "[ "; } .xp-dialog .xp-btn::after { content: " ]"; }
+.xp-dialog .xp-btn:active { background: var(--dos-text); color: var(--dos-dark); }
+.xp-dialog .xp-btn.primary { background: var(--dos-text); color: var(--dos-dark); border-color: var(--dos-bright); }
+.xp-dialog .xp-btn.primary:active { background: var(--dos-bright); }
+.xp-dialog .xp-btn.danger { background: var(--dos-bg); color: var(--dos-danger); border-color: var(--dos-danger); }
+.xp-dialog .xp-btn.danger:active { background: var(--dos-danger); color: var(--dos-dark); }
+.xp-dialog .xp-btn[disabled] { color: var(--dos-shadow); border-color: var(--dos-shadow); background: var(--dos-bg); }
+.xp-dialog .xp-input, .xp-dialog .xp-select, .xp-dialog .wz-num { background: var(--dos-bg); color: var(--dos-bright); border: 2px solid var(--dos-text); border-radius: 0; font-family: inherit; }
+.xp-dialog .xp-check input { accent-color: var(--dos-accent); }
+.xp-dialog .xp-seg { border: 2px solid var(--dos-text); border-radius: 0; }
+.xp-dialog .xp-seg button { background: var(--dos-bg); color: var(--dos-text); border-right: 2px solid var(--dos-text); font-family: inherit; }
+.xp-dialog .xp-seg button[aria-pressed="true"] { background: var(--dos-text); color: var(--dos-dark); }
+.xp-dialog .pl-result { background: var(--dos-bg); color: var(--dos-accent); border: 2px solid var(--dos-accent); }
+.xp-dialog .pl-result b { color: var(--dos-accent); }
+.xp-dialog .pl-formula { color: var(--dos-bright); }
+.xp-dialog .pl-src li { border-bottom: 1px dotted var(--dos-shadow); }
+.xp-dialog .xp-list { background: var(--dos-bg); border: 2px solid var(--dos-text); }
+.xp-dialog .xp-list li { border-bottom: 1px dotted var(--dos-shadow); }
+.xp-dialog .xp-list li.active { background: var(--dos-text); color: var(--dos-dark); }
+.xp-dialog .xp-list li.active b, .xp-dialog .xp-list li.active .xp-muted { color: var(--dos-dark); }
+.xp-dialog .xp-error { background: var(--dos-bg); color: var(--dos-danger); border: 2px solid var(--dos-danger); }
+.xp-dialog .xp-banner { background: var(--dos-bg); color: var(--dos-accent); border: 2px solid var(--dos-accent); }
+.xp-dialog :focus-visible { outline: 3px dotted var(--dos-bright); }
 
 @media (prefers-reduced-motion: no-preference) {
   .xp-btn, .xp-tab, .xp-title-btn { transition: background-color .08s linear; }

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { icons, type IconName } from "./icons";
 import "./xp.css";
 
@@ -51,11 +51,25 @@ export function TabBar({ tabs, current, onSelect }: { tabs: TabDef[]; current: s
   );
 }
 
+// Popup: finestra "Prompt di MS-DOS" di Windows 95 (barra blu con _ □ ×; solo × funziona). Esc chiude.
 export function Dialog({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
   return (
     <div className="xp-overlay" onClick={onClose}>
       <div className="xp-dialog" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
-        <header>{title}</header>
+        <header className="dos-title">
+          <span className="dos-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" fill="#000" stroke="#c0c0c0" strokeWidth="2" /><path d="M5 9l3 3-3 3M10 15h5" fill="none" stroke="#c0c0c0" strokeWidth="1.6" /></svg>
+          </span>
+          <span className="dos-name">{title}</span>
+          <span className="dos-btn" aria-hidden="true">_</span>
+          <span className="dos-btn" aria-hidden="true">□</span>
+          <button type="button" className="dos-btn close" aria-label="Chiudi" onClick={onClose}>×</button>
+        </header>
         <div className="xp-body">{children}</div>
       </div>
     </div>

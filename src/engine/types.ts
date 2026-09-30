@@ -1,7 +1,7 @@
 import type { z } from "zod";
 import type {
   armorSchema, backgroundSchema, classSchema, featSchema, itemSchema, speciesSchema,
-  spellSchema, subclassSchema, weaponSchema,
+  spellSchema, subclassSchema, termSchema, toolSchema, weaponSchema,
 } from "./schema";
 import type { Ability } from "./schema";
 
@@ -15,6 +15,8 @@ export type Weapon = z.infer<typeof weaponSchema>;
 export type Armor = z.infer<typeof armorSchema>;
 export type Item = z.infer<typeof itemSchema>;
 export type Spell = z.infer<typeof spellSchema>;
+export type Tool = z.infer<typeof toolSchema>;
+export type Term = z.infer<typeof termSchema>;
 
 export type EquipState = "stowed" | "wielded" | "worn" | "dropped";
 

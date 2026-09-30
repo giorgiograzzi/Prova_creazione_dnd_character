@@ -75,3 +75,12 @@ Convenzioni:
 - **Valori forzati** (`Character.overrides`): `ac`, `hp.max`, `initiative`, `passivePerception`, `speed.walk`; restano visibili come prima fonte.
 - Le condizioni sull'arma (`equipped`, `weaponProperty`, `attackType`) sono false qui: si valutano allo step 9 con `buildCtx(ch, rs, weapon)`.
 - Fuori dallo step 3: attacchi per arma (9), slot degli incantesimi (16), multiclasse: competenze parziali (17).
+
+## Dati (step 4)
+- Tutto in `data/private/*.json` (non tracciato), forma `{ "kind", "entries" }`. Generato da `scripts/extract-data.ts`
+  leggendo `docs/rules/01_Dati_Gioco_DnD2024.pdf`; `npm run validate:data` controlla schema e riferimenti
+  (`src/engine/validate.ts`: maestrie, proprietà, tipi di danno, contenuto delle dotazioni).
+- Kind: `weapons`, `armors`, `tools`, `items` (gear, munizioni, dotazioni con `contents`), e glossario con `termSchema`:
+  `skills`, `languages`, `sizes`, `damageTypes`, `conditions`, `weaponProperties`, `masteries`, `coins`.
+- `Ruleset` è derivato da `KINDS` in `ruleset.ts`: aggiungere un tipo di dato = una riga lì.
+- I test su dati privati (`data.private.test.ts`) si saltano se `data/private` non esiste.

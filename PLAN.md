@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-3 completati** (schema approvato). Prossimo: step 4 (dati cap. A).
+Stato: **Step 1-4 completati.** Prossimo: step 5 (talenti e background). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -47,8 +47,8 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - **File**: `compute/*.ts` piccoli (`abilities`, `proficiency`, `hp`, `ac`, `speed`, `resources`, `effects`), test.
 - **Fatto**: test unitari verdi su tutte le formule del file 02 §5 e 03 §4; ogni numero ha le fonti.
 
-### 4. Dati cap. A — Fondamenti, armi, armature, strumenti, equipaggiamento
-- **Obiettivo**: abilità, linguaggi, taglie, danni, condizioni (nomi), 37 armi con proprietà e maestrie (8 proprietà di maestria + regole proprietà), armature e scudo, strumenti, oggetti, dotazioni, monete. Parte SRD-compatibile in `data/srd/`, il resto in `data/private/`.
+### 4. Dati cap. A — Fondamenti, armi, armature, strumenti, equipaggiamento ✅
+- **Obiettivo**: abilità, linguaggi, taglie, danni, condizioni (nomi), 37 armi con proprietà e maestrie (8 proprietà di maestria + regole proprietà), armature e scudo, strumenti, oggetti, dotazioni, monete. Tutto in `data/private/` (non tracciato), generato da `scripts/extract-data.ts`.
 - **Fatto**: `validate:data` (schema + riferimenti incrociati), 10 voci verificate, esito riportato.
 
 ### 5. Dati cap. B — Talenti e background

@@ -1,41 +1,29 @@
 import type { z } from "zod";
 import {
   armorSchema, backgroundSchema, classSchema, featSchema, itemSchema, speciesSchema,
-  spellSchema, subclassSchema, weaponSchema,
+  spellSchema, subclassSchema, termSchema, toolSchema, weaponSchema,
 } from "./schema";
-import type {
-  Armor, Background, ClassDef, Feat, Item, Species, Spell, Subclass, Weapon,
-} from "./types";
-
-export interface Ruleset {
-  species: Map<string, Species>;
-  backgrounds: Map<string, Background>;
-  classes: Map<string, ClassDef>;
-  subclasses: Map<string, Subclass>;
-  feats: Map<string, Feat>;
-  weapons: Map<string, Weapon>;
-  armors: Map<string, Armor>;
-  items: Map<string, Item>;
-  spells: Map<string, Spell>;
-  errors: string[]; // voci scartate perché non valide: l'app parte lo stesso
-}
 
 const KINDS = {
   species: speciesSchema, backgrounds: backgroundSchema, classes: classSchema,
   subclasses: subclassSchema, feats: featSchema, weapons: weaponSchema,
-  armors: armorSchema, items: itemSchema, spells: spellSchema,
+  armors: armorSchema, items: itemSchema, spells: spellSchema, tools: toolSchema,
+  // glossario (tutti con termSchema)
+  skills: termSchema, languages: termSchema, sizes: termSchema, damageTypes: termSchema,
+  conditions: termSchema, weaponProperties: termSchema, masteries: termSchema, coins: termSchema,
 } as const;
 
 export type Kind = keyof typeof KINDS;
+export type Ruleset = { [K in Kind]: Map<string, z.infer<(typeof KINDS)[K]>> } & {
+  errors: string[]; // voci scartate perché non valide: l'app parte lo stesso
+};
 // Un file di dati: { "kind": "weapons", "entries": [...] }
 export interface DataFile { kind: Kind; entries: unknown[] }
 
 export function emptyRuleset(): Ruleset {
-  return {
-    species: new Map(), backgrounds: new Map(), classes: new Map(), subclasses: new Map(),
-    feats: new Map(), weapons: new Map(), armors: new Map(), items: new Map(),
-    spells: new Map(), errors: [],
-  };
+  const rs: Record<string, unknown> = { errors: [] };
+  for (const k of Object.keys(KINDS)) rs[k] = new Map();
+  return rs as Ruleset;
 }
 
 // Costruisce il ruleset da file già letti. Tollerante: se private/ manca (nessun file)

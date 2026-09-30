@@ -71,7 +71,7 @@ export const weaponSchema = z.object({
   ...base,
   category: z.enum(["simple", "martial"]),
   kind: z.enum(["melee", "ranged"]),
-  damage: z.string().regex(/^\d+d\d+$/),
+  damage: z.string().regex(/^(\d+d\d+|\d+)$/), // "1d8"; fisso "1" (Cerbottana)
   damageType,
   properties: weaponProps,
   versatileDamage: z.string().optional(),
@@ -87,6 +87,8 @@ export const armorSchema = z.object({
   baseAc: z.number().int(), // scudo: bonus
   dexCap: z.number().int().nullable().default(null), // null = nessun limite (leggera); 0 = pesante
   strRequired: z.number().int().default(0),
+  donMinutes: z.number().default(0), // tempo per indossare (0 = 1 azione, es. scudo)
+  doffMinutes: z.number().default(0),
   stealthDisadvantage: z.boolean().default(false),
   weight: z.number().default(0),
   cost: z.number().default(0),
@@ -98,6 +100,25 @@ export const itemSchema = z.object({
   weight: z.number().default(0),
   cost: z.number().default(0),
   attunement: z.boolean().default(false),
+  contents: z.array(z.object({ item: id, qty: z.number().int().min(1) })).optional(), // dotazioni
+});
+
+export const toolSchema = z.object({
+  ...base,
+  group: z.enum(["artisan", "other", "gaming", "musical"]),
+  ability,
+  weight: z.number().default(0),
+  cost: z.number().default(0),
+});
+
+// Voce di glossario: abilità, linguaggi, taglie, danni, condizioni, proprietà, maestrie, monete
+export const termSchema = z.object({
+  id,
+  name: text,
+  description: z.string().default(""),
+  origin: z.enum(["srd", "private", "homebrew"]).default("private"),
+  needsReview: z.boolean().default(false),
+  extra: z.record(z.string(), z.union([z.string(), z.number()])).default({}),
 });
 
 export const spellSchema = z.object({

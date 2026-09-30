@@ -220,6 +220,8 @@
     },
     "hp": "Punti Ferita",
     "temp": "PF temporanei",
+    "tempShort": "PF temp",
+    "deathSaves": "Tiri su Morte",
     "amount": "Quantità",
     "damage": "Danno",
     "heal": "Cura",

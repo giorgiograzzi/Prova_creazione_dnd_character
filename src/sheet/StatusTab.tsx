@@ -19,15 +19,23 @@ const Pips = ({ n, of, kind }: { n: number; of: number; kind: "ok" | "ko" }) => 
 );
 
 export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSection: (s: "conditions") => void }) {
-  const [amount, setAmount] = useState("");
-  const [crit, setCrit] = useState(false);
   const [note, setNote] = useState("");
-  const [dlg, setDlg] = useState<null | { kind: "sources"; title: string; value: Sourced; key?: OverrideKey } | { kind: "init" } | { kind: "short" } | { kind: "long" } | { kind: "save" }>(null);
+  const [dlg, setDlg] = useState<null | { kind: "sources"; title: string; value: Sourced; key?: OverrideKey } | { kind: "init" } | { kind: "short" } | { kind: "long" } | { kind: "save" } | { kind: "hp" }>(null);
   const s = ch.state;
   const max = d.hp.max.value;
   const dying = isDying(ch), stable = isStable(ch), dead = isDead(ch, d);
-  const amt = Math.max(0, num(amount));
-  const done = () => { setAmount(""); setCrit(false); };
+  const damage = (amt: number, crit = false) => {
+    const r = applyDamage(ch, max, amt, { crit });
+    let next = r.character, msg = r.note ?? (r.downed ? "PF a zero." : "");
+    const conc = ch.state.concentration;
+    if (conc) {
+      // a 0 PF o morto si è Incapacitati: la Concentrazione termina; altrimenti TS Costituzione (file 04)
+      if (r.downed || r.dead) { next = endConcentration(next); msg += ` ${it.magic.concEnded}`; }
+      else msg += ` ${fmt(it.magic.damageConc, { n: rs.spells.get(conc)?.name.it ?? conc, dc: concentrationDc(amt) })}${d.feats.includes("war_caster") ? it.magic.damageConcAdv : ""}`;
+    }
+    update(() => next); setNote(msg.trim());
+  };
+  const heal = (amt: number) => { update((c) => applyHealing(c, max, amt)); setNote(""); };
   const pct = Math.max(0, Math.min(100, (s.hp / Math.max(1, max)) * 100));
 
   const tile = (label: string, v: Sourced, key?: OverrideKey, fmtv: (n: number) => string = String) => (
@@ -39,41 +47,26 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
   return (
     <>
       <section className="pl-hp" aria-label={t.hp}>
-        <div>{t.hp}</div>
-        <div className="big">{s.hp} / {max}{s.tempHp > 0 && <span className="pl-sub"> +{s.tempHp} {t.temp.toLowerCase()}</span>}</div>
-        <div className={`pl-hpbar ${pct <= 25 ? "low" : ""}`} role="progressbar" aria-valuenow={s.hp} aria-valuemin={0} aria-valuemax={max}><div style={{ width: `${pct}%` }} /></div>
-        {note && <p className="xp-muted" role="status">{note}</p>}
-        <div className="pl-row">
-          <input className="wz-num" style={{ width: 120 }} type="number" inputMode="numeric" min={0} aria-label={t.amount} placeholder={t.amount} value={amount} onChange={(e) => setAmount(e.target.value)} />
-          <Button variant="danger" disabled={!amt || dead} onClick={() => {
-            const r = applyDamage(ch, max, amt, { crit });
-            let next = r.character, msg = r.note ?? (r.downed ? "PF a zero." : "");
-            const conc = ch.state.concentration;
-            if (conc) {
-              // a 0 PF o morto si è Incapacitati: la Concentrazione termina; altrimenti TS Costituzione (file 04)
-              if (r.downed || r.dead) { next = endConcentration(next); msg += ` ${it.magic.concEnded}`; }
-              else msg += ` ${fmt(it.magic.damageConc, { n: rs.spells.get(conc)?.name.it ?? conc, dc: concentrationDc(amt) })}${d.feats.includes("war_caster") ? it.magic.damageConcAdv : ""}`;
-            }
-            update(() => next); setNote(msg.trim()); done();
-          }}>{t.damage}</Button>
-          <Button variant="primary" disabled={!amt || dead} onClick={() => { update((c) => applyHealing(c, max, amt)); setNote(""); done(); }}>{t.heal}</Button>
-          <Button disabled={!amt} onClick={() => { update((c) => setTempHp(c, amt)); done(); }}>{t.setTemp}</Button>
+        <div className="pl-hp-top">
+          <div><div className="pl-hp-lbl">{t.hp}</div><div className="big">{s.hp} / {max}</div></div>
+          <div><div className="pl-hp-lbl">{t.tempShort}</div><div className="big">{s.tempHp}</div></div>
+          <button type="button" className="pl-hp-saves" aria-label={t.deathSaves} onClick={() => setDlg({ kind: "hp" })}>
+            <div className="pl-hp-lbl">{t.deathSaves}</div>
+            <div className="pl-row"><Pips n={s.deathSaves.successes} of={3} kind="ok" /></div>
+            <div className="pl-row"><Pips n={s.deathSaves.failures} of={3} kind="ko" /></div>
+          </button>
         </div>
-        {s.hp <= 0 && <Check checked={crit} onChange={setCrit}>{t.crit}</Check>}
+        <div className={`pl-hpbar ${pct <= 25 ? "low" : ""}`} role="progressbar" aria-valuenow={s.hp} aria-valuemin={0} aria-valuemax={max}><div style={{ width: `${pct}%` }} /></div>
+        {(dead || s.hp <= 0) && <b role="status">{dead ? t.dead : stable ? t.stable : dying ? t.dying : ""}</b>}
+        {note && <p className="xp-muted" role="status">{note}</p>}
+        <div className="pl-quick">
+          <Button variant="danger" aria-label={`${t.damage} 5`} disabled={dead} onClick={() => damage(5)}>−5</Button>
+          <Button variant="danger" aria-label={`${t.damage} 1`} disabled={dead} onClick={() => damage(1)}>−1</Button>
+          <Button variant="primary" className="pl-quick-hp" onClick={() => setDlg({ kind: "hp" })}>PF</Button>
+          <Button variant="primary" aria-label={`${t.heal} 1`} disabled={dead} onClick={() => heal(1)}>+1</Button>
+          <Button variant="primary" aria-label={`${t.heal} 5`} disabled={dead} onClick={() => heal(5)}>+5</Button>
+        </div>
       </section>
-
-      {(s.hp <= 0 || dead) && (
-        <section className="pl-hp" aria-label="Salvezze contro morte">
-          <b>{dead ? t.dead : stable ? t.stable : dying ? t.dying : ""}</b>
-          <div className="pl-row"><span>{t.successes}</span><Pips n={s.deathSaves.successes} of={3} kind="ok" />
-            <Button aria-label={`${t.successes} −`} onClick={() => update((c) => setDeathSaves(c, c.state.deathSaves.successes - 1, c.state.deathSaves.failures))}>−</Button>
-            <Button aria-label={`${t.successes} +`} onClick={() => update((c) => setDeathSaves(c, c.state.deathSaves.successes + 1, c.state.deathSaves.failures))}>+</Button></div>
-          <div className="pl-row"><span>{t.failures}</span><Pips n={s.deathSaves.failures} of={3} kind="ko" />
-            <Button aria-label={`${t.failures} −`} onClick={() => update((c) => setDeathSaves(c, c.state.deathSaves.successes, c.state.deathSaves.failures - 1))}>−</Button>
-            <Button aria-label={`${t.failures} +`} onClick={() => update((c) => setDeathSaves(c, c.state.deathSaves.successes, c.state.deathSaves.failures + 1))}>+</Button></div>
-          {dying && <div className="pl-row"><Button variant="primary" onClick={() => setDlg({ kind: "save" })}>{t.rollSave}</Button><Button onClick={() => update(stabilize)}>{t.stabilize}</Button></div>}
-        </section>
-      )}
 
       <div className="pl-grid">
         {tile(t.ac, d.ac, "ac")}
@@ -137,6 +130,7 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
           {...(dlg.key ? { onForce: (v: number | undefined) => { update((c) => setOverride(c, dlg.key!, v)); setDlg(null); } } : {})} onClose={() => setDlg(null)}
           {...(dlg.title === t.init ? { onRoll: () => setDlg({ kind: "init" }) } : {})} />
       )}
+      {dlg?.kind === "hp" && <HpDialog {...{ ch, update, dead, dying, stable, damage, heal }} onRollSave={() => setDlg({ kind: "save" })} onClose={() => setDlg(null)} />}
       {dlg?.kind === "init" && <RollDialog title={t.init} bonus={d.initiative} mode={d.conditions.initiativeMode.mode} modeSources={d.conditions.initiativeMode.modeSources} onClose={() => setDlg(null)} />}
       {dlg?.kind === "save" && <DeathSaveDialog onRoll={(n) => { const r = deathSave(ch, n); update(() => r.character); }} onClose={() => setDlg(null)} />}
       {dlg?.kind === "short" && <ShortRest {...{ ch, d, update }} onClose={() => setDlg(null)} />}
@@ -150,6 +144,42 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
         </Dialog>
       )}
     </>
+  );
+}
+
+function HpDialog({ ch, update, dead, dying, stable, damage, heal, onRollSave, onClose }: Pick<TabProps, "ch" | "update"> & {
+  dead: boolean; dying: boolean; stable: boolean; damage: (n: number, crit: boolean) => void; heal: (n: number) => void; onRollSave: () => void; onClose: () => void;
+}) {
+  const [amount, setAmount] = useState("");
+  const [crit, setCrit] = useState(false);
+  const s = ch.state;
+  const amt = Math.max(0, num(amount));
+  const done = () => { setAmount(""); setCrit(false); };
+  const saves = (su: number, fa: number) => update((c) => setDeathSaves(c, su, fa));
+  return (
+    <Dialog title={t.hp} onClose={onClose}>
+      <p>{s.hp} PF · {t.tempShort}: <b>{s.tempHp}</b></p>
+      <div className="pl-row">
+        <input className="wz-num" style={{ width: 120 }} type="number" inputMode="numeric" min={0} aria-label={t.amount} placeholder={t.amount} value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <Button variant="danger" disabled={!amt || dead} onClick={() => { damage(amt, crit); done(); }}>{t.damage}</Button>
+        <Button variant="primary" disabled={!amt || dead} onClick={() => { heal(amt); done(); }}>{t.heal}</Button>
+        <Button disabled={!amt} onClick={() => { update((c) => setTempHp(c, amt)); done(); }}>{t.setTemp}</Button>
+      </div>
+      {s.hp <= 0 && <Check checked={crit} onChange={setCrit}>{t.crit}</Check>}
+      {(s.hp <= 0 || dead) && (
+        <>
+          <b>{dead ? t.dead : stable ? t.stable : dying ? t.dying : ""}</b>
+          <div className="pl-row"><span>{t.successes}</span><Pips n={s.deathSaves.successes} of={3} kind="ok" />
+            <Button aria-label={`${t.successes} −`} onClick={() => saves(s.deathSaves.successes - 1, s.deathSaves.failures)}>−</Button>
+            <Button aria-label={`${t.successes} +`} onClick={() => saves(s.deathSaves.successes + 1, s.deathSaves.failures)}>+</Button></div>
+          <div className="pl-row"><span>{t.failures}</span><Pips n={s.deathSaves.failures} of={3} kind="ko" />
+            <Button aria-label={`${t.failures} −`} onClick={() => saves(s.deathSaves.successes, s.deathSaves.failures - 1)}>−</Button>
+            <Button aria-label={`${t.failures} +`} onClick={() => saves(s.deathSaves.successes, s.deathSaves.failures + 1)}>+</Button></div>
+          {dying && <div className="pl-row"><Button variant="primary" onClick={onRollSave}>{t.rollSave}</Button><Button onClick={() => update(stabilize)}>{t.stabilize}</Button></div>}
+        </>
+      )}
+      <div className="xp-actions footer"><Button onClick={onClose}>{t.close}</Button></div>
+    </Dialog>
   );
 }
 

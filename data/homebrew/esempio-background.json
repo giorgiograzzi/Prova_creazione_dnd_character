@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "name": "Esempio: background",
+  "feats": [
+    {
+      "id": "hb_occhio_del_guardiano",
+      "name": {
+        "it": "Occhio del guardiano"
+      },
+      "category": "origin",
+      "description": "Anni di veglie notturne ti hanno affinato la vista e i riflessi.",
+      "effects": [
+        {
+          "op": "sense",
+          "kind": "darkvision",
+          "range": 60
+        },
+        {
+          "op": "initiativeBonus",
+          "value": 2
+        }
+      ]
+    }
+  ],
+  "backgrounds": [
+    {
+      "id": "hb_guardiano_del_faro",
+      "name": {
+        "it": "Guardiano del faro"
+      },
+      "description": "Hai passato anni a vegliare sulla costa, tra tempeste e navi in difficoltà.",
+      "abilityOptions": [
+        "con",
+        "wis",
+        "cha"
+      ],
+      "skills": [
+        "perception",
+        "survival"
+      ],
+      "tool": "gaming",
+      "feat": "hb_occhio_del_guardiano",
+      "equipment": {
+        "A": {
+          "items": [],
+          "gp": 10
+        },
+        "B": {
+          "items": [],
+          "gp": 50
+        }
+      }
+    }
+  ]
+}

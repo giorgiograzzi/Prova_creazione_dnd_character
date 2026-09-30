@@ -9,6 +9,8 @@ import { collectSlots, resolveCount, type Slot } from "./slots";
 import { STEPS, type OptionState, type Question, type StepId } from "./types";
 
 const AB_IT: Record<Ability, string> = { str: "Forza", dex: "Destrezza", con: "Costituzione", int: "Intelligenza", wis: "Saggezza", cha: "Carisma" };
+// Le voci homebrew si riconoscono nell'elenco dalla dicitura accanto al nome
+const badge = (d: { name: { it: string }; origin?: string }) => (d.origin === "homebrew" ? `${d.name.it} · Homebrew` : d.name.it);
 const stepIndex = (s: StepId) => STEPS.indexOf(s);
 const mkChoice = (id: string, label: string, count: number, source: string): Choice => ({ id, label: { it: label }, count, source, distinct: true });
 
@@ -27,12 +29,12 @@ export function allQuestions(ch: Character, rs: Ruleset): Question[] {
 
   // -- classe e sottoclasse
   drafts.push({ q: { key: "pick:class", step: "class", owner: "Classe", label: "Classe", kind: "choice", count: 1 },
-    fixedOptions: () => [...rs.classes.values()].map((c) => ({ id: c.id, name: c.name.it, enabled: true, selected: false })), selectedFrom: () => (first ? [first.classId] : []) });
+    fixedOptions: () => [...rs.classes.values()].map((c) => ({ id: c.id, name: badge(c), enabled: true, selected: false })), selectedFrom: () => (first ? [first.classId] : []) });
   for (const cl of ch.classes) {
     const def = rs.classes.get(cl.classId);
     if (def && cl.level >= def.subclassLevel) drafts.push({
       q: { key: `subclass:${cl.classId}`, step: "class", owner: def.name.it, label: "Sottoclasse", kind: "choice", count: 1, classId: cl.classId },
-      fixedOptions: () => [...rs.subclasses.values()].filter((s) => s.classId === cl.classId).map((s) => ({ id: s.id, name: s.name.it, enabled: true, selected: false })),
+      fixedOptions: () => [...rs.subclasses.values()].filter((s) => s.classId === cl.classId).map((s) => ({ id: s.id, name: badge(s), enabled: true, selected: false })),
       selectedFrom: () => (cl.subclassId ? [cl.subclassId] : []),
     });
   }
@@ -58,13 +60,13 @@ export function allQuestions(ch: Character, rs: Ruleset): Question[] {
 
   // -- origine
   drafts.push({ q: { key: "pick:background", step: "background", owner: "Background", label: "Background", kind: "choice", count: 1 },
-    fixedOptions: () => [...rs.backgrounds.values()].map((b) => ({ id: b.id, name: b.name.it, enabled: true, selected: false })), selectedFrom: () => (ch.backgroundId ? [ch.backgroundId] : []) });
+    fixedOptions: () => [...rs.backgrounds.values()].map((b) => ({ id: b.id, name: badge(b), enabled: true, selected: false })), selectedFrom: () => (ch.backgroundId ? [ch.backgroundId] : []) });
   const bg = rs.backgrounds.get(ch.backgroundId);
   if (bg) drafts.push({ q: { key: "background/asi", step: "background", owner: bg.name.it, label: "Aumenti di caratteristica (+2/+1 oppure +1/+1/+1)", kind: "abilityIncrease", count: 3,
     asi: { allowed: [...bg.abilityOptions], mode: "background", cap: 20 } }, asiKey: "background/asi" });
   addSlots("background");
   drafts.push({ q: { key: "pick:species", step: "species", owner: "Specie", label: "Specie", kind: "choice", count: 1 },
-    fixedOptions: () => [...rs.species.values()].map((s) => ({ id: s.id, name: s.name.it, enabled: true, selected: false })), selectedFrom: () => (ch.speciesId ? [ch.speciesId] : []) });
+    fixedOptions: () => [...rs.species.values()].map((s) => ({ id: s.id, name: badge(s), enabled: true, selected: false })), selectedFrom: () => (ch.speciesId ? [ch.speciesId] : []) });
   addSlots("species");
 
   // -- linguaggi: Comune + 2 a scelta (i rari solo se una regola li concede), poi quelli dei privilegi

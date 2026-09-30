@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRuleset } from "../data/ruleset";
+import { missingHomebrew } from "../engine/homebrew";
+import { fmt } from "../ui/format";
 import it from "../i18n/it.json";
 import { Button, Dialog } from "../ui/xp";
 import { useApp } from "../ui/useApp";
@@ -16,14 +18,18 @@ export function Sheet({ section, onSection }: { section: SheetView; onSection: (
   const flush = useApp((s) => s.flush);
   const allowReroll = useApp((s) => s.settings.allowReroll);
   const [reopen, setReopen] = useState(false);
+  // contenuti homebrew usati dal personaggio che qui non ci sono: avviso con l'elenco, mai un errore muto
+  const missing = useMemo(() => (ch ? missingHomebrew(ch, rs) : []), [ch, rs]);
   if (!ch) return null;
+  const warning = missing.length > 0 ? <div className="xp-banner" role="alert">{fmt(it.homebrew.missing, { list: missing.join(", ") })}</div> : null;
   if (rs.classes.size === 0) return <div className="xp-error" role="alert">{it.wizard.noData}</div>;
 
   if (!isFinalized(ch)) {
-    return <Wizard ch={ch} rs={rs} allowReroll={allowReroll} onChange={(c) => update(() => c)} onDone={(c) => { update(() => c); void flush(); }} />;
+    return <>{warning}<Wizard ch={ch} rs={rs} allowReroll={allowReroll} onChange={(c) => update(() => c)} onDone={(c) => { update(() => c); void flush(); }} /></>;
   }
   return (
     <>
+      {warning}
       <PlaySheet ch={ch} rs={rs} update={update} onReopen={() => setReopen(true)} tab={section} onSection={onSection} />
       {reopen && (
         <Dialog title={it.wizard.sum.reopen} onClose={() => setReopen(false)}>

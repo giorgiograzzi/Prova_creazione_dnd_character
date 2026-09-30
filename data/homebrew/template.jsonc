@@ -79,4 +79,58 @@
     "summary": "Riga breve per l'elenco.",
     "higherLevels": ""
   }]
+  ,
+
+  // ---- contenuti del personaggio (stessa forma dei dati di gioco) ----
+  "species": [{
+    "id": "hb_mia_specie",
+    "name": { "it": "Mia specie" },
+    "sizes": ["medium", "small"],   // tiny | small | medium | large: se più di una, il giocatore sceglie
+    "speed": 30,
+    "traits": [{                    // ogni tratto ha il livello in cui si ottiene (di solito 1, 3 o 5)
+      "id": "hb_mia_specie_vista", "name": { "it": "Vista nel buio" }, "level": 1,
+      "effects": [{ "op": "sense", "kind": "darkvision", "range": 60 }],
+      "usage": { "uses": "pb", "recharge": "long_rest" },   // usi limitati (numero, formula o { "table": [20 valori] })
+      "choices": [{ "id": "hb_mia_specie_dono", "label": { "it": "Dono" }, "count": 1, "options": [
+        { "id": "a", "name": { "it": "Dono A" }, "effects": [{ "op": "speedBonus", "value": 10 }] },
+        { "id": "b", "name": { "it": "Dono B" }, "effects": [{ "op": "acBonus", "value": 1 }] }] }]
+    }]
+  }],
+
+  "backgrounds": [{                 // i talenti homebrew del pacchetto si leggono prima dei background
+    "id": "hb_mio_background",
+    "name": { "it": "Mio background" },
+    "abilityOptions": ["con", "wis", "cha"],   // le 3 caratteristiche aumentabili
+    "skills": ["perception", "survival"],      // 2 abilità
+    "tool": "gaming",                          // id di uno strumento oppure artisan | gaming | musical (a scelta)
+    "feat": "hb_mio_talento",                  // un talento di Origine, anche homebrew
+    "equipment": { "A": { "items": [], "gp": 10 }, "B": { "items": [], "gp": 50 } }  // items: [{ "item": "id", "qty": 1 }]; segnaposto "$tool", "$gaming_set", "$instrument"
+  }],
+
+  "classes": [{
+    "id": "hb_mia_classe",
+    "name": { "it": "Mia classe" },
+    "hitDie": 8,                    // 6 | 8 | 10 | 12
+    "primaryAbility": ["wis"], "saves": ["con", "wis"],
+    "skillChoices": { "count": 2, "from": "any" },     // "any" o una lista di abilità
+    "armorTraining": ["light", "medium", "shield"], "weaponProficiency": ["simple", "martial"],
+    "caster": "none",               // none | full | half | third | pact. Se incantatrice: spellAbility, spellList, spellSlots (20 righe) e la colonna "preparati"
+    "subclassLevel": 3,
+    "table": { "rune": [1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 6, 7, 7] },   // colonne a piacere, 20 valori ciascuna
+    "equipment": { "A": { "items": [], "gp": 100 } },
+    "features": [{ "id": "hb_mia_classe_p1", "name": { "it": "Primo privilegio" }, "level": 1, "description": "" }],
+    "choices": [{ "id": "hb_mia_classe_skills", "label": { "it": "Abilità" }, "count": 2, "source": "skills" }]   // l'editor genera questa scelta da solo
+  }],
+
+  "subclasses": [{
+    "id": "hb_mia_sottoclasse",
+    "name": { "it": "Mia sottoclasse" },
+    "classId": "hb_mia_classe",     // una classe ufficiale (es. "fighter") o homebrew
+    "features": [{ "id": "hb_mia_sottoclasse_p3", "name": { "it": "Privilegio di sottoclasse" }, "level": 3 }]
+  }],
+
+  // ---- fondamenti ----
+  "languages": [{ "id": "hb_ignico", "name": { "it": "Ignico" }, "extra": { "rarity": "rare" } }],   // standard | rare
+  "damageTypes": [{ "id": "hb_sonico", "name": { "it": "Sonico" } }],
+  "conditions": [{ "id": "hb_brillante", "name": { "it": "Brillante" }, "description": "Emetti luce." }]
 }

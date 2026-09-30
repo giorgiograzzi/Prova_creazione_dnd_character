@@ -3,7 +3,7 @@ import { newId } from "../db/id";
 import { applyImport, exportBackup, previewImport, type ImportPreview, type Resolution } from "../db/backup";
 import type { CharacterSummary, Repo } from "../db/repo";
 import { emptyCharacter } from "../engine/character";
-import type { HbEntry } from "../engine/homebrew";
+import { charactersUsing, entriesUsedBy, mergeEntries, type HbEntry } from "../engine/homebrew";
 import type { Character } from "../engine/types";
 import { normalizeSettings, type AppSettings, DEFAULT_APP_SETTINGS } from "./settings";
 
@@ -32,6 +32,8 @@ export interface AppActions {
   remove(id: string): Promise<void>;
   updateSettings(patch: Partial<AppSettings>): Promise<void>;
   setHomebrew(entries: HbEntry[]): Promise<void>;
+  // nomi dei personaggi salvati che usano almeno una di queste voci homebrew (per avvisare prima di spegnerle o cancellarle)
+  homebrewUsers(ids: string[]): Promise<string[]>;
   exportAll(): Promise<string>;
   previewImport(text: string): Promise<ImportPreview>;
   commitImport(preview: ImportPreview, resolutions?: Record<string, Resolution>): Promise<number>;
@@ -119,9 +121,14 @@ export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 8
         set({ homebrew: entries });
         await repo.setSetting("homebrew", entries);
       },
+      async homebrewUsers(ids) {
+        await get().flush();
+        return charactersUsing(await allCharacters(), ids).map((c) => c.name || "Senza nome");
+      },
       async exportAll() {
         await get().flush();
-        const text = exportBackup(await allCharacters(), get().settings, now());
+        const chars = await allCharacters();
+        const text = exportBackup(chars, get().settings, now(), entriesUsedBy(get().homebrew, chars));
         await get().updateSettings({ lastBackupAt: now() });
         return text;
       },
@@ -133,6 +140,12 @@ export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 8
         const cur = get().current;
         const replaced = cur && toSave.find((c) => c.id === cur.id);
         if (replaced) set({ current: replaced, saveStatus: "saved" });
+        // voci homebrew del backup: si aggiungono a quelle che ci sono già (le esistenti restano com'erano, attive o no)
+        if (preview.ok && preview.homebrew?.length) {
+          const have = new Set(get().homebrew.map((e) => `${e.kind}/${e.data.id}`));
+          const fresh = preview.homebrew.filter((e) => !have.has(`${e.kind}/${e.data.id}`));
+          if (fresh.length) await get().setHomebrew(mergeEntries(get().homebrew, fresh).entries);
+        }
         await refreshList();
         return toSave.length;
       },

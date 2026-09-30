@@ -66,7 +66,7 @@ describe("homebrew: pacchetti", () => {
     expect(p.ok).toBe(true);
     if (!p.ok) return;
     expect(p.errors).toEqual([]);
-    expect(p.entries.map((e) => `${e.kind}/${e.data.id}`)).toEqual(["weapons/hb_lama", "feats/hb_pelle", "spells/hb_scintilla"]);
+    expect(p.entries.map((e) => `${e.kind}/${e.data.id}`).sort()).toEqual(["feats/hb_pelle", "spells/hb_scintilla", "weapons/hb_lama"]);
     // esportare di nuovo il reimportato dà lo stesso testo: il formato è stabile
     expect(buildPack("Prova", p.entries)).toBe(buildPack("Prova", p.entries.map((e) => ({ ...e }))));
     expect(JSON.parse(text)).toMatchObject({ schemaVersion: 1, name: "Prova" });
@@ -172,7 +172,7 @@ describe("homebrew: catalogo effetti", () => {
 
 const EX = "data/homebrew";
 describe.skipIf(!existsSync("data/private/weapons.json"))("homebrew: esempi con i dati veri", () => {
-  const files = readdirSync("data/private").filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(`data/private/${f}`, "utf8")));
+  const files = (existsSync("data/private") ? readdirSync("data/private") : []).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(`data/private/${f}`, "utf8")));
   const rs = buildRuleset(files);
   for (const f of readdirSync(EX).filter((x) => x.endsWith(".json"))) {
     it(`${f} si importa senza errori e si usa`, () => {

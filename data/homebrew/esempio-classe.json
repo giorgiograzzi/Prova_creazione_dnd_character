@@ -1,0 +1,450 @@
+{
+  "schemaVersion": 1,
+  "name": "Esempio: classe e sottoclasse",
+  "classes": [
+    {
+      "id": "hb_custode_delle_rune",
+      "name": {
+        "it": "Custode delle Rune"
+      },
+      "description": "Incide rune di potere sulle armi e sulla pelle, e le risveglia nel momento del bisogno.",
+      "hitDie": 8,
+      "primaryAbility": [
+        "wis"
+      ],
+      "saves": [
+        "con",
+        "wis"
+      ],
+      "skillChoices": {
+        "count": 2,
+        "from": [
+          "arcana",
+          "history",
+          "insight",
+          "nature",
+          "perception",
+          "survival"
+        ]
+      },
+      "armorTraining": [
+        "light",
+        "medium",
+        "shield"
+      ],
+      "weaponProficiency": [
+        "simple",
+        "martial"
+      ],
+      "caster": "half",
+      "spellAbility": "wis",
+      "spellList": "hb_custode_delle_rune",
+      "spellSlots": [
+        [
+          2
+        ],
+        [
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          3,
+          1
+        ],
+        [
+          4,
+          3,
+          3,
+          1
+        ],
+        [
+          4,
+          3,
+          3,
+          1
+        ],
+        [
+          4,
+          3,
+          3,
+          1
+        ],
+        [
+          4,
+          3,
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          3,
+          2
+        ],
+        [
+          4,
+          3,
+          3,
+          2
+        ]
+      ],
+      "subclassLevel": 3,
+      "table": {
+        "rune": [
+          1,
+          1,
+          2,
+          2,
+          2,
+          3,
+          3,
+          3,
+          4,
+          4,
+          4,
+          5,
+          5,
+          5,
+          6,
+          6,
+          6,
+          6,
+          7,
+          7
+        ],
+        "preparati": [
+          0,
+          2,
+          3,
+          3,
+          4,
+          4,
+          5,
+          5,
+          6,
+          6,
+          7,
+          7,
+          8,
+          8,
+          9,
+          9,
+          10,
+          10,
+          11,
+          11
+        ]
+      },
+      "equipment": {
+        "A": {
+          "items": [],
+          "gp": 100
+        },
+        "B": {
+          "items": [],
+          "gp": 0
+        }
+      },
+      "features": [
+        {
+          "id": "hb_rune_incisione",
+          "name": {
+            "it": "Incisione runica"
+          },
+          "level": 1,
+          "description": "Incidi una runa su un'arma: per un minuto colpisce con più forza. Gli usi sono quelli della colonna Rune.",
+          "usage": {
+            "uses": {
+              "table": [
+                1,
+                1,
+                2,
+                2,
+                2,
+                3,
+                3,
+                3,
+                4,
+                4,
+                4,
+                5,
+                5,
+                5,
+                6,
+                6,
+                6,
+                6,
+                7,
+                7
+              ]
+            },
+            "recharge": "long_rest"
+          },
+          "activation": {
+            "resource": "hb_rune_incisione",
+            "duration": "1 minuto"
+          },
+          "effects": [
+            {
+              "op": "damageBonus",
+              "value": 1,
+              "when": "active:hb_rune_incisione"
+            }
+          ]
+        },
+        {
+          "id": "hb_rune_pelle",
+          "name": {
+            "it": "Pelle runica"
+          },
+          "level": 2,
+          "description": "Le rune sulla pelle ti proteggono: +1 ai tiri salvezza.",
+          "effects": [
+            {
+              "op": "saveBonus",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "id": "hb_rune_maestria",
+          "name": {
+            "it": "Maestria delle rune"
+          },
+          "level": 5,
+          "description": "Attacchi e danni crescono: +1 ai tiri per colpire.",
+          "effects": [
+            {
+              "op": "attackBonus",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "id": "hb_custode_delle_rune_skills",
+          "label": {
+            "it": "Abilità"
+          },
+          "count": 2,
+          "options": [
+            {
+              "id": "arcana",
+              "name": {
+                "it": "Arcano"
+              },
+              "effects": [
+                {
+                  "op": "grantSkillProficiency",
+                  "skills": [
+                    "arcana"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "history",
+              "name": {
+                "it": "Storia"
+              },
+              "effects": [
+                {
+                  "op": "grantSkillProficiency",
+                  "skills": [
+                    "history"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "insight",
+              "name": {
+                "it": "Intuizione"
+              },
+              "effects": [
+                {
+                  "op": "grantSkillProficiency",
+                  "skills": [
+                    "insight"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "nature",
+              "name": {
+                "it": "Natura"
+              },
+              "effects": [
+                {
+                  "op": "grantSkillProficiency",
+                  "skills": [
+                    "nature"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "perception",
+              "name": {
+                "it": "Percezione"
+              },
+              "effects": [
+                {
+                  "op": "grantSkillProficiency",
+                  "skills": [
+                    "perception"
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "survival",
+              "name": {
+                "it": "Sopravvivenza"
+              },
+              "effects": [
+                {
+                  "op": "grantSkillProficiency",
+                  "skills": [
+                    "survival"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hb_custode_delle_rune_prepared",
+          "label": {
+            "it": "Incantesimi preparati"
+          },
+          "count": 1,
+          "countFrom": "preparati",
+          "source": "spells:hb_custode_delle_rune"
+        }
+      ]
+    }
+  ],
+  "subclasses": [
+    {
+      "id": "hb_via_della_fiamma",
+      "name": {
+        "it": "Via della Fiamma"
+      },
+      "classId": "hb_custode_delle_rune",
+      "description": "Le tue rune bruciano di fuoco vivo.",
+      "features": [
+        {
+          "id": "hb_fiamma_rune",
+          "name": {
+            "it": "Rune di fuoco"
+          },
+          "level": 3,
+          "description": "Resistenza al fuoco.",
+          "effects": [
+            {
+              "op": "resistance",
+              "types": [
+                "fire"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hb_fiamma_esplosione",
+          "name": {
+            "it": "Esplosione di fiamma"
+          },
+          "level": 6,
+          "description": "Una volta per riposo lungo liberi le rune in un'esplosione (a parole).",
+          "usage": {
+            "uses": 1,
+            "recharge": "long_rest"
+          }
+        }
+      ]
+    }
+  ],
+  "spells": [
+    {
+      "id": "hb_raggio_dell_alba",
+      "name": {
+        "it": "Raggio dell'alba"
+      },
+      "level": 1,
+      "school": "evocation",
+      "classes": [
+        "hb_custode_delle_rune"
+      ],
+      "castingTime": {
+        "unit": "action",
+        "amount": 1
+      },
+      "range": "18 m",
+      "components": {
+        "v": true,
+        "s": true,
+        "m": false
+      },
+      "duration": "Istantanea",
+      "resolution": "attack_ranged",
+      "summary": "Un raggio di luce dorata infligge danni radiosi a una creatura.",
+      "higherLevels": "Il danno aumenta di 1d6 per ogni slot sopra il 1°."
+    }
+  ]
+}

@@ -1,112 +1,46 @@
 import { useMemo, useState } from "react";
-import {
-  EFFECT_PRESETS, buildEffect, defaultValues, newHbId, optionSet, presetFor, readEffect, takenIds, validEffect, validateEntry,
-  type EffectPreset, type HbEntry, type HbKind, type ParamSpec, type ParamValues,
-} from "../engine/homebrew";
+import { buildEffect, newHbId, readEffect, takenIds, validateEntry, type HbEntry, type HbKind } from "../engine/homebrew";
 import type { Ruleset } from "../engine/ruleset";
 import type { Effect } from "../engine/types";
 import it from "../i18n/it.json";
-import { Button, Check, Field } from "../ui/xp";
-import { FIELDS, dataToDraft, draftToData, emptyDraft, withDefaults, type Draft, type FieldSpec } from "./forms";
+import { Button, Field } from "../ui/xp";
+import { ComplexEditor, type Then } from "./ComplexEditor";
+import { isComplex, type EffectRow } from "./complex";
+import { FIELDS, dataToDraft, draftToData, emptyDraft, withDefaults, type Draft, type FlatKind } from "./forms";
+import { EffectsEditor, FieldInput } from "./parts";
 import { summarize } from "./summary";
 
 const t = it.homebrew;
-type EffectRow = { preset: EffectPreset; values: ParamValues };
 
-function ParamInput({ spec, value, onChange, rs }: { spec: ParamSpec; value: ParamValues[string]; onChange: (v: ParamValues[string]) => void; rs: Ruleset }) {
-  if (spec.type === "number") {
-    return <Field label={spec.label}><input className="xp-input" type="number" inputMode="numeric" value={String(value)} min={spec.min} max={spec.max} onChange={(e) => onChange(Number(e.target.value))} /></Field>;
-  }
-  if (spec.type === "bool") return <Check checked={Boolean(value)} onChange={onChange}>{spec.label}</Check>;
-  const opts = optionSet(spec.options, rs);
-  if (spec.type === "select") {
-    return (
-      <Field label={spec.label}>
-        <select className="xp-select" value={String(value)} onChange={(e) => onChange(e.target.value)}>
-          {spec.optional && <option value="">—</option>}
-          {opts.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-        </select>
-      </Field>
-    );
-  }
-  const list = value as string[];
-  return (
-    <Field label={spec.label}>
-      <div className="hb-chips">
-        {opts.map((o) => <button key={o.id} type="button" aria-pressed={list.includes(o.id)} onClick={() => onChange(list.includes(o.id) ? list.filter((x) => x !== o.id) : [...list, o.id])}>{o.label}</button>)}
-      </div>
-    </Field>
-  );
+interface EditorProps {
+  kind: HbKind; initial: HbEntry | null; rs: Ruleset; existing: HbEntry[]; presetClassId?: string;
+  onSave: (e: HbEntry, then?: Then) => void; onCancel: () => void;
 }
 
-function EffectsEditor({ rows, onChange, rs }: { rows: EffectRow[]; onChange: (r: EffectRow[]) => void; rs: Ruleset }) {
-  const [add, setAdd] = useState("");
-  return (
-    <fieldset className="xp-group">
-      <legend>{t.effects}</legend>
-      <span className="xp-help">{t.effectsHelp}</span>
-      {rows.length === 0 && <p className="xp-muted">{t.noEffects}</p>}
-      {rows.map((r, i) => (
-        <div key={i} className="hb-effect">
-          <strong>{r.preset.label}</strong>
-          {r.preset.help && <span className="xp-help">{r.preset.help}</span>}
-          {r.preset.params.map((p) => (
-            <ParamInput key={p.key} spec={p} rs={rs} value={r.values[p.key]!} onChange={(v) => onChange(rows.map((x, k) => (k === i ? { ...x, values: { ...x.values, [p.key]: v } } : x)))} />
-          ))}
-          {!validEffect(r.preset, r.values) && <div className="xp-error" role="alert">Completa i campi di questo effetto.</div>}
-          <Button variant="danger" onClick={() => onChange(rows.filter((_, k) => k !== i))}>{t.removeEffect}</Button>
-        </div>
-      ))}
-      <Field label={t.addEffect}>
-        <select className="xp-select" value={add} onChange={(e) => { const p = presetFor(e.target.value); if (p) { onChange([...rows, { preset: p, values: defaultValues(p, rs) }]); } setAdd(""); }}>
-          <option value="">{t.chooseEffect}</option>
-          {EFFECT_PRESETS.map((p) => <option key={p.op} value={p.op}>{p.label}</option>)}
-        </select>
-      </Field>
-    </fieldset>
-  );
+// Un editor per tipo: i contenuti semplici hanno un modulo a campi, quelli complessi (specie, background, classi, sottoclassi) un editor a sezioni
+export function Editor(p: EditorProps) {
+  if (isComplex(p.kind)) return <ComplexEditor {...p} kind={p.kind} />;
+  return <FlatEditor {...p} kind={p.kind} />;
 }
 
-function FieldInput({ spec, draft, set, rs }: { spec: FieldSpec; draft: Draft; set: (k: string, v: Draft[string]) => void; rs: Ruleset }) {
-  const v = draft[spec.key]!;
-  const label = spec.label;
-  if (spec.type === "bool") return <Check checked={Boolean(v)} onChange={(x) => set(spec.key, x)}>{label}</Check>;
-  if (spec.type === "select") {
-    return (
-      <Field label={label} help={spec.help}>
-        <select className="xp-select" value={String(v)} onChange={(e) => set(spec.key, e.target.value)}>
-          {spec.options!(rs).map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-        </select>
-      </Field>
-    );
-  }
-  if (spec.type === "multi") {
-    const list = v as string[];
-    return (
-      <Field label={label} help={spec.help}>
-        <div className="hb-chips">
-          {spec.options!(rs).map((o) => <button key={o.id} type="button" aria-pressed={list.includes(o.id)} onClick={() => set(spec.key, list.includes(o.id) ? list.filter((x) => x !== o.id) : [...list, o.id])}>{o.label}</button>)}
-        </div>
-      </Field>
-    );
-  }
-  if (spec.type === "long") return <Field label={label} help={spec.help}><textarea className="xp-input" rows={4} style={{ padding: 8 }} value={String(v)} onChange={(e) => set(spec.key, e.target.value)} /></Field>;
-  return <Field label={label} help={spec.help}><input className="xp-input" type="text" inputMode={spec.type === "number" ? "decimal" : undefined} value={String(v)} onChange={(e) => set(spec.key, e.target.value)} /></Field>;
-}
-
-// Modulo guidato per una voce: campi, effetti (talenti), anteprima e controllo con lo schema del motore
-export function Editor({ kind, initial, rs, existing, onSave, onCancel }: {
-  kind: HbKind; initial: HbEntry | null; rs: Ruleset; existing: HbEntry[]; onSave: (e: HbEntry) => void; onCancel: () => void;
-}) {
+// Modulo guidato per una voce semplice: campi, effetti (talenti), anteprima e controllo con lo schema del motore
+function FlatEditor({ kind, initial, rs, existing, onSave, onCancel }: EditorProps & { kind: FlatKind }) {
   const [draft, setDraft] = useState<Draft>(() => (initial ? dataToDraft(kind, initial.data) : withDefaults(kind, emptyDraft(kind), rs)));
-  const [rows, setRows] = useState<EffectRow[]>(() => ((initial?.data.effects as Effect[] | undefined) ?? []).flatMap((e) => { const r = readEffect(e); return r ? [r] : []; }));
+  // effetti del talento: quelli che il modulo sa leggere si modificano, gli altri (copiati da una voce ufficiale) restano com'erano
+  const [rows, setRows] = useState<EffectRow[]>(() => ((initial?.data.effects as Effect[] | undefined) ?? []).flatMap((e) => { const r = readEffect(e); return r && JSON.stringify(buildEffect(r.preset, r.values)) === JSON.stringify(e) ? [r] : []; }));
+  const [advanced] = useState<unknown[]>(() => ((initial?.data.effects as Effect[] | undefined) ?? []).filter((e) => { const r = readEffect(e); return !(r && JSON.stringify(buildEffect(r.preset, r.values)) === JSON.stringify(e)); }));
+  const [pack, setPack] = useState(initial?.pack ?? "");
   const [tried, setTried] = useState(false);
   const id = initial?.data.id ?? newHbId(String(draft.name), takenIds(rs, existing));
+  const extra = initial ? (() => { const { id: _i, name: _n, description: _d, ...rest } = initial.data; void _i; void _n; void _d; return rest; })() : {};
   const result = useMemo(() => {
-    const effects = rows.map((r) => buildEffect(r.preset, r.values));
-    return validateEntry(kind, draftToData(kind, draft, id, effects), rs);
-  }, [kind, draft, rows, id, rs]);
+    const effects = [...rows.map((r) => buildEffect(r.preset, r.values)), ...advanced];
+    // i campi che il modulo non mostra (copiati da una voce ufficiale) si conservano; quelli del modulo hanno la precedenza
+    return validateEntry(kind, { ...extra, ...draftToData(kind, draft, id, effects) }, rs);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kind, draft, rows, advanced, id, rs]);
   const set = (k: string, v: Draft[string]) => setDraft((d) => ({ ...d, [k]: v }));
+  const packs = [...new Set(existing.map((e) => e.pack).filter((x): x is string => !!x))];
 
   return (
     <>
@@ -114,6 +48,11 @@ export function Editor({ kind, initial, rs, existing, onSave, onCancel }: {
       <h2>{initial ? t.edit : t.new}: {t.kinds[kind]}</h2>
       {FIELDS[kind].filter((s) => !s.show || s.show(draft)).map((s) => <FieldInput key={s.key} spec={s} draft={draft} set={set} rs={rs} />)}
       {kind === "feats" && <EffectsEditor rows={rows} onChange={setRows} rs={rs} />}
+      {advanced.length > 0 && <p className="xp-muted">{it.homebrew.cx.advanced.replace("{n}", String(advanced.length))}</p>}
+      <Field label={it.homebrew.cx.pack} help={it.homebrew.cx.packHelp}>
+        <input className="xp-input" list="hb-packs-flat" value={pack} onChange={(e) => setPack(e.target.value)} />
+        <datalist id="hb-packs-flat">{packs.map((x) => <option key={x} value={x} />)}</datalist>
+      </Field>
 
       <fieldset className="xp-group">
         <legend>{t.preview}</legend>
@@ -129,7 +68,7 @@ export function Editor({ kind, initial, rs, existing, onSave, onCancel }: {
       {!result.ok && tried && <div className="xp-error" role="alert"><strong>{t.errors}</strong><ul>{result.errors.map((e, i) => <li key={i}>{e}</li>)}</ul></div>}
       <div className="xp-actions">
         <Button onClick={onCancel}>{t.cancel}</Button>
-        <Button variant="primary" onClick={() => { setTried(true); if (result.ok) onSave({ kind, enabled: initial?.enabled ?? true, data: result.data }); }}>{t.save}</Button>
+        <Button variant="primary" onClick={() => { setTried(true); if (result.ok) onSave({ kind, enabled: initial?.enabled ?? true, data: result.data, ...(pack.trim() ? { pack: pack.trim() } : {}) }); }}>{t.save}</Button>
       </div>
     </>
   );

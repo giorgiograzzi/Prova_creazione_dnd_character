@@ -51,7 +51,7 @@ Se `data/private/` manca il ruleset è semplicemente più piccolo. I file dati h
 `{ "kind": "weapons", "entries": [...] }`. `src/data/loadRuleset.ts` legge `data/**/*.json` con Vite.
 
 ### Homebrew
-`homebrewPackSchema`: `{ schemaVersion, name, weapons, armors, items, feats, spells }`.
+`homebrewPackSchema`: `{ schemaVersion, name, species, feats, backgrounds, classes, subclasses, weapons, armors, items, spells, languages, damageTypes, conditions }`.
 
 ## Motore di calcolo (step 3) — `src/engine/compute/`
 
@@ -242,8 +242,17 @@ Convenzioni:
 - L'engine `levelUp` (un livello alla volta, con multiclasse e anteprima) resta nel motore e nei test, senza interfaccia: serve per un futuro multiclasse.
 - **Creazione riaperta** (`Character.editing` / `created`): `editing: true` = creazione in corso o riaperta (la scheda giocabile non si apre); `created: true` = già chiusa almeno una volta. Alla chiusura di una modifica restano PF già tirati (`fillHpRolls` riempie solo i livelli mancanti), equipaggiamento, monete, PF attuali (al massimo il nuovo massimo) e Dadi Vita spesi; alla prima chiusura si assegnano equipaggiamento e monete iniziali. Nei salvataggi vecchi (senza `editing`) vale "chiusa" se la prima classe ha i PF per livello.
 
-## Homebrew (step 18) — `src/engine/homebrew/`, `src/homebrew/`, `src/pages/Homebrew.tsx`
-- **Modello**: `HbEntry { kind, enabled, data }` con `kind` ∈ armi, armature, oggetti, talenti, incantesimi (gli schemi sono quelli dei dati di gioco, `origin: "homebrew"`). Le voci stanno nell'archivio del browser (impostazione `homebrew`, `store.homebrew`, azione `setHomebrew`) e **non** nel backup dei personaggi: si scambiano con l'export `.json`.
+## Homebrew (step 18, completo)
+- **Tipi complessi** (`src/homebrew/complex.ts`, `ComplexEditor.tsx`): specie, background, classi (a passi: base → tabella dei livelli → privilegi → equipaggiamento → sottoclassi) e sottoclassi. Bozza (`*Draft`) ↔ dati: il modulo tiene testo e liste; tutto ciò che non sa modificare (campi rari, effetti avanzati, scelte con `source`/`requires`, usi a tabella) va in `keep`/`advanced` e torna intatto nei dati, quindi copiare e modificare una voce ufficiale non perde niente. Privilegi (`FeatureDraft`): effetti dal catalogo, usi limitati, attivazione (`active:<id>`), scelte con opzioni. La classe genera da sola le scelte `<id>_skills`, `<id>_cantrips`, `<id>_prepared` e prende gli slot copiandoli da una classe esistente dello stesso tipo. Bozza non salvata in `localStorage` (`hb-draft:<tipo>`), da riprendere o scartare.
+- **Fondamenti**: linguaggi (`extra.rarity`), tipi di danno e condizioni a solo testo. Le abilità non si possono aggiungere (enum fisso).
+- **Pacchetti**: `HbEntry.pack`; `parsePack` valuta i tipi nell'ordine di `HB_KINDS` estendendo il ruleset con le voci già accettate (una sottoclasse vede la classe dello stesso file). Esportazione di un solo pacchetto.
+- **Copia da voce ufficiale** (`copyOfficial`): id e nome nuovi, prefisso delle scelte di classe aggiornato, lista incantesimi originale mantenuta.
+- **Uso da parte dei personaggi** (`engine/homebrew/usage.ts`): `homebrewIds`, `missingHomebrew` (avviso in scheda e wizard), `charactersUsing` (conferma prima di spegnere/eliminare: `store.homebrewUsers`), `entriesUsedBy` (il backup porta le voci usate, le dipendenze incluse: classe di una sottoclasse, talento di un background; `commitImport` le aggiunge senza toccare quelle esistenti).
+- **Creazione**: specie, background, classi e sottoclassi homebrew compaiono negli stessi elenchi dei dati ufficiali (con « · Homebrew »); il passo ⚗ Homebrew del wizard dà talenti, incantesimi, armi, armature e oggetti (`GIVE_KINDS`).
+- **Negozio**: il gruppo non è più a parte: `CatalogEntry.homebrew` + interruttore nella barra del titolo della finestra.
+
+## Homebrew (step 18, base) — `src/engine/homebrew/`, `src/homebrew/`, `src/pages/Homebrew.tsx`
+- **Modello**: `HbEntry { kind, enabled, data, pack? }` con `kind` ∈ `HB_KINDS`: specie, talenti, background, classi, sottoclassi, armi, armature, oggetti, incantesimi, linguaggi, tipi di danno, condizioni (gli schemi sono quelli dei dati di gioco, `origin: "homebrew"`). Le voci stanno nell'archivio del browser (impostazione `homebrew`, `store.homebrew`, azione `setHomebrew`) e **non** nel backup dei personaggi: si scambiano con l'export `.json`.
 - **Ruleset dinamico** (`src/data/ruleset.ts`): `getRuleset()` = dati di gioco + homebrew attivo (`extendRuleset` copia le mappe del base e aggiunge i file; il base non si rilegge). `main.tsx` ascolta lo store e chiama `setHomebrewFiles`; `useRuleset` si aggiorna con `useSyncExternalStore`. Le voci disattivate non entrano: un personaggio che le usa semplicemente non le vede (nessun errore).
 - **Id**: sempre `hb_<nome>` (con numero se già preso da dati di gioco o altro homebrew). Un id dei dati di gioco non si può sovrascrivere (`validateEntry`). Importando un pacchetto, stesso id = aggiorna la voce e conserva l'attivazione (`mergeEntries`).
 - **Validazione** (`validateEntry`): schema Zod del motore + riferimenti (maestria, tipo di danno, incantesimo concesso) + nome obbligatorio; errori in italiano. Il modulo (`homebrew/forms.ts`) è guidato da una lista di campi per tipo (`FIELDS`), tiene tutto come testo e converte in dati solo al salvataggio (`draftToData`/`dataToDraft`); i costi si scrivono in mo e si salvano in rame.

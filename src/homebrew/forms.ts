@@ -1,4 +1,5 @@
 import type { HbData, HbKind, Opt } from "../engine/homebrew";
+import type { ComplexKind } from "./complex";
 import type { Ruleset } from "../engine/ruleset";
 import it from "../i18n/it.json";
 
@@ -18,7 +19,8 @@ export interface FieldSpec {
 const f = (key: string, label: string, type: FieldSpec["type"], extra: Partial<FieldSpec> = {}): FieldSpec => ({ key, label, type, ...extra });
 const terms = (m: Map<string, { id: string; name: { it: string } }>) => [...m.values()].map((x) => ({ id: x.id, label: x.name.it }));
 
-export const FIELDS: Record<HbKind, FieldSpec[]> = {
+export type FlatKind = Exclude<HbKind, ComplexKind>;
+export const FIELDS: Record<FlatKind, FieldSpec[]> = {
   weapons: [
     f("name", F.name, "text"), f("description", F.description, "long"),
     f("category", F.weaponCategory, "select", { options: () => fromMap(O.weaponCategory) }),
@@ -56,7 +58,7 @@ export const FIELDS: Record<HbKind, FieldSpec[]> = {
     f("name", F.name, "text"), f("description", F.description, "long"),
     f("level", F.level, "select", { options: () => Array.from({ length: 10 }, (_, i) => ({ id: String(i), label: i === 0 ? it.homebrew.presets.cantripShort : `${i}°` })) }),
     f("school", F.school, "select", { options: () => fromMap(O.school) }),
-    f("classes", F.classes, "multi", { options: () => fromMap(O.classes) }),
+    f("classes", F.classes, "multi", { options: (rs) => [...fromMap(O.classes), ...[...rs.classes.values()].filter((c) => c.origin === "homebrew" && c.caster !== "none").map((c) => ({ id: c.spellList ?? c.id, label: `${c.name.it} · Homebrew` }))] }),
     f("castUnit", F.castUnit, "select", { options: () => fromMap(O.castUnit) }), f("castAmount", F.castAmount, "number"),
     f("range", F.range, "text", { help: F.rangeHelp }),
     f("comp", F.components, "multi", { options: () => fromMap(O.components) }),
@@ -67,14 +69,26 @@ export const FIELDS: Record<HbKind, FieldSpec[]> = {
     f("summary", F.summary, "text", { help: F.summaryHelp }),
     f("higherLevels", F.higher, "long"),
   ],
+  languages: [
+    f("name", F.name, "text"), f("description", F.description, "long"),
+    f("rarity", F.rarity, "select", { options: () => fromMap(O.rarity), help: F.rarityHelp }),
+  ],
+  damageTypes: [f("name", F.name, "text"), f("description", F.description, "long")],
+  conditions: [
+    f("name", F.name, "text"), f("description", F.description, "long", { help: F.conditionHelp }),
+    f("requiresSource", F.requiresSource, "bool"),
+  ],
 };
 
-export const emptyDraft = (kind: HbKind): Draft => {
+export const emptyDraft = (kind: FlatKind): Draft => {
   switch (kind) {
     case "weapons": return { name: "", description: "", category: "simple", wkind: "melee", damage: "1d6", damageType: "slashing", properties: [], versatileDamage: "", rangeNormal: "", rangeLong: "", mastery: "", weight: "0", costGp: "0" };
     case "armors": return { name: "", description: "", category: "light", baseAc: "11", dexCap: "", strRequired: "0", donMinutes: "1", stealthDisadvantage: false, weight: "0", costGp: "0" };
     case "items": return { name: "", description: "", category: "Oggetto magico", attunement: false, weight: "0", costGp: "0" };
     case "feats": return { name: "", description: "", category: "general", minLevel: "", repeatable: false };
+    case "languages": return { name: "", description: "", rarity: "standard" };
+    case "damageTypes": return { name: "", description: "" };
+    case "conditions": return { name: "", description: "", requiresSource: false };
     case "spells": return { name: "", description: "", level: "1", school: "evocation", classes: [], castUnit: "action", castAmount: "1", range: "Personale", comp: ["v", "s"], material: "", duration: "Istantanea", concentration: false, ritual: false, resolution: "none", summary: "", higherLevels: "" };
   }
 };
@@ -86,7 +100,7 @@ const str = (s: unknown) => String(s ?? "").trim();
 const opt = <T,>(k: string, v: T | undefined) => (v === undefined || v === "" ? {} : { [k]: v });
 
 // Modulo → dati (da validare con lo schema). `id` e `effects` arrivano da fuori.
-export function draftToData(kind: HbKind, d: Draft, id: string, effects: unknown[] = []): HbData {
+export function draftToData(kind: FlatKind, d: Draft, id: string, effects: unknown[] = []): HbData {
   const base = { id, name: { it: str(d.name) }, description: str(d.description) };
   switch (kind) {
     case "weapons": {
@@ -105,6 +119,9 @@ export function draftToData(kind: HbKind, d: Draft, id: string, effects: unknown
       const lv = optNum(d.minLevel);
       return { ...base, category: d.category, prerequisites: lv ? [`level>=${lv}`] : [], repeatable: d.repeatable, effects } as HbData;
     }
+    case "languages": return { ...base, extra: { rarity: str(d.rarity) || "standard" } } as HbData;
+    case "damageTypes": return { ...base } as HbData;
+    case "conditions": return { ...base, requiresSource: d.requiresSource } as HbData;
     case "spells": {
       const comp = d.comp as string[];
       return { ...base, level: num(d.level), school: d.school, classes: d.classes,
@@ -118,7 +135,7 @@ export function draftToData(kind: HbKind, d: Draft, id: string, effects: unknown
 }
 
 // Dati salvati → modulo (per modificare)
-export function dataToDraft(kind: HbKind, x: HbData): Draft {
+export function dataToDraft(kind: FlatKind, x: HbData): Draft {
   const d = x as Record<string, any>;
   const s = (v: unknown) => (v === undefined || v === null ? "" : String(v));
   const gp = (v: unknown) => String(Number(v ?? 0) / 100);
@@ -130,6 +147,9 @@ export function dataToDraft(kind: HbKind, x: HbData): Draft {
       stealthDisadvantage: !!d.stealthDisadvantage, weight: s(d.weight), costGp: gp(d.cost) };
     case "items": return { ...common, category: s(d.category), attunement: !!d.attunement, weight: s(d.weight), costGp: gp(d.cost) };
     case "feats": return { ...common, category: d.category, minLevel: s(((d.prerequisites ?? []) as string[]).map((p) => /^level>=(\d+)$/.exec(p)?.[1]).find(Boolean)), repeatable: !!d.repeatable };
+    case "languages": return { ...common, rarity: s(d.extra?.rarity) || "standard" };
+    case "damageTypes": return { ...common };
+    case "conditions": return { ...common, requiresSource: !!d.requiresSource };
     case "spells": return { ...common, level: s(d.level), school: d.school, classes: d.classes ?? [], castUnit: d.castingTime?.unit ?? "action", castAmount: s(d.castingTime?.amount ?? 1),
       range: s(d.range), comp: [d.components?.v && "v", d.components?.s && "s", d.components?.m && "m"].filter(Boolean) as string[], material: s(d.components?.material),
       duration: s(d.duration), concentration: !!d.concentration, ritual: !!d.ritual, resolution: d.resolution ?? "none", summary: s(d.summary), higherLevels: s(d.higherLevels) };
@@ -137,7 +157,7 @@ export function dataToDraft(kind: HbKind, x: HbData): Draft {
 }
 
 // Valori che dipendono dai dati di gioco (la prima scelta disponibile) quando il modulo è nuovo
-export function withDefaults(kind: HbKind, d: Draft, rs: Ruleset): Draft {
+export function withDefaults(kind: FlatKind, d: Draft, rs: Ruleset): Draft {
   if (kind === "weapons" && !d.mastery) return { ...d, mastery: [...rs.masteries.keys()][0] ?? "" };
   return d;
 }

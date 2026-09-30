@@ -2,6 +2,7 @@ import { newId as makeId } from "./id";
 import { z } from "zod";
 import type { Character } from "../engine/types";
 import { migrateCharacter } from "./migrations";
+import { HB_KINDS, type HbEntry } from "../engine/homebrew";
 
 export const BACKUP_FORMAT = "dnd-personaggi-backup";
 export const BACKUP_VERSION = 1;
@@ -12,18 +13,19 @@ const containerSchema = z.object({
   exportedAt: z.number(),
   characters: z.array(z.unknown()),
   settings: z.unknown().optional(),
+  homebrew: z.unknown().optional(), // voci homebrew usate dai personaggi: così si importano anche su un altro dispositivo
 });
-export interface Backup { format: typeof BACKUP_FORMAT; version: number; exportedAt: number; characters: Character[]; settings?: unknown }
+export interface Backup { format: typeof BACKUP_FORMAT; version: number; exportedAt: number; characters: Character[]; settings?: unknown; homebrew?: HbEntry[] }
 
-export function exportBackup(characters: Character[], settings?: unknown, now = Date.now()): string {
-  const b: Backup = { format: BACKUP_FORMAT, version: BACKUP_VERSION, exportedAt: now, characters, ...(settings !== undefined ? { settings } : {}) };
+export function exportBackup(characters: Character[], settings?: unknown, now = Date.now(), homebrew: HbEntry[] = []): string {
+  const b: Backup = { format: BACKUP_FORMAT, version: BACKUP_VERSION, exportedAt: now, characters, ...(settings !== undefined ? { settings } : {}), ...(homebrew.length ? { homebrew } : {}) };
   return JSON.stringify(b, null, 2);
 }
 
 // new = id sconosciuto; same = identico a quello già presente; conflict = stesso id ma contenuto diverso
 export type ImportStatus = "new" | "same" | "conflict" | "invalid";
 export interface ImportItem { index: number; id: string; name: string; status: ImportStatus; migratedFrom?: number; error?: string; character?: Character }
-export type ImportPreview = { ok: true; exportedAt: number; items: ImportItem[]; settings?: unknown } | { ok: false; error: string };
+export type ImportPreview = { ok: true; exportedAt: number; items: ImportItem[]; settings?: unknown; homebrew?: HbEntry[] } | { ok: false; error: string };
 
 export function previewImport(text: string, existing: Character[]): ImportPreview {
   let json: unknown;
@@ -44,7 +46,18 @@ export function previewImport(text: string, existing: Character[]): ImportPrevie
     }
     return classify(i, r.character, r.migratedFrom, existing);
   });
-  return { ok: true, exportedAt: container.data.exportedAt, items, ...(container.data.settings !== undefined ? { settings: container.data.settings } : {}) };
+  const homebrew = readHomebrew(container.data.homebrew);
+  return { ok: true, exportedAt: container.data.exportedAt, items, ...(container.data.settings !== undefined ? { settings: container.data.settings } : {}), ...(homebrew.length ? { homebrew } : {}) };
+}
+
+// Voci homebrew di un backup: si tengono solo quelle con la forma giusta (la validazione piena avviene quando il ruleset le legge)
+function readHomebrew(raw: unknown): HbEntry[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((e): e is HbEntry => {
+    const x = e as Partial<HbEntry> | null;
+    return !!x && typeof x === "object" && (HB_KINDS as readonly string[]).includes(String(x.kind)) && typeof x.data === "object" && x.data !== null
+      && typeof (x.data as { id?: unknown }).id === "string" && typeof (x.data as { name?: { it?: unknown } }).name?.it === "string";
+  }).map((e) => ({ kind: e.kind, enabled: e.enabled !== false, data: e.data, ...(typeof e.pack === "string" ? { pack: e.pack } : {}) }));
 }
 
 function classify(index: number, ch: Character, migratedFrom: number | undefined, existing: Character[]): ImportItem {

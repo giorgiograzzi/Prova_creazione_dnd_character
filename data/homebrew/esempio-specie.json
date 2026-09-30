@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "name": "Esempio: specie",
+  "species": [
+    {
+      "id": "hb_figli_della_cenere",
+      "name": {
+        "it": "Figli della Cenere"
+      },
+      "description": "Discendenti di un vulcano dormiente: pelle scura e calda, occhi che brillano come braci.",
+      "sizes": [
+        "medium",
+        "small"
+      ],
+      "speed": 30,
+      "traits": [
+        {
+          "id": "hb_cenere_pelle",
+          "name": {
+            "it": "Pelle di brace"
+          },
+          "level": 1,
+          "description": "Resistenza al fuoco e vista nell'oscurità fino a 18 metri.",
+          "effects": [
+            {
+              "op": "resistance",
+              "types": [
+                "fire"
+              ]
+            },
+            {
+              "op": "sense",
+              "kind": "darkvision",
+              "range": 60
+            }
+          ]
+        },
+        {
+          "id": "hb_cenere_soffio",
+          "name": {
+            "it": "Soffio di cenere"
+          },
+          "level": 3,
+          "description": "Una nube di cenere brucia gli occhi dei nemici vicini (effetto a parole: il DM decide i dettagli).",
+          "usage": {
+            "uses": "pb",
+            "recharge": "long_rest"
+          }
+        },
+        {
+          "id": "hb_cenere_retaggio",
+          "name": {
+            "it": "Retaggio del vulcano"
+          },
+          "level": 1,
+          "description": "Scegli il dono che la tua stirpe ti ha lasciato.",
+          "choices": [
+            {
+              "id": "hb_cenere_dono",
+              "label": {
+                "it": "Dono"
+              },
+              "count": 1,
+              "options": [
+                {
+                  "id": "svelto",
+                  "name": {
+                    "it": "Passo di lava"
+                  },
+                  "description": "+10 piedi di velocità.",
+                  "effects": [
+                    {
+                      "op": "speedBonus",
+                      "value": 10
+                    }
+                  ]
+                },
+                {
+                  "id": "duro",
+                  "name": {
+                    "it": "Cuore di pietra"
+                  },
+                  "description": "+1 alla CA.",
+                  "effects": [
+                    {
+                      "op": "acBonus",
+                      "value": 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

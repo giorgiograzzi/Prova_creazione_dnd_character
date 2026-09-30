@@ -1,7 +1,7 @@
-import { HB_KINDS, hbKey, type HbEntry } from "../engine/homebrew";
+import { hbKey, type HbEntry } from "../engine/homebrew";
 import type { Ruleset } from "../engine/ruleset";
 import type { Character } from "../engine/types";
-import { give, has, take } from "../homebrew/give";
+import { GIVE_KINDS, give, has, take } from "../homebrew/give";
 import { summarize } from "../homebrew/summary";
 import it from "../i18n/it.json";
 import { Check } from "../ui/xp";
@@ -12,12 +12,12 @@ const t = it.homebrew;
 // Passo "Homebrew" della creazione (e della modifica): le creazioni attive si aggiungono al personaggio con un tocco.
 // Stesso meccanismo del pulsante "Dai a..." nella scheda Homebrew, così il risultato è identico.
 export function HomebrewStep({ ch, rs, onChange }: { ch: Character; rs: Ruleset; onChange: (c: Character) => void }) {
-  const entries = useApp((s) => s.homebrew).filter((e: HbEntry) => e.enabled);
+  const entries = useApp((s) => s.homebrew).filter((e: HbEntry) => e.enabled && GIVE_KINDS.includes(e.kind));
   if (entries.length === 0) return <p className="xp-muted">{t.wizardEmpty}</p>;
   return (
     <>
       <p className="xp-muted">{t.wizardIntro}</p>
-      {HB_KINDS.map((kind) => {
+      {GIVE_KINDS.map((kind) => {
         const list = entries.filter((e) => e.kind === kind);
         if (!list.length) return null;
         return (

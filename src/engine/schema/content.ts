@@ -212,7 +212,7 @@ export const spellSchema = z.object({
     "abjuration", "conjuration", "divination", "enchantment",
     "evocation", "illusion", "necromancy", "transmutation",
   ]),
-  classes: z.array(z.enum(["bard", "cleric", "druid", "paladin", "ranger", "sorcerer", "warlock", "wizard"])),
+  classes: z.array(id), // liste di classe (quelle ufficiali e la `spellList` delle classi homebrew)
   castingTime: z.object({
     unit: z.enum(["action", "bonus_action", "reaction", "minute", "hour"]),
     amount: z.number().default(1),
@@ -253,6 +253,13 @@ export const homebrewPackSchema = z.object({
   items: z.array(itemSchema).default([]),
   feats: z.array(featSchema).default([]),
   spells: z.array(spellSchema).default([]),
+  species: z.array(speciesSchema).default([]),
+  backgrounds: z.array(backgroundSchema).default([]),
+  classes: z.array(classSchema).default([]),
+  subclasses: z.array(subclassSchema).default([]),
+  languages: z.array(termSchema).default([]),
+  damageTypes: z.array(termSchema).default([]),
+  conditions: z.array(conditionDefSchema).default([]),
 });
 
 // Regole di creazione del personaggio (file "Regole_Creazione_Personaggio"): un solo record con id "creation"

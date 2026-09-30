@@ -122,6 +122,10 @@ function Shop({ ch, onBuy, onClose }: { ch: Character; onBuy: (id: string) => { 
   const [msg, setMsg] = useState("");
   const rows = catalog.filter((c) => (group === "all" || c.group === group) && (!q || c.name.toLowerCase().includes(q.toLowerCase())));
   const LIMIT = 80;
+  // nel gruppo Homebrew le voci sono divise per tipo (Armi, Armature, Oggetti...)
+  const KIND_LABEL: Record<string, string> = { weapon: "Armi", armor: "Armature", item: "Oggetti", tool: "Strumenti" };
+  const KIND_ORDER = Object.keys(KIND_LABEL);
+  const shown = (group === "Homebrew" ? [...rows].sort((a, b) => KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind)) : rows).slice(0, LIMIT);
   return (
     <Dialog title={t.shop} onClose={onClose}>
       <p>{t.funds}: <b>{formatCost(walletCp(ch.coins))}</b></p>
@@ -132,11 +136,14 @@ function Shop({ ch, onBuy, onClose }: { ch: Character; onBuy: (id: string) => { 
       <input className="xp-input" style={{ marginBottom: 8 }} type="search" placeholder={t.search} aria-label={t.search} value={q} onChange={(e) => setQ(e.target.value)} />
       {msg && <p role="status"><b>{msg}</b></p>}
       {rows.length === 0 && <p className="xp-muted">{t.noResults}</p>}
-      <ul className="xp-list" style={{ maxHeight: "45dvh", overflowY: "auto" }}>
-        {rows.slice(0, LIMIT).map((c) => (
-          <li key={`${c.kind}-${c.id}`}>
+      <ul className="xp-list">
+        {shown.map((c, i) => (
+          <li key={`${c.kind}-${c.id}`} style={{ display: "block" }}>
+            {group === "Homebrew" && (i === 0 || shown[i - 1]!.kind !== c.kind) && <h3 style={{ margin: "4px 0" }}>{KIND_LABEL[c.kind]}</h3>}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div className="grow"><div className="name">{c.name}</div><div className="xp-muted">{c.group} · {c.cost > 0 ? formatCost(c.cost) : t.free} · {c.weight} {t.lb}</div></div>
             <Button disabled={walletCp(ch.coins) < c.cost} onClick={() => { const r = onBuy(c.id); setMsg(r.ok ? fmt(t.bought, { n: c.name }) : r.errors.join(" ")); }}>{t.buy}</Button>
+            </div>
           </li>
         ))}
       </ul>

@@ -16,6 +16,8 @@ export function summarize(kind: HbKind, x: HbData, rs: Ruleset): string[] {
   const d = x as Record<string, any>;
   const cost = d.cost > 0 ? [formatCost(d.cost)] : [];
   const fx = ((d.effects ?? []) as Effect[]).map((e) => describeEffect(e, rs)); // effetti magici: bonus mentre l'oggetto è usato
+  const ch = d.charges as { max: number; recharge: string; regain?: string } | undefined;
+  if (ch) fx.unshift(`${ch.max} cariche${ch.recharge === "none" ? "" : `, si ricarica: ${(it.homebrew.cx.rechargeOpts as Record<string, string>)[ch.recharge]?.toLowerCase()}${ch.regain ? ` (recupera ${ch.regain})` : " (tutte)"}`}`);
   switch (kind) {
     case "weapons": return [
       `${(O.weaponCategory as Record<string, string>)[d.category]} · ${(O.weaponKind as Record<string, string>)[d.kind]}`,

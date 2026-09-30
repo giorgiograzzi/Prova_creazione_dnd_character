@@ -16,6 +16,8 @@ export const skill = z.enum(SKILLS);
 
 export const armorTraining = z.enum(["light", "medium", "heavy", "shield"]);
 export const senseKind = z.enum(["darkvision", "blindsight", "truesight"]);
+// Dadi o numero: "1d6+1", "2d4", "3"
+export const REGAIN = /^(\d+d\d+([+-]\d+)?|\d+)$/;
 export const recharge = z.enum(["short_rest", "long_rest", "dawn", "none"]);
 export const damageType = z.string().regex(/^[a-z_]+$/); // acid, fire, necrotic...
 

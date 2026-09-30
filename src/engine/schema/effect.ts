@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { isValidCondition } from "./condition";
 import { isValidFormula } from "./formula";
-import { ability, armorTraining, damageType, id, recharge, senseKind, skill } from "./primitives";
+import { ability, armorTraining, damageType, id, recharge, REGAIN, senseKind, skill } from "./primitives";
 
 export const condition = z.string().refine(isValidCondition, "condizione non valida");
 // Valore: numero fisso oppure formula (es. "pb", "max(1, mod:wis)")
@@ -59,6 +59,7 @@ export const effectSchema = z.discriminatedUnion("op", [
     uses: z.union([value, z.object({ table: z.array(z.number()).length(20) })]),
     recharge,
     partialShortRest: z.number().int().optional(), // usi che tornano con Riposo Breve
+    regain: z.string().regex(REGAIN, "deve essere un numero o dei dadi, per esempio 2 o 1d6+1").optional(), // cariche recuperate a ogni ricarica ("1d6+1", "2"); assente = tutte. Con `regain` la ricarica è manuale (si tira)
   }),
 ]);
 export type Effect = z.infer<typeof effectSchema>;

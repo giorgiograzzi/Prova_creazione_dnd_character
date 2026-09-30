@@ -8,7 +8,7 @@ import it from "../i18n/it.json";
 import { fmt } from "../ui/format";
 import { Button, Check, Dialog } from "../ui/xp";
 import { concentrationDc, endConcentration } from "../engine/magic";
-import { RollDialog, SourcesDialog } from "./dialogs";
+import { RegainButton, RollDialog, SourcesDialog } from "./dialogs";
 import type { TabProps } from "./types";
 import { num, sign } from "./util";
 
@@ -103,6 +103,7 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
                 <span className="val">{r.remaining}/{r.max.value}</span>
                 <Button aria-label={`${t.use} ${id}`} disabled={r.remaining <= 0} onClick={() => update((c) => useResource(c, id, r.max.value, 1))}>{t.use}</Button>
                 <Button aria-label={`${t.restore} ${id}`} disabled={r.used <= 0} onClick={() => update((c) => useResource(c, id, r.max.value, -1))}>+</Button>
+                {r.regain && <RegainButton id={id} max={r.max.value} used={r.used} regain={r.regain} update={update} />}
               </div></li>
             ))}
           </ul>

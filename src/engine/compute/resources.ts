@@ -16,7 +16,7 @@ export function computeResources(x: Ctx): Derived["resources"] {
     const used = Math.min(x.ch.state.resourcesUsed[e.resourceId] ?? 0, max);
     out[e.resourceId] = {
       max: { value: max, sources: [{ label, value: max }] },
-      used, remaining: max - used, recharge: e.recharge,
+      used, remaining: max - used, recharge: e.recharge, ...(e.regain ? { regain: e.regain } : {}),
     };
   }
   // Lanci gratuiti di incantesimi (specie, talenti, privilegi): un contatore per incantesimo, id `spell:<incantesimo>`

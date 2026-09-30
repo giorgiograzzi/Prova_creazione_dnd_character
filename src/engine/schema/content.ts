@@ -2,7 +2,7 @@ import { z } from "zod";
 import { choiceSchema, optionSchema } from "./choice";
 import { condition, effectSchema, value } from "./effect";
 import {
-  ability, armorTraining, damageType, id, SCHEMA_VERSION, skill, text,
+  ability, armorTraining, damageType, id, recharge, REGAIN, SCHEMA_VERSION, skill, text,
 } from "./primitives";
 
 // Campi comuni a ogni voce dei dati
@@ -106,6 +106,8 @@ export const classSchema = z.object({
   subclassLevel: z.number().int().default(3),
 });
 
+// Cariche di un oggetto magico: massimo, quando si ricaricano e quante tornano (assente = tutte; dadi o numero = si tira a mano)
+export const chargesSchema = z.object({ max: z.number().int().min(1).max(99), recharge, regain: z.string().regex(REGAIN, "deve essere un numero o dei dadi, per esempio 2 o 1d6+1").optional() });
 const weaponProps = z.array(z.string()); // light, finesse, heavy, thrown, versatile...
 export const weaponSchema = z.object({
   ...base,
@@ -120,6 +122,7 @@ export const weaponSchema = z.object({
   ammunition: id.optional(), // id dell'oggetto munizione (frecce, quadrelli...)
   twoHandedUnlessMounted: z.boolean().default(false), // Lancia da cavaliere: a due mani solo se non in sella
   attunement: z.boolean().default(false), // arma magica che richiede sintonia
+  charges: chargesSchema.optional(),
   weight: z.number().default(0),
   cost: z.number().default(0), // in monete di rame (1 mo = 100 mr)
 });
@@ -134,6 +137,7 @@ export const armorSchema = z.object({
   doffMinutes: z.number().default(0),
   stealthDisadvantage: z.boolean().default(false),
   attunement: z.boolean().default(false), // armatura magica che richiede sintonia
+  charges: chargesSchema.optional(),
   weight: z.number().default(0),
   cost: z.number().default(0),
 });
@@ -144,6 +148,7 @@ export const itemSchema = z.object({
   weight: z.number().default(0),
   cost: z.number().default(0),
   attunement: z.boolean().default(false),
+  charges: chargesSchema.optional(),
   contents: z.array(z.object({ item: id, qty: z.number().int().min(1) })).optional(), // dotazioni
 });
 

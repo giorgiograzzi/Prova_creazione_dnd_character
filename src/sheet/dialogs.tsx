@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { RollMode } from "../engine/compute/types";
-import { rollD20, rollExpr, type D20Roll } from "../engine/play";
+import { rollD20, rollExpr, useResource, type D20Roll } from "../engine/play";
+import type { Character } from "../engine/types";
 import type { Sourced } from "../engine/types";
 import it from "../i18n/it.json";
 import { Button, Dialog, Segmented } from "../ui/xp";
@@ -82,5 +83,23 @@ export function SourcesDialog({ title, value, forced, onForce, onClose, onRoll }
       )}
       <div className="xp-actions footer"><Button onClick={onClose}>{t.close}</Button></div>
     </Dialog>
+  );
+}
+
+// Cariche che tornano a dadi ("1d6+1"): tira e le recupera (mai oltre il massimo); mostra quante sono tornate
+export function RegainButton({ id, max, used, regain, update }: { id: string; max: number; used: number; regain: string; update: (fn: (c: Character) => Character) => void }) {
+  const [msg, setMsg] = useState("");
+  const go = () => {
+    const r = rollExpr(regain);
+    if (!r) return;
+    const n = Math.min(Math.max(0, r.total), used);
+    update((c) => useResource(c, id, max, -n));
+    setMsg(t.regained.replace("{n}", String(n)).replace("{r}", `${r.rolls.join(" + ")}${r.bonus ? ` ${sign(r.bonus)}` : ""}`));
+  };
+  return (
+    <>
+      <Button disabled={used <= 0} onClick={go}>{t.regain.replace("{d}", regain)}</Button>
+      {msg && <span className="pl-sub" role="status">{msg}</span>}
+    </>
   );
 }

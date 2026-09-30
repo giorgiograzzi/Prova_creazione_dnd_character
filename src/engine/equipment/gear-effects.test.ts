@@ -14,6 +14,7 @@ rs.items.set("hb_charm", { id: "hb_charm", name: tx("Amuleto"), description: "",
 rs.weapons.set("hb_blade", { ...rs.weapons.get("longsword")!, id: "hb_blade", name: tx("Lama +1"), attunement: false, effects: [{ op: "attackBonus", value: 1, attackType: "any" }, { op: "damageBonus", value: 1, attackType: "any" }] } as never);
 rs.items.set("hb_wand", { id: "hb_wand", name: tx("Bacchetta"), description: "", origin: "homebrew", needsReview: false, category: "Oggetto magico", weight: 0, cost: 0, attunement: false, effects: [], charges: { max: 7, recharge: "dawn", regain: "1d6+1" } } as never);
 rs.items.set("hb_orb", { id: "hb_orb", name: tx("Sfera"), description: "", origin: "homebrew", needsReview: false, category: "Oggetto magico", weight: 0, cost: 0, attunement: false, effects: [], charges: { max: 3, recharge: "long_rest" } } as never);
+rs.weapons.set("hb_staff", { ...rs.weapons.get("longsword")!, id: "hb_staff", name: tx("Bastone"), attunement: false, effects: [], charges: { max: 7, recharge: "dawn", regain: "1d6" } } as never);
 const mk = (over: Partial<Character> = {}) => testCharacter({ asi, ...over });
 const run = (over: Partial<Character> = {}) => computeCharacter(mk(over), rs);
 const item = (itemId: string, state: "stowed" | "wielded" | "worn", attuned?: boolean) => ({ itemId, qty: 1, state, ...(attuned ? { attuned } : {}) });
@@ -61,5 +62,11 @@ describe("cariche degli oggetti", () => {
     expect(after.state.resourcesUsed["item:hb_orb"]).toBeUndefined();
     expect(after.state.resourcesUsed["item:hb_wand"]).toBe(5);
     expect(shortRest(ch, computeCharacter(ch, rs)).state.resourcesUsed["item:hb_orb"]).toBe(2);
+  });
+  it("un'arma con cariche impugnata: l'attacco ha lo stesso id della risorsa (così le cariche compaiono negli Attacchi)", () => {
+    const d = run({ inventory: [item("hb_staff", "wielded")] });
+    const a = d.attacks.find((x) => x.label === "Bastone")!;
+    expect(d.resources[`item:${a.id}`]).toMatchObject({ remaining: 7, regain: "1d6" });
+    expect(run({ inventory: [item("hb_staff", "stowed")] }).resources["item:hb_staff"]).toBeDefined(); // nello zaino ha le cariche, ma senza attacco
   });
 });

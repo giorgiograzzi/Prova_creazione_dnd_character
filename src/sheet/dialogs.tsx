@@ -103,3 +103,16 @@ export function RegainButton({ id, max, used, regain, update }: { id: string; ma
     </>
   );
 }
+
+// Cariche di un oggetto magico: quante restano, Usa, rimetti una, e Recupera (a dadi) se le cariche tornano tirando
+export type ChargeRes = { max: Sourced; used: number; remaining: number; regain?: string };
+export function ChargeControls({ id, name, r, update }: { id: string; name: string; r: ChargeRes; update: (fn: (c: Character) => Character) => void }) {
+  return (
+    <div className="pl-row" style={{ flexWrap: "wrap" }}>
+      <span className="pl-sub">{t.charges} {r.remaining}/{r.max.value}</span>
+      <Button aria-label={`${t.use} ${name}`} disabled={r.remaining <= 0} onClick={() => update((c) => useResource(c, id, r.max.value, 1))}>{t.use}</Button>
+      <Button aria-label={`${t.restore} ${name}`} disabled={r.used <= 0} onClick={() => update((c) => useResource(c, id, r.max.value, -1))}>+</Button>
+      {r.regain && <RegainButton id={id} max={r.max.value} used={r.used} regain={r.regain} update={update} />}
+    </div>
+  );
+}

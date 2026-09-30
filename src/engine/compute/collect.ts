@@ -170,16 +170,17 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
     }
   }
   for (const f of ch.feats) addFeat(f.featId, f.choices ?? {}, general);
-  // effetti dell'equipaggiamento (oggetti magici): arma impugnata, armatura indossata, oggetto nello zaino; con sintonia solo se sintonizzato
+  // equipaggiamento magico: le cariche ci sono finché l'oggetto non è a terra (si ricaricano anche nello zaino);
+  // gli effetti valgono con l'arma impugnata, l'armatura indossata, l'oggetto nello zaino, e con sintonia solo se sintonizzati
   for (const e of ch.inventory) {
     const f = lookupItem(rs, e.itemId);
-    if (!f || (!f.def.effects.length && !("charges" in f.def && f.def.charges))) continue;
-    const on = f.kind === "weapon" ? e.state === "wielded" : f.kind === "armor" ? e.state === "worn" : e.state !== "dropped";
-    if (!on || (needsAttunement(f) && !e.attuned)) continue;
-    const go = { label: f.def.name.it, picks: general, prefix: "" };
-    // cariche: una risorsa dell'oggetto (id `item:<id>`), ricaricata dai riposi o a mano se tornano solo alcune cariche
+    if (!f || e.state === "dropped") continue;
     const cg = "charges" in f.def ? f.def.charges : undefined;
+    const effectsOn = f.def.effects.length > 0 && (f.kind === "weapon" ? e.state === "wielded" : f.kind === "armor" ? e.state === "worn" : true) && !(needsAttunement(f) && !e.attuned);
+    if (!cg && !effectsOn) continue;
+    const go = { label: f.def.name.it, picks: general, prefix: "" };
     if (cg) add({ op: "resource", resourceId: `item:${f.def.id}`, uses: cg.max, recharge: cg.recharge, ...(cg.regain ? { regain: cg.regain } : {}) } as Effect, go);
+    if (!effectsOn) continue;
     for (const ef of f.def.effects) {
       // i bonus di un'arma valgono solo per i suoi attacchi, non per tutti
       const own = f.kind === "weapon" && (ef.op === "attackBonus" || ef.op === "damageBonus" || ef.op === "critRange");

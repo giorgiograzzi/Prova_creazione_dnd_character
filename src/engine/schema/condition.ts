@@ -3,6 +3,7 @@
 //   wearingArmor:none|light|medium|heavy|any   shield   equipped:<id|categoria>
 //   trained:light|medium|heavy|shield (addestramento nelle armature)
 //   twoHanded (l'arma è impugnata a due mani)   otherWeapon (nell'altra mano c'è un'altra arma)
+//   usingWeapon:<id> (l'arma dell'attacco è proprio questa: bonus di un'arma magica)
 //   weaponProperty:<prop>   attackType:melee|ranged   hasFeature:<id>   hasFeat:<id>
 //   active:<id> (privilegio attivato: Ira...)   attackAbility:<car> (caratteristica usata dall'attacco)
 //   saveProficient:<car> (TS già di classe: la prima classe dà i TS)
@@ -18,7 +19,7 @@ export type Condition =
   | { t: "otherWeapon" }
   | { t: "trained"; value: "light" | "medium" | "heavy" | "shield" }
   | { t: "equipped"; value: string }
-  | { t: "weaponProperty"; value: string }
+  | { t: "weaponProperty" | "usingWeapon"; value: string }
   | { t: "attackType"; value: "melee" | "ranged" }
   | { t: "hasFeature" | "hasFeat" | "active"; value: string } // active:<id> = privilegio attivato (Ira...)
   | { t: "attackAbility" | "saveProficient"; value: Ability } // saveProficient: competenza nel TS già data dalla classe di partenza (Mente di ferro) // caratteristica usata dall'attacco (Ira: solo attacchi con la Forza)
@@ -47,7 +48,7 @@ function atom(s: string): Condition {
   if (k === "attackType" && (v === "melee" || v === "ranged")) return { t: k, value: v };
   if (k === "trained" && ["light", "medium", "heavy", "shield"].includes(v)) return { t: k, value: v as never };
   if ((k === "attackAbility" || k === "saveProficient") && ABIL.includes(v)) return { t: k, value: v as Ability };
-  if ((k === "equipped" || k === "weaponProperty" || k === "hasFeature" || k === "hasFeat" || k === "active") && ID.test(v))
+  if ((k === "equipped" || k === "weaponProperty" || k === "usingWeapon" || k === "hasFeature" || k === "hasFeat" || k === "active") && ID.test(v))
     return { t: k, value: v };
   throw bad();
 }

@@ -30,11 +30,10 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
   - Condizioni con fonte e situazionali (linea di vista, distanza): il motore le mostra come testo, con la fonte se indicata (fatto nella scheda, step 14).
 
 ## 3. Homebrew (step 18): cosa non c'è ancora
-- Gli **effetti sul motore** valgono solo per i talenti (17 effetti predefiniti). Armi, armature e oggetti homebrew hanno i campi standard ma un oggetto magico non può ancora dare bonus (anello +1 CA, sintonia con effetti).
-- **Incantesimi homebrew**: si aggiungono a mano al personaggio (`extraSpells`, lanciati con la prima classe incantatrice); non compaiono nelle liste di classe per la preparazione e la creazione.
-- **Backup**: l'homebrew non è nel backup dei personaggi (si scambia con l'export `.json` del pacchetto).
+- **Effetti degli oggetti**: armi, armature e oggetti homebrew hanno lo stesso catalogo di effetti dei talenti (17 predefiniti). Valgono con l'arma impugnata, l'armatura indossata, l'oggetto nello zaino (non a terra); se richiedono sintonia, solo se sintonizzati. Attacco, danno e critico di un'arma valgono solo per i suoi attacchi (condizione `usingWeapon:<id>`). Restano fuori: cariche e ricariche degli oggetti, attivazioni.
+- **Incantesimi homebrew**: le classi scelte nel modulo mettono l'incantesimo nella loro lista (creazione, passaggio di livello, preparazione). Senza classi si aggiunge a mano al personaggio (`extraSpells`).
+- **Backup**: contiene tutta la libreria homebrew (anche le voci non usate e quelle spente); all'importazione le voci già presenti restano com'erano.
 - Nessun effetto "a scelta" o con condizioni (`when`) nel catalogo: per quelli serve scrivere il `.json` a mano (vedi `data/homebrew/template.jsonc`).
-- Bug segnalato: dadi del danno delle armi (vedi PLAN.md, "Aperti").
 
 ## Nota sugli incantesimi (step 8)
 390 incantesimi dal riepilogo `04_Incantesimi`: i testi sono riassunti in parole nostre (non il testo del manuale). Per 10 incantesimi la risoluzione non entra nell'enum e resta in

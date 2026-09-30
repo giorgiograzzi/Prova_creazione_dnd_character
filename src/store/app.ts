@@ -3,7 +3,7 @@ import { newId } from "../db/id";
 import { applyImport, exportBackup, previewImport, type ImportPreview, type Resolution } from "../db/backup";
 import type { CharacterSummary, Repo } from "../db/repo";
 import { emptyCharacter } from "../engine/character";
-import { charactersUsing, entriesUsedBy, mergeEntries, type HbEntry } from "../engine/homebrew";
+import { charactersUsing, mergeEntries, type HbEntry } from "../engine/homebrew";
 import type { Character } from "../engine/types";
 import { normalizeSettings, type AppSettings, DEFAULT_APP_SETTINGS } from "./settings";
 
@@ -128,7 +128,7 @@ export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 8
       async exportAll() {
         await get().flush();
         const chars = await allCharacters();
-        const text = exportBackup(chars, get().settings, now(), entriesUsedBy(get().homebrew, chars));
+        const text = exportBackup(chars, get().settings, now(), get().homebrew); // tutta la libreria homebrew, anche le voci non ancora usate
         await get().updateSettings({ lastBackupAt: now() });
         return text;
       },

@@ -36,12 +36,12 @@ export function ParamInput({ spec, value, onChange, rs }: { spec: ParamSpec; val
   );
 }
 
-export function EffectsEditor({ rows, onChange, rs }: { rows: EffectRow[]; onChange: (r: EffectRow[]) => void; rs: Ruleset }) {
+export function EffectsEditor({ rows, onChange, rs, help }: { rows: EffectRow[]; onChange: (r: EffectRow[]) => void; rs: Ruleset; help?: string }) {
   const [add, setAdd] = useState("");
   return (
     <fieldset className="xp-group">
       <legend>{t.effects}</legend>
-      <span className="xp-help">{t.effectsHelp}</span>
+      <span className="xp-help">{help ?? t.effectsHelp}</span>
       {rows.length === 0 && <p className="xp-muted">{t.noEffects}</p>}
       {rows.map((r, i) => (
         <div key={i} className="hb-effect">

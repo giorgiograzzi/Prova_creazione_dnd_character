@@ -119,6 +119,7 @@ export const weaponSchema = z.object({
   mastery: id,
   ammunition: id.optional(), // id dell'oggetto munizione (frecce, quadrelli...)
   twoHandedUnlessMounted: z.boolean().default(false), // Lancia da cavaliere: a due mani solo se non in sella
+  attunement: z.boolean().default(false), // arma magica che richiede sintonia
   weight: z.number().default(0),
   cost: z.number().default(0), // in monete di rame (1 mo = 100 mr)
 });
@@ -132,6 +133,7 @@ export const armorSchema = z.object({
   donMinutes: z.number().default(0), // tempo per indossare (0 = 1 azione, es. scudo)
   doffMinutes: z.number().default(0),
   stealthDisadvantage: z.boolean().default(false),
+  attunement: z.boolean().default(false), // armatura magica che richiede sintonia
   weight: z.number().default(0),
   cost: z.number().default(0),
 });

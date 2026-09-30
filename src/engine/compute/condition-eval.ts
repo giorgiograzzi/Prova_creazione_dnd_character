@@ -35,6 +35,7 @@ export function evalCondition(c: Condition, x: CondCtx): boolean {
     case "otherWeapon": return !!x.otherWeapon;
     case "trained": return !!x.armorTraining?.has(c.value);
     case "equipped": return x.equipped.has(c.value);
+    case "usingWeapon": return x.weapon?.id === c.value;
     case "weaponProperty": return !!x.weapon?.properties.includes(c.value);
     case "attackType": return x.weapon?.kind === c.value;
     case "hasFeature": return x.features.has(c.value);

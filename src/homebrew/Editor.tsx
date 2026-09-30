@@ -47,7 +47,7 @@ function FlatEditor({ kind, initial, rs, existing, onSave, onCancel }: EditorPro
       <div className="xp-actions" style={{ justifyContent: "flex-start" }}><Button onClick={onCancel}>← {t.back}</Button></div>
       <h2>{initial ? t.edit : t.new}: {t.kinds[kind]}</h2>
       {FIELDS[kind].filter((s) => !s.show || s.show(draft)).map((s) => <FieldInput key={s.key} spec={s} draft={draft} set={set} rs={rs} />)}
-      {kind === "feats" && <EffectsEditor rows={rows} onChange={setRows} rs={rs} />}
+      {(kind === "feats" || kind === "items" || kind === "weapons" || kind === "armors") && <EffectsEditor rows={rows} onChange={setRows} rs={rs} help={kind === "feats" ? undefined : t.gearEffectsHelp} />}
       {advanced.length > 0 && <p className="xp-muted">{it.homebrew.cx.advanced.replace("{n}", String(advanced.length))}</p>}
       <Field label={it.homebrew.cx.pack} help={it.homebrew.cx.packHelp}>
         <input className="xp-input" list="hb-packs-flat" value={pack} onChange={(e) => setPack(e.target.value)} />

@@ -3,7 +3,7 @@ import { useRuleset } from "../data/ruleset";
 import { computeCharacter } from "../engine/compute";
 import type { AttackOption } from "../engine/compute/types";
 import {
-  analyzeLoadout, buyItem, equipItem, formatCost, lookupItem, setAttuned, setQty, shopCatalog, walletCp, type EquipTime,
+  analyzeLoadout, buyItem, equipItem, formatCost, lookupItem, needsAttunement, setAttuned, setQty, shopCatalog, walletCp, type EquipTime,
 } from "../engine/equipment";
 import type { Character, EquipState } from "../engine/types";
 import it from "../i18n/it.json";
@@ -95,7 +95,7 @@ export function Equip() {
                 {f?.kind === "armor" && (e.state === "worn"
                   ? <Button onClick={() => equip(e.itemId, "stowed")}>{t.remove}</Button>
                   : <Button variant="primary" onClick={() => equip(e.itemId, "worn")}>{t.wear}</Button>)}
-                {f?.kind === "item" && f.def.attunement && (
+                {f && needsAttunement(f) && (
                   <Button onClick={() => apply(setAttuned(ch, rs, e.itemId, !e.attuned))}>{e.attuned ? t.attuneOff : t.attuneOn}</Button>
                 )}
                 <Button aria-label={`${t.qtyMinus} ${def?.name.it ?? e.itemId}`} onClick={() => (e.qty <= 1 ? setDiscard({ id: e.itemId, name: def?.name.it ?? e.itemId }) : update((c) => setQty(c, e.itemId, e.qty - 1)))}>−</Button>

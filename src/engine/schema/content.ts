@@ -63,8 +63,11 @@ export const classSchema = z.object({
   skillChoices: z.object({ count: z.number().int(), from: z.array(skill).or(z.literal("any")) }),
   armorTraining: z.array(armorTraining),
   weaponProficiency: z.array(z.string()),
+  toolProficiency: z.array(z.string()).default([]), // strumenti iniziali fissi (solo 1ª classe)
   caster: z.enum(["none", "full", "half", "third", "pact"]).default("none"),
   spellAbility: ability.optional(),
+  spellList: id.optional(), // lista di incantesimi della classe (es. "cleric")
+  spellSlots: z.array(z.array(z.number().int())).length(20).optional(), // per livello di classe: slot di 1°, 2°, ...
   multiclassRequirement: z.string().optional(), // solo annotato (step 17)
   equipment: z.partialRecord(z.enum(["A", "B", "C"]), equipmentSet),
   features: z.array(featureSchema),

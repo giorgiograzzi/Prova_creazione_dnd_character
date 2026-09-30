@@ -21,6 +21,7 @@ export function computeProfs(x: Ctx): Profs {
     first.saves.forEach((a) => p.saves.add(a));
     first.armorTraining.forEach((a) => p.armor.add(a));
     first.weaponProficiency.forEach((w) => p.weapons.add(w));
+    first.toolProficiency.forEach((t) => p.tools.add(t));
   }
   const bg = x.rs.backgrounds.get(x.ch.backgroundId);
   if (bg) {

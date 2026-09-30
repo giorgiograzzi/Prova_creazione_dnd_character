@@ -17,6 +17,7 @@ export const choiceSchema = z.object({
   id,
   label: text,
   count: z.number().int().min(1).default(1),
+  countFrom: z.string().optional(), // colonna della tabella di classe che dà il numero di scelte (es. "trucchetti")
   options: z.array(optionSchema).optional(),
   source: z.string().regex(/^[a-zA-Z_]+(:[a-z0-9_]+)*$/).optional(),
   group: id.optional(), // opzioni "una tra": scegliere una esclude le altre del gruppo

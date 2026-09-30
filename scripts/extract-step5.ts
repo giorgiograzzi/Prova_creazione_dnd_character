@@ -3,6 +3,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { FEAT_RULES } from "./lib/feat-rules";
 import { bodyLines, pdfPages, section } from "./lib/pdf-text";
+import { equipment, itemNames } from "./lib/equipment";
 import { splitNames } from "./lib/util";
 
 const SRC = process.env.RULES_DIR ?? "docs/rules";
@@ -75,44 +76,13 @@ cuts.forEach((cut, ci) => {
 if (new Set(feats.map((f) => f.id)).size !== feats.length) throw new Error("Talenti: id duplicati");
 
 // ---------- Background ----------
-const items = new Map<string, string>(); // nome italiano → id (armi, armature, strumenti, oggetti)
-for (const k of ["weapons", "armors", "tools", "items"]) for (const e of read(k)) items.set(e.name.it, e.id);
+const items = itemNames();
 const toolIds = new Map<string, string>(read("tools").map((t) => [t.name.it, t.id]));
 const skillIds = read("skills").map((s) => s.name.it as string).sort((a, b) => b.length - a.length);
 const skillId = new Map<string, string>(read("skills").map((s) => [s.name.it, s.id]));
 const featByName = new Map<string, string>(feats.map((f) => [f.name.it, f.id]));
 const LIST: Record<string, string> = { Chierico: "cleric", Druido: "druid", Mago: "wizard" };
 const GROUP: Record<string, string> = { "Strumenti da artigiano": "artisan", "Set da gioco": "gaming", "Strumento musicale": "musical" };
-
-function splitTop(s: string): string[] {
-  const r: string[] = []; let d = 0, cur = "";
-  for (const c of s) {
-    if (c === "(") d++; if (c === ")") d--;
-    if (c === "," && d === 0) { r.push(cur.trim()); cur = ""; } else cur += c;
-  }
-  return [...r, cur.trim()].filter(Boolean);
-}
-
-function equipment(s: string) {
-  const parts = splitTop(s);
-  const gold = /^(\d+) mo$/.exec(parts[parts.length - 1]!);
-  if (!gold) throw new Error(`Equipaggiamento senza monete finali: ${s}`);
-  const list = parts.slice(0, -1).map((tok) => {
-    const q = /^(\d+)× (.+)$/.exec(tok);
-    const qty = q ? Number(q[1]) : 1;
-    let name = q ? q[2]! : tok, note: string | undefined;
-    if (name === "lo strumento scelto") return { item: "$tool", qty };
-    // Viandante: nel PDF la voce è in inglese ("gaming set a scelta") — un set da gioco qualsiasi
-    if (name === "gaming set a scelta") return { item: "$gaming_set", qty };
-    while (!items.has(name)) {
-      const g = /^(.*\S)\s*\(([^()]*)\)$/.exec(name);
-      if (!g) throw new Error(`Oggetto sconosciuto: "${tok}"`);
-      name = g[1]!; note = note ? `${g[2]}; ${note}` : g[2];
-    }
-    return { item: items.get(name)!, qty, ...(note ? { note } : {}) };
-  });
-  return { items: list, gp: Number(gold[1]) };
-}
 
 const btext = section(lines, "3. Background", "4. Classi");
 const body = btext.slice(btext.indexOf("(B = 50 mo)") + "(B = 50 mo)".length).trim();
@@ -141,7 +111,7 @@ for (let m; (m = bre.exec(body)); end = m.index + m[0].length) {
     ? [{ id: `${id}_tool`, label: { it: "Strumento" }, count: 1, source: `tools:${tool}` }] : [];
   backgrounds.push({
     id, name: names, abilityOptions: abil, skills, tool, feat, ...(fm[2] ? { featConfig: { list: LIST[fm[2]]! } } : {}),
-    equipment: { A: equipment(eq), B: { items: [], gp: 50 } }, choices: groupChoice,
+    equipment: { A: equipment(eq, items), B: { items: [], gp: 50 } }, choices: groupChoice,
   });
 }
 if (backgrounds.length !== 16) throw new Error(`Background trovati: ${backgrounds.length} (attesi 16)`);

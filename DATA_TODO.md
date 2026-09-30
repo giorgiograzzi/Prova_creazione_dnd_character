@@ -43,3 +43,21 @@ Fonte: `01_Dati_Gioco_DnD2024.pdf`. Sono **10** specie (il piano ne indicava 9):
 - **Trucchetti**: la distinzione trucchetto / incantesimo di 1° nei lignaggi usa un elenco fisso (`CANTRIPS` in `scripts/lib/species-rules.ts`);
   da riallineare ai livelli veri degli incantesimi allo step 8.
 - **Alto elfo**: "trucchetto sostituibile a ogni Riposo Lungo" non modellato.
+
+## Step 7a — Barbaro, Bardo, Chierico, Druido
+Fonte: `01_Dati_Gioco_DnD2024.pdf`. Tabelle 1-20 e privilegi controllati in automatico: i nomi dei privilegi di ogni livello
+coincidono con la colonna "Privilegi" della tabella (l'estrazione si ferma se non quadrano). 16 sottoclassi.
+
+- **Codificato**: CA alternative (Difesa senza armatura, Bardo della Danza), Movimento veloce, Campione primordiale (+4, max 25),
+  Percezione del pericolo (vantaggio TS Des), risorse a tabella (Ira, Incanalare divinità, Forma selvatica) e formula
+  (Ispirazione bardica = mod Car, min 1), Ordine divino / primordiale (con competenze e trucchetto extra), Maestria del Bardo (liv. 2 e 9),
+  Factotum (id `jack_of_all_trades`), competenze bonus (Sapienza), addestramento del Valore, incantesimi sempre preparati dei
+  domini del Chierico e dei circoli del Druido (per livello di classe), terreni del Circolo della Terra (scelta).
+- **Scelte per numero da tabella**: `countFrom` indica la colonna (trucchetti, preparati, maestria armi). Il conteggio effettivo lo risolve lo step 10.
+- **Solo testo**: quasi tutti i privilegi di combattimento (Attacco irruento, Colpo brutale, Furia, Forma selvatica, ecc.),
+  Colpo divino/Incantesimi potenti (scelta senza effetto numerico), risorse "usi = mod Sag" delle sottoclassi (Bagliore protettivo, Sacerdote di guerra).
+- **Ira**: usi in tabella; il recupero "1 uso con Riposo Breve" è codificato come `partialShortRest: 1`. Incanalare divinità: stesso recupero parziale **non** codificato (verificare sul manuale).
+- **Incantesimi delle sottoclassi**: gli elenchi includono anche trucchetti (es. `fire_bolt`, `ray_of_frost`); per ora tutti `alwaysPrepared`. Riallineare allo step 8.
+- **Magia seducente (Bardo Fascino)**: gli incantesimi sempre preparati sono solo nel testo (Charme su persone, Immagine speculare, Comando): non codificati.
+- **Terreno del Circolo della Terra**: la resistenza di "Protezione della natura" per terreno è solo testo.
+- **Equipaggiamento**: "musical instrument a scelta" (inglese nel PDF) reso come `$instrument`.

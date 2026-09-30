@@ -100,3 +100,12 @@ Convenzioni:
   (`pb` = bonus competenza; ricarica `long_rest`, o `short_rest` se "Riposo Breve o Lungo").
 - Le opzioni dei lignaggi portano `grantSpell` con `when: level>=3|5`; gli incantesimi di 1° sono `alwaysPrepared` con `freeCast`.
 - Scelta `size` generata per Aasimar, Umano, Tiefling. Le scelte "una tra" sono `Choice` con `options`.
+
+## Classi (step 7)
+- `classes.json`, `subclasses.json` da `scripts/extract-classes.ts [id,id...]` (unisce con quanto già estratto). Regole in `scripts/lib/class-rules.ts`
+  (colonne della tabella, effetti e scelte per privilegio `id` o `id@livello`, regole per sottoclasse).
+- Tabella di progressione → `table` (colonne con id = etichetta in snake_case: `ire`, `danno_ira`, `maestria_armi`, `trucchetti`, `preparati`...) e `spellSlots` (20 righe di slot per livello).
+- Righe "Usi: <colonna|formula> / Riposo ..." del PDF → effetto `resource` sul privilegio (uso a tabella o formula).
+- "Sempre preparati: <incantesimi>" nel privilegio → `grantSpell alwaysPrepared`; "Incantesimi sempre preparati — liv. N: ..." della sottoclasse → `grantSpell` con `when: classLevel:<classe>>=N`.
+- Scelte automatiche di classe: `<classe>_skills` (options o `source: skills`), `<classe>_tools`, `<classe>_weapon_mastery`, `<classe>_cantrips`, `<classe>_prepared` con `countFrom`.
+- `toolProficiency` (strumenti fissi) vale solo per la prima classe, come TS, armi e armature.

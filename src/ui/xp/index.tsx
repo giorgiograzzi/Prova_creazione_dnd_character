@@ -53,11 +53,16 @@ export function TabBar({ tabs, current, onSelect }: { tabs: TabDef[]; current: s
 
 // Popup: finestra "Prompt di MS-DOS" di Windows 95 (barra blu con _ □ ×; solo × funziona). Esc chiude.
 // Barra in basso della scheda: al posto delle tab principali, con "Indietro" per tornare al menu principale
-export function SectionBar({ items, current, onSelect, onBack, backLabel }: { items: { id: string; label: string }[]; current: string; onSelect: (id: string) => void; onBack: () => void; backLabel: string }) {
+// Solo icone per risparmiare spazio (il nome è in aria-label e title)
+export function SectionBar({ items, current, onSelect, onBack, backLabel }: { items: { id: string; label: string; icon: IconName }[]; current: string; onSelect: (id: string) => void; onBack: () => void; backLabel: string }) {
+  const Back = icons.back;
   return (
     <nav className="xp-sections" aria-label="Sezioni della scheda">
-      <button type="button" className="back" onClick={onBack}>← {backLabel}</button>
-      {items.map((s) => <button key={s.id} type="button" aria-current={s.id === current ? "page" : undefined} onClick={() => onSelect(s.id)}>{s.label}</button>)}
+      <button type="button" className="back" aria-label={backLabel} title={backLabel} onClick={onBack}><Back /></button>
+      {items.map((s) => {
+        const Icon = icons[s.icon];
+        return <button key={s.id} type="button" aria-label={s.label} title={s.label} aria-current={s.id === current ? "page" : undefined} onClick={() => onSelect(s.id)}><Icon /></button>;
+      })}
     </nav>
   );
 }
@@ -87,3 +92,4 @@ export function Dialog({ title, children, onClose }: { title: string; children: 
   );
 }
 export { icons };
+export type { IconName };

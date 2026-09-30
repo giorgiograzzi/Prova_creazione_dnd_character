@@ -5,11 +5,12 @@ import { Placeholder } from "./pages/Placeholder";
 import { Sheet } from "./pages/Sheet";
 import { ImportDialog, Settings, exportNow } from "./pages/Settings";
 import type { ImportPreview } from "./db/backup";
-import { SectionBar, TabBar, icons, type TabDef } from "./ui/xp";
+import { SectionBar, TabBar, icons, type IconName, type TabDef } from "./ui/xp";
 import { SHEET_SECTIONS, type SheetSection } from "./sheet/sections";
 import { isFinalized } from "./wizard/logic";
 import { useApp } from "./ui/useApp";
 
+const SECTION_ICONS: Record<SheetSection, IconName> = { status: "heart", features: "star", stats: "chart", attacks: "sword", conditions: "alert", misc: "notes" };
 type TabId = "characters" | "sheet" | "equip" | "magic" | "homebrew";
 
 export function App() {
@@ -81,7 +82,7 @@ export function App() {
         )}
       </main>
       {inSheet
-        ? <SectionBar items={SHEET_SECTIONS.map((id) => ({ id, label: it.play.tabs[id] }))} current={section} backLabel={it.play.back}
+        ? <SectionBar items={SHEET_SECTIONS.map((id) => ({ id, label: it.play.tabs[id], icon: SECTION_ICONS[id] }))} current={section} backLabel={it.play.back}
             onSelect={(id) => { setSettings(false); setSection(id as SheetSection); }} onBack={() => { setSettings(false); setTab("characters"); }} />
         : <TabBar tabs={tabs} current={shown} onSelect={(id) => { setSettings(false); setTab(id as TabId); }} />}
       {importing && <ImportDialog preview={importing} onClose={() => setImporting(null)} onDone={() => setImporting(null)} />}

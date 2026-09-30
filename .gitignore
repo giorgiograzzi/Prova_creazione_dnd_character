@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.local
+.env
+# Contenuti protetti: non vanno mai tracciati
+private/
+data/private/
+docs/rules/*.pdf

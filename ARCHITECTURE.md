@@ -144,3 +144,16 @@ Convenzioni:
 - `src/engine/spells.ts`: `spellsMatching(rs, filter, decisions, list)` e `spellChoiceCandidates(rs, choice, decisions)` per le scelte (`cantrips:<lista>`, `spells:<lista>`, `freespells`, `alwaysspells`, `filter`).
 - `compute/slots.ts` → `Derived.spellSlots {casterLevel, slots, used, remaining, pact?}`: una sola classe incantatrice = la sua tabella; più classi = tabella dell'incantatore completo sul livello combinato
   (pieno + metà per eccesso + un terzo per difetto); Warlock a parte (`pactSlots`).
+
+## Equipaggiamento e attacchi (step 9)
+- `src/engine/equipment/loadout.ts`: `analyzeLoadout(ch, rs)` → mani occupate (A due mani = 2; Versatile con `grip: "two"` = 2; Lancia da cavaliere in sella = 1; scudo = 1),
+  una sola armatura e un solo scudo, stati validi (l'armatura si indossa `worn`, l'arma si impugna `wielded`), sintonia (max 3), peso (oggetti + monete/50) e `problems`.
+  `equipItem(ch, rs, itemId, stato, settings, grip?)` cambia stato e dà il tempo: armatura = minuti dai dati (togliendo prima l'altra), scudo = 1 azione,
+  arma = 1 azione con `weaponSwap: "house"` (default) oppure gratis con `"official"` (`src/engine/settings.ts`). Se il risultato non è valido il personaggio resta invariato.
+- `compute/attacks.ts` → `Derived.attacks` (`AttackOption`): un attacco per ogni arma impugnata, la versione lanciata delle armi Da lancio, la mano secondaria con due armi Leggere e il colpo senz'armi.
+  Caratteristica: For (mischia), Des (distanza), migliore tra le due con Accurata, Des con arma da Monaco senza armatura né scudo (Arti marziali), Car per l'arma del patto (`Character.pactWeapon`).
+  Tiro per colpire = mod + competenza (`isProficient`: id, categoria o filtro) + `attackBonus` + Esaurimento; Svantaggio da Pesante (For/Des < 13), armatura non addestrata e condizioni.
+  Danno = dado (Versatile a due mani) + mod (mano secondaria: no, salvo modificatore negativo o Combattere con due armi) + `damageBonus` (Duellare `!twoHanded && !otherWeapon`, Armi da lancio...) + `critRange`.
+  Maestria attiva se l'arma è tra le scelte `weaponMastery` (CD di Rovesciare = 8 + mod + competenza), munizioni disponibili dall'inventario, promemoria, extra di Attacco furtivo.
+- `Derived.attacksPerAction` (Attacco extra 2/3/4, colonna del Guerriero) e `Derived.loadout` (mani, armatura, scudo, sintonia, peso, capacità, problemi).
+- Condizioni delle regole: `twoHanded`, `otherWeapon` (contesto dell'attacco: `buildCtx(ch, rs, weapon, {twoHanded, otherWeapon})`).

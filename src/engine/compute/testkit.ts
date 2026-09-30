@@ -5,8 +5,10 @@ const t = (it: string) => ({ it });
 const feat = (id: string, effects: unknown[] = [], extra: object = {}) =>
   ({ id, name: t(id), category: "general", effects, ...extra });
 
+// tempi indossa/togli come nei dati veri: leggera 1/1 min, media 5/1, pesante 10/5, scudo 1 azione (0/0)
+const TIMES: Record<string, [number, number]> = { light: [1, 1], medium: [5, 1], heavy: [10, 5], shield: [0, 0] };
 const armor = (id: string, category: string, baseAc: number, dexCap: number | null, extra: object = {}) =>
-  ({ id, name: t(id), category, baseAc, dexCap, ...extra });
+  ({ id, name: t(id), category, baseAc, dexCap, donMinutes: TIMES[category]![0], doffMinutes: TIMES[category]![1], ...extra });
 
 const cond = (id: string, name: string, effects: object[], extra: object = {}) =>
   ({ id, name: t(name), description: `${name}: riassunto`, effects, ...extra });
@@ -31,6 +33,18 @@ const TEST_SPELLS = [
   sp("spark", 0, "evocation", ["wizard", "sorcerer"]), sp("comfort", 0, "abjuration", ["cleric", "bard"]),
   sp("charm", 1, "enchantment", ["bard", "wizard"]), sp("ward", 1, "abjuration", ["cleric", "wizard"]),
   sp("omen", 1, "divination", ["cleric", "bard"], { ritual: true }), sp("bolt", 3, "evocation", ["wizard"]),
+];
+
+const wp = (id: string, category: string, kind: string, damage: string, damageType: string, properties: string[], extra: object = {}) =>
+  ({ id, name: t(id), category, kind, damage, damageType, properties, mastery: "nick", weight: 3, ...extra });
+const TEST_WEAPONS = [
+  wp("dagger", "simple", "melee", "1d4", "piercing", ["finesse", "light", "thrown"], { range: { normal: 20, long: 60 }, weight: 1 }),
+  wp("handaxe", "simple", "melee", "1d6", "slashing", ["light", "thrown"], { range: { normal: 20, long: 60 } }),
+  wp("longsword", "martial", "melee", "1d8", "slashing", ["versatile"], { versatileDamage: "1d10" }),
+  wp("greatsword", "martial", "melee", "2d6", "slashing", ["heavy", "two_handed"], { weight: 6 }),
+  wp("rapier", "martial", "melee", "1d8", "piercing", ["finesse"]),
+  wp("lance", "martial", "melee", "1d10", "piercing", ["heavy", "reach", "two_handed"], { twoHandedUnlessMounted: true }),
+  wp("shortbow", "simple", "ranged", "1d6", "piercing", ["ammunition", "two_handed"], { range: { normal: 80, long: 320 }, ammunition: "arrow" }),
 ];
 
 // Dati minimi in memoria (i veri dati arrivano dagli step 4-7)
@@ -75,10 +89,16 @@ export function testRuleset(): Ruleset {
       feat("medium_armor_master", []),
       feat("defense", [{ op: "acBonus", value: 1, when: "wearingArmor:any" }], { category: "fighting_style" }),
       feat("steady", [{ op: "saveAdvantage", abilities: ["str"] }, { op: "saveAdvantage", abilities: ["wis"], against: "charmed" }]),
+      feat("dueling", [{ op: "damageBonus", value: 2, attackType: "melee", when: "attackType:melee && !twoHanded && !otherWeapon" }], { category: "fighting_style" }),
+      feat("archery", [{ op: "attackBonus", value: 2, attackType: "ranged" }], { category: "fighting_style" }),
+      feat("great_weapon_fighting", [], { category: "fighting_style" }),
+      feat("two_weapon_fighting", [], { category: "fighting_style" }),
       feat("epic_boon", [{ op: "abilityScoreIncrease", abilities: ["str"], amount: 2, cap: 30 }]),
       feat("fleet", [{ op: "speedBonus", value: 10 }]),
     ] },
     { kind: "conditions", entries: TEST_CONDITIONS },
+    { kind: "weapons", entries: TEST_WEAPONS },
+    { kind: "items", entries: [{ id: "arrow", name: t("Frecce (20)"), category: "ammunition", weight: 1 }, { id: "ring", name: t("Anello"), category: "gear", attunement: true }, { id: "rope", name: t("Corda"), category: "gear", weight: 5 }] },
     { kind: "spells", entries: TEST_SPELLS },
     { kind: "armors", entries: [
       armor("leather", "light", 11, null),

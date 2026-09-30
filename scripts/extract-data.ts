@@ -92,7 +92,7 @@ function weapons(lines: string[]) {
     const names = splitNames(m[1]!.trim(), m[2]!);
     if (gap.trim()) throw new Error(`Armi: testo inatteso prima di ${m[2]}: ${gap}`);
     const props: string[] = []; const notes: string[] = [];
-    let versatileDamage: string | undefined; let range: { normal: number; long: number } | undefined;
+    let versatileDamage: string | undefined; let range: { normal: number; long: number } | undefined; let ammoName: string | undefined;
     for (const tok of m[7] === "—" ? [] : splitTop(m[7]!)) {
       const name = tok.replace(/\s*\(.*$/, "");
       const id = PROP[name];
@@ -100,12 +100,15 @@ function weapons(lines: string[]) {
       if (!props.includes(id)) props.push(id);
       const v = /Versatile \((\d+d\d+)\)/.exec(tok); if (v) versatileDamage = v[1];
       const r = /\((\d+)\/(\d+)/.exec(tok); if (r) range = { normal: Number(r[1]), long: Number(r[2]) };
+      const am = /^Munizioni \(\d+\/\d+; (.+)\)$/.exec(tok); if (am) ammoName = am[1]; // "Munizioni (80/320; Quadrelli (20))"
     }
     return {
       id: m[2], name: names, category: m[3] === "Semplice" ? "simple" : "martial", kind: m[4] === "mischia" ? "melee" : "ranged",
       damage: m[5], damageType: DMG[m[6]!], properties: props, ...(versatileDamage ? { versatileDamage } : {}),
       ...(range ? { range } : {}), mastery: MAST[m[8]!], weight: Number(m[9]), cost: toCopper(m[10]!, m[11]!),
       description: notes.join(", "),
+      ...(ammoName ? { _ammoName: ammoName } : {}),
+      ...(notes.some((n) => /solo se non in sella/.test(n)) ? { twoHandedUnlessMounted: true } : {}),
     };
   });
 }
@@ -197,6 +200,15 @@ const propText = section(lines, "Proprietà delle armi", "Proprietà di maestria
 out.weaponProperties = rules(propText, ["Munizioni", "Accurata", "Pesante", "Leggera", "Ricarica", "Gittata", "Portata", "Da lancio", "A due mani", "Versatile"]);
 out.masteries = rules(section(lines, "Proprietà di maestria", "Munizioni, colpo senz'armi, armi improvvisate"),
   ["Fendere", "Sfiorare", "Intaccare", "Spingere", "Fiaccare", "Rallentare", "Rovesciare", "Tormentare"]);
+
+// munizioni: nome italiano ("Quadrelli (20)") → id dell'oggetto
+const ammoIds = new Map((out.items as { id: string; name: { it: string }; category: string }[]).filter((i) => i.category === "ammunition").map((i) => [i.name.it, i.id]));
+for (const w of out.weapons as Record<string, any>[]) {
+  if (!w._ammoName) continue;
+  const aid = ammoIds.get(w._ammoName);
+  if (!aid) throw new Error(`Arma ${w.id}: munizione sconosciuta "${w._ammoName}"`);
+  w.ammunition = aid; delete w._ammoName;
+}
 
 mkdirSync(OUT, { recursive: true });
 for (const [kind, entries] of Object.entries(out)) {

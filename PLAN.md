@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-8 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 8 completato (incantesimi). Prossimo: step 9 (equipaggiamento e attacchi). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-9 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 9 completato (equipaggiamento e attacchi). Prossimo: step 10 (motore di creazione). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -67,7 +67,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - Elenco, livello, scuola, lista di classe, testo breve. **Serve la fonte**; fino ad allora solo gli id citati nei dati (validati come "riferimento noto").
 - **Fatto**: come step 4, oppure rinviato a tua decisione.
 
-### 9. Motore equipaggiamento e attacchi (`equipment/`)
+### 9. Motore equipaggiamento e attacchi (`equipment/`) ✅
 - Stati `stowed|wielded|worn|dropped`, slot mani, due mani/versatile/scudo, armatura + scudo unici, Forza minima, svantaggio Furtività, addestramento, munizioni, attacco e danno per arma (Accurata, Pesante, Leggera, Da lancio, gittata, stili di combattimento, maestrie attive), sintonia (max 3), regole cambio equipaggiamento configurabili (ufficiale / casa: 1 azione).
 - **Fatto**: test su CA (es. "18 = Cotta di maglia 16 + Scudo 2"), attacchi per arma, tempi indossa/togli.
 

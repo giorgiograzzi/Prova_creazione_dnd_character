@@ -33,7 +33,9 @@ export interface Character {
   decisions: Record<string, string[]>; // choiceId → opzioni scelte (id univoci per scelta)
   asi: { source: string; ability: Ability; amount: number; cap?: number }[]; // cap: 20 (default), 30 Doni epici // aumenti scelti (background, ASI di livello)
   feats: { featId: string; choices?: Record<string, string[]> }[];
-  inventory: { itemId: string; qty: number; state: EquipState; attuned?: boolean }[];
+  // grip: impugnatura a una o due mani (armi Versatili); attuned: sintonizzato (max 3)
+  inventory: { itemId: string; qty: number; state: EquipState; attuned?: boolean; grip?: "one" | "two" }[];
+  pactWeapon?: string; // Warlock con Patto della Lama: id dell'arma del patto (usa Carisma)
   coins: { cp: number; sp: number; ep: number; gp: number; pp: number };
   state: {
     hp: number; tempHp: number; hitDiceUsed: number;
@@ -42,6 +44,7 @@ export interface Character {
     slotsUsed: Record<number, number>;
     conditions: string[]; exhaustion: number; inspiration: boolean; // conditions: id (Esaurimento: livello in `exhaustion`)
     conditionSources?: Record<string, string>; // chi causa Affascinato / Spaventato / Afferrato
+    mounted?: boolean; // in sella (Lancia da cavaliere)
   };
   overrides: Record<string, number>; // valori forzati a mano, visibili e rimovibili
   notes: string;

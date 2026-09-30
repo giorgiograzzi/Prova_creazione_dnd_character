@@ -6,3 +6,5 @@ export type * from "./types";
 export * from "./compute";
 export * from "./validate";
 export * from "./spells";
+export * from "./equipment";
+export * from "./settings";

@@ -12,11 +12,10 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
   - Uso in gioco: slot spesi (`state.slotsUsed` c'è già), Riposo Breve/Lungo, rituali (+10 minuti, nessuno slot), regola "uno slot per turno", concentrazione.
   - Arcani firma del Mago (20°), Arcanum mistico, Maestria degli incantesimi (18°): scelte di incantesimi con ricarica particolare, non codificate.
   - Slot del patto: ricarica con Riposo Breve; Astuzia magica (recupero metà).
-- **Step 9 (armi e attacchi)**
-  - Lancia da cavaliere: "A due mani solo se non in sella" (ora solo testo in `description`).
-  - Competenze con filtro: `martial[light]` (Monaco), `martial[finesse|light]` (Ladro).
-  - Duellare (`needsReview`): "senza altre armi impugnate".
-  - Bonus/dadi di Arti marziali, Furtivo e simili applicati ai singoli attacchi.
+- **Step 14b (attacchi in gioco)**
+  - Bonus che dipendono da uno stato attivo: Danno ira (serve "Ira attiva"), Punizione divina, Colpo brutale, Furia, Sacro Simbolo ecc. Nelle schede degli attacchi ci sono solo gli extra sempre validi (Attacco furtivo, come promemoria).
+  - Proprietà di maestria: il motore dice quale è attiva e la CD di Rovesciare; l'effetto (Spingere, Fiaccare...) è solo testo della regola.
+  - Attacco a distanza con nemico entro 5 ft / a gittata lunga: promemoria di Svantaggio (dipende dalla situazione).
 - **Step 10 (creazione)**
   - Aumenti "+1 a una tra..." dei talenti e ASI: si registrano in `Character.asi` (con `cap` 20/30).
   - Scelte alternative (`Choice.group`): Stile di combattimento / Guerriero benedetto / Guerriero druidico; conteggi da `countFrom`
@@ -40,6 +39,8 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 `resolutionRaw` (Indagare, "TS Des / Cos", "TS vario/vari"). L'estrazione verifica ogni incantesimo contro le liste per classe del PDF (nome, livello, classe, ◆ Concentrazione, ® Rituale).
 
 ## Chiuso in questa revisione
+- **Step 9**: Lancia da cavaliere (`twoHandedUnlessMounted` + `state.mounted`), competenze con filtro (`martial[light]`, `martial[finesse|light]`),
+  Duellare (condizioni `twoHanded` / `otherWeapon`, non più `needsReview`), Arti marziali e Attacco furtivo negli attacchi, munizioni delle armi (`ammunition`).
 - Id dei privilegi nei prerequisiti dei talenti (`spellcasting`, `pact_magic`, `fighting_style`): ora `validate:data` controlla ogni `hasFeature:`/`hasFeat:` in tutte le condizioni.
 - Caratteristica da incantatore delle specie: la scelta `spell_ability` arriva ai `grantSpell` (`abilityFrom`); `Derived.grantedSpells` dà caratteristica, CD e attacco
   (per gli incantesimi di classe e sottoclasse usa la caratteristica della classe).

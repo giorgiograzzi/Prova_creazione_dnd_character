@@ -68,7 +68,8 @@ export function finalScores(ch: Character, collected: Collected, cond: CondCtx) 
   return { scores, parts };
 }
 
-export function buildCtx(ch: Character, rs: Ruleset, weapon?: Weapon): Ctx {
+// weapon + hand: contesto di un attacco (arma considerata, impugnata a due mani?, altra arma nell'altra mano?)
+export function buildCtx(ch: Character, rs: Ruleset, weapon?: Weapon, hand?: { twoHanded?: boolean; otherWeapon?: boolean }): Ctx {
   const totalLevel = ch.classes.reduce((n, c) => n + c.level, 0);
   const classLevels = classLevelsOf(ch);
   const collected = collectEffects(ch, rs);
@@ -77,7 +78,7 @@ export function buildCtx(ch: Character, rs: Ruleset, weapon?: Weapon): Ctx {
     totalLevel, classLevels, scores: ch.baseScores, equipped: gear.equipped,
     features: collected.features, feats: collected.feats,
     ...(gear.body ? { bodyArmor: gear.body } : {}), ...(gear.shield ? { shield: gear.shield } : {}),
-    ...(weapon ? { weapon } : {}),
+    ...(weapon ? { weapon } : {}), ...(hand?.twoHanded ? { twoHanded: true } : {}), ...(hand?.otherWeapon ? { otherWeapon: true } : {}),
   };
   const { scores, parts } = finalScores(ch, collected, base);
   const mods = {} as Record<Ability, number>;

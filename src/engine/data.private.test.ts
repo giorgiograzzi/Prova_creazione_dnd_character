@@ -4,6 +4,7 @@ import { buildRuleset } from "./ruleset";
 import { checkReferences } from "./validate";
 import { buildCtx, computeCharacter, evalValue } from "./compute";
 import { spellChoiceCandidates } from "./spells";
+import { equipItem } from "./equipment";
 import { testCharacter } from "./compute/testkit";
 
 // Questi test girano solo dove esiste data/private (non tracciata): altrove vengono saltati.
@@ -447,7 +448,7 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
     });
     it("nessun needsReview rimasto sui talenti codificati", () => {
       const left = [...R.feats.values()].filter((x) => x.needsReview).map((x) => x.id);
-      expect(left).toEqual(["dueling"]); // solo Duellare (dipende dalle armi, step 9)
+      expect(left).toEqual([]); // Duellare incluso: ora sa se hai altre armi in mano (step 9)
     });
   });
 
@@ -617,6 +618,91 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
       const half = R.slotTables.get("half_caster")!.slots;
       for (const id of ["paladin", "ranger"]) expect(R.classes.get(id)!.spellSlots, id).toEqual(half);
       expect(R.slotTables.get("third_caster")!.slots.slice(2)).toEqual(R.subclasses.get("eldritch_knight")!.spellSlots!.slice(2));
+    });
+  });
+
+  describe("equipaggiamento e attacchi (step 9) con i dati veri", () => {
+    const R = fullRuleset();
+    const cls = (classId: string, level: number, extra: object = {}) => ({ classId, level, hpRolls: [], ...extra });
+    const inv = (...e: [string, "wielded" | "worn" | "stowed", object?][]) => e.map(([itemId, state, x]) => ({ itemId, qty: 1, state, ...(x ?? {}) }));
+    const sc = (o: object) => ({ baseScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, ...o } });
+    const run = (classes: ReturnType<typeof cls>[], over: object = {}) => computeCharacter(testCharacter({ classes, ...over }), R);
+    const atk = (d: ReturnType<typeof run>, label: string) => d.attacks.find((a) => a.label === label)!;
+
+    it("Guerriero con Spadone: Pesante, 2d6 + For, maestria Sfiorare solo se scelta", () => {
+      const inventory = inv(["greatsword", "wielded"]);
+      const base = sc({ str: 16 });
+      const a = atk(run([cls("fighter", 1)], { ...base, inventory }), "Spadone");
+      expect([a.hands, a.damage.dice, a.damage.bonus.value, a.toHit.value, a.mastery]).toEqual([2, "2d6", 3, 5, { id: "graze", name: "Sfiorare", active: false }]);
+      const m = atk(run([cls("fighter", 1)], { ...base, inventory, decisions: { fighter_weapon_mastery: ["greatsword"] } }), "Spadone");
+      expect(m.mastery?.active).toBe(true);
+      expect(atk(run([cls("fighter", 1)], { ...sc({ str: 12 }), inventory }), "Spadone").mode).toBe("disadvantage");
+    });
+    it("Rovesciare: CD = 8 + modificatore + competenza", () => {
+      const a = atk(run([cls("fighter", 1)], { ...sc({ str: 16 }), inventory: inv(["battleaxe", "wielded"]), decisions: { fighter_weapon_mastery: ["battleaxe"] } }), "Ascia da battaglia");
+      expect(a.mastery).toMatchObject({ id: "topple", active: true, dc: 8 + 3 + 2 });
+    });
+    it("Stili di combattimento con i dati veri: Duellare, Tiro con l'arco, Armi da lancio, Armi possenti", () => {
+      const style = (id: string) => ({ decisions: { fighter_fighting_style: [id] }, feats: [{ featId: id }] });
+      const b = sc({ str: 16, dex: 14 });
+      const sword = inv(["longsword", "wielded"], ["shield", "worn"]);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("dueling"), inventory: sword }), "Spada lunga").damage.bonus.value).toBe(3 + 2);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("dueling"), inventory: inv(["greatsword", "wielded"]) }), "Spadone").damage.bonus.value).toBe(3);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("archery"), inventory: inv(["longbow", "wielded"]) }), "Arco lungo").toHit.value).toBe(2 + 2 + 2);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("thrown_weapon_fighting"), inventory: inv(["handaxe", "wielded"]) }), "Ascia (lanciata)").damage.bonus.value).toBe(3 + 2);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("thrown_weapon_fighting"), inventory: inv(["handaxe", "wielded"]) }), "Ascia").damage.bonus.value).toBe(3);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("great_weapon_fighting"), inventory: inv(["greatsword", "wielded"]) }), "Spadone").notes.join()).toMatch(/contano 3/);
+    });
+    it("Arco lungo: Des, gittata 150/600, Frecce dall'inventario; Lancia da cavaliere: 10 ft e a una mano in sella", () => {
+      const a = atk(run([cls("fighter", 1)], { ...sc({ dex: 16 }), inventory: [...inv(["longbow", "wielded"]), { itemId: "arrow", qty: 3, state: "stowed" }] }), "Arco lungo");
+      expect([a.ability, a.range, a.ammo]).toEqual(["dex", { normal: 150, long: 600 }, { itemId: "arrow", available: 60 }]);
+      const l = (mounted: boolean) => atk(run([cls("fighter", 1)], { inventory: inv(["lance", "wielded"]), state: { ...testCharacter().state, mounted } }), "Lancia da cavaliere");
+      expect([l(false).hands, l(true).hands, l(false).reach]).toEqual([2, 1, 10]);
+    });
+    it("Attacco extra: Guerriero 2/3/4 attacchi, Barbaro al 5°", () => {
+      const n = (c: string, l: number) => run([cls(c, l)]).attacksPerAction;
+      expect([n("fighter", 1), n("fighter", 5), n("fighter", 11), n("fighter", 20), n("barbarian", 4), n("barbarian", 5)]).toEqual([1, 2, 3, 4, 1, 2]);
+    });
+    it("Campione: critico 19-20 dal 3° e 18-20 dal 15°", () => {
+      const c = (l: number) => atk(run([cls("fighter", l, { subclassId: "champion" })], { inventory: inv(["longsword", "wielded"]) }), "Spada lunga").critRange;
+      expect([c(2), c(3), c(15)]).toEqual([20, 19, 18]);
+    });
+    it("Monaco: Arti marziali (Des, dado per livello) solo senza armatura né scudo", () => {
+      const b = sc({ str: 10, dex: 16 });
+      const u = (l: number, inv2: object[] = []) => atk(run([cls("monk", l)], { ...b, inventory: inv2 }), "Colpo senz'armi");
+      expect([u(1).damage.dice, u(5).damage.dice, u(11).damage.dice, u(17).damage.dice]).toEqual(["1d6", "1d8", "1d10", "1d12"]);
+      expect([u(1).ability, u(1).abilityWhy, u(1).damage.bonus.value]).toEqual(["dex", "Arti marziali", 3]);
+      const armored = u(5, inv(["studded_leather", "worn"]));
+      expect([armored.ability, armored.damage.dice]).toEqual(["str", "1"]); // armatura: niente Arti marziali
+      const w = atk(run([cls("monk", 1)], { ...b, inventory: inv(["shortsword", "wielded"]) }), "Spada corta");
+      expect([w.ability, w.abilityWhy]).toEqual(["dex", "Accurata"]);
+      const club = atk(run([cls("monk", 1)], { ...sc({ str: 10, dex: 16 }), inventory: inv(["mace", "wielded"]) }), "Mazza"); // arma da Monaco
+      expect([club.ability, club.abilityWhy, club.proficient]).toEqual(["dex", "Arti marziali", true]);
+      const greatsword = atk(run([cls("monk", 1)], { ...b, inventory: inv(["greatsword", "wielded"]) }), "Spadone"); // né semplice né Leggera
+      expect([greatsword.ability, greatsword.proficient]).toEqual(["str", false]);
+    });
+    it("Ladro: Attacco furtivo con arma Accurata o a distanza; competenza nelle armi marziali Accurate o Leggere", () => {
+      const r = (w: string) => atk(run([cls("rogue", 5)], { ...sc({ dex: 16 }), inventory: inv([w, "wielded"]) }), R.weapons.get(w)!.name.it);
+      expect(r("rapier").riders[0]).toMatch(/Attacco furtivo 3d6/);
+      expect(r("rapier").proficient).toBe(true);
+      expect(r("shortbow").riders[0]).toMatch(/3d6/);
+      expect(r("longsword").riders).toEqual([]);
+      expect(r("longsword").proficient).toBe(false); // marziale non Accurata né Leggera
+    });
+    it("Warlock del Patto della Lama: l'arma del patto usa Carisma", () => {
+      const ch = { ...sc({ str: 8, cha: 16 }), inventory: inv(["longsword", "wielded"]), pactWeapon: "longsword", decisions: { warlock_invocations: ["pact_of_the_blade"] } };
+      const a = atk(run([cls("warlock", 3)], ch), "Spada lunga");
+      expect([a.ability, a.abilityWhy]).toEqual(["cha", "arma del patto"]);
+      expect(atk(run([cls("warlock", 3)], { ...ch, pactWeapon: undefined }), "Spada lunga").ability).toBe("str");
+    });
+    it("tempi con i dati veri: Cotta di maglia 10 minuti, Scudo 1 azione, sintonia e peso", () => {
+      const ch = testCharacter({ classes: [cls("fighter", 1)], inventory: inv(["chain_mail", "stowed"], ["shield", "stowed"]) });
+      const r = equipItem(ch, R, "chain_mail", "worn");
+      expect(r.time.minutes).toBe(10);
+      expect(equipItem(r.character, R, "shield", "worn").time.action).toBe(true);
+      const d = computeCharacter(equipItem(equipItem(ch, R, "chain_mail", "worn").character, R, "shield", "worn").character, R);
+      expect(d.ac.value).toBe(18);
+      expect(d.loadout.weight).toBe(55 + 6);
     });
   });
 });

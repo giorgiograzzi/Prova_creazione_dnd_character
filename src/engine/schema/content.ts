@@ -94,6 +94,8 @@ export const weaponSchema = z.object({
   versatileDamage: z.string().optional(),
   range: z.object({ normal: z.number(), long: z.number() }).optional(),
   mastery: id,
+  ammunition: id.optional(), // id dell'oggetto munizione (frecce, quadrelli...)
+  twoHandedUnlessMounted: z.boolean().default(false), // Lancia da cavaliere: a due mani solo se non in sella
   weight: z.number().default(0),
   cost: z.number().default(0), // in monete di rame (1 mo = 100 mr)
 });

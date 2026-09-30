@@ -12,6 +12,28 @@ export interface GrantedSpell {
   freeCast?: { uses: number; recharge: string };
 }
 
+// Un attacco pronto da tirare (arma impugnata, lanciata, mano secondaria o colpo senz'armi)
+export interface AttackOption {
+  id: string; // id dell'oggetto, oppure "unarmed"
+  weaponId?: string;
+  label: string;
+  kind: "melee" | "ranged";
+  thrown: boolean; offhand: boolean; hands: 0 | 1 | 2;
+  ability: Ability; abilityWhy: string;
+  proficient: boolean;
+  toHit: Sourced; mode: RollMode; modeSources: string[];
+  damage: { dice: string; bonus: Sourced; type: string; text: string }; // text = "2d6 + 3 tagliente"
+  critRange: number; // 20, oppure 19/18 (Campione)
+  reach: number; // ft
+  range?: { normal: number; long: number };
+  mastery?: { id: string; name: string; active: boolean; dc?: number };
+  ammo?: { itemId: string; available: number };
+  riders: string[]; // danni extra a parole (Attacco furtivo...)
+  notes: string[]; // promemoria: Svantaggio a gittata lunga, Ricarica, ecc.
+}
+
+export interface LoadoutSummary { handsUsed: number; handsMax: number; body?: string; shield?: string; attuned: number; weight: number; capacity: number; problems: string[] }
+
 export interface Lists { adv: string[]; dis: string[] }
 
 // Effetto delle condizioni attive sul personaggio (vedi compute/conditions.ts)
@@ -63,4 +85,7 @@ export interface Derived {
   warnings: string[]; // es. armatura senza addestramento
   spellcastingBlocked: boolean;
   conditions: ConditionState;
+  attacksPerAction: number;
+  attacks: AttackOption[];
+  loadout: LoadoutSummary;
 }

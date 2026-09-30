@@ -13,6 +13,7 @@ export interface Collected {
   entries: Entry[];
   features: Set<string>;
   feats: Set<string>;
+  masteries: Set<string>; // armi di cui si usa la proprietà di maestria (scelte `weaponMastery`)
 }
 
 const SKILL_IDS = new Set<string>(SKILLS);
@@ -62,7 +63,7 @@ function sourceEffects(c: Choice, picked: string[]): Effect[] {
 // Le scelte di un talento acquisito (Character.feats[i].choices) hanno la precedenza sulle
 // decisioni generali: così un talento ripetibile (Resiliente, Iniziato alla magia) ha scelte per ogni acquisizione.
 export function collectEffects(ch: Character, rs: Ruleset): Collected {
-  const out: Collected = { entries: [], features: new Set(), feats: new Set() };
+  const out: Collected = { entries: [], features: new Set(), feats: new Set(), masteries: new Set() };
   const seenFeats = new Set<string>();
   const general: Picks = (id) => ch.decisions[id];
 
@@ -88,7 +89,10 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
         out.features.add(opt.id); // l'opzione scelta conta come posseduta (prerequisiti: hasFeature:pact_of_the_blade)
         opt.effects.forEach((e) => add(e, o));
       }
-    } else if (c.source) sourceEffects(c, picked).forEach((e) => add(e, o));
+    } else if (c.source) {
+      if (c.source === "weaponMastery") picked.forEach((w) => out.masteries.add(w));
+      sourceEffects(c, picked).forEach((e) => add(e, o));
+    }
   };
   const addFeat = (id: string, instance: Record<string, string[]> | undefined, base: Picks) => {
     const f = rs.feats.get(id);

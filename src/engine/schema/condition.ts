@@ -2,6 +2,7 @@
 // Grammatica: or := and ('||' and)* ; and := not ('&&' not)* ; not := '!'? atom
 //   wearingArmor:none|light|medium|heavy|any   shield   equipped:<id|categoria>
 //   trained:light|medium|heavy|shield (addestramento nelle armature)
+//   twoHanded (l'arma è impugnata a due mani)   otherWeapon (nell'altra mano c'è un'altra arma)
 //   weaponProperty:<prop>   attackType:melee|ranged   hasFeature:<id>   hasFeat:<id>
 //   level>=N   classLevel:<classe>>=N   ability:<car>>=N   (operatori: >= <= == > <)
 export type Cmp = ">=" | "<=" | "==" | ">" | "<";
@@ -10,6 +11,8 @@ export type Condition =
   | { t: "not"; item: Condition }
   | { t: "wearingArmor"; value: "none" | "light" | "medium" | "heavy" | "any" }
   | { t: "shield" }
+  | { t: "twoHanded" }
+  | { t: "otherWeapon" }
   | { t: "trained"; value: "light" | "medium" | "heavy" | "shield" }
   | { t: "equipped"; value: string }
   | { t: "weaponProperty"; value: string }
@@ -24,6 +27,8 @@ const ID = /^[a-z][a-z0-9_]*$/;
 function atom(s: string): Condition {
   const bad = () => new Error(`Condizione non valida: "${s}"`);
   if (s === "shield") return { t: "shield" };
+  if (s === "twoHanded") return { t: "twoHanded" };
+  if (s === "otherWeapon") return { t: "otherWeapon" };
   let m = /^level(>=|<=|==|>|<)(\d+)$/.exec(s);
   if (m) return { t: "level", cmp: m[1] as Cmp, n: Number(m[2]) };
   m = /^(classLevel|ability):([a-z_]+)(>=|<=|==|>|<)(\d+)$/.exec(s);

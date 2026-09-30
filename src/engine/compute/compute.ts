@@ -10,6 +10,8 @@ import { computeProfs } from "./proficiencies";
 import { computeResources } from "./resources";
 import { computeGrantedSpells } from "./spells";
 import { computeSlots } from "./slots";
+import { attacksPerAction, computeAttacks } from "./attacks";
+import { analyzeLoadout } from "../equipment/loadout";
 import { computeRolls, untrainedArmor } from "./rolls";
 import { sum, withOverride } from "./sourced";
 import { computeResistances, computeSenses, computeSpeed } from "./speed";
@@ -68,6 +70,13 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     spellcasting,
     grantedSpells: computeGrantedSpells(x),
     spellSlots: computeSlots(ch, rs),
+    attacksPerAction: attacksPerAction(x),
+    attacks: computeAttacks(x, profs, cs, untrainedArmor(x, profs)),
+    loadout: (() => {
+      const l = analyzeLoadout(ch, rs);
+      return { handsUsed: l.handsUsed, handsMax: l.handsMax, ...(l.body ? { body: l.body.name.it } : {}), ...(l.shield ? { shield: l.shield.name.it } : {}),
+        attuned: l.attuned, weight: l.weight, capacity: x.scores.str * 15, problems: l.problems };
+    })(),
     carryCapacity: x.scores.str * 15,
     proficiencies: { weapons: [...profs.weapons], tools: [...profs.tools], armor: [...profs.armor] },
     features: [...x.collected.features].sort(),

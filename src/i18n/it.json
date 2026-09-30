@@ -225,6 +225,8 @@
     "heal": "Cura",
     "setTemp": "PF temp.",
     "crit": "Colpo critico",
+    "attackD20": "Tiro per colpire: sempre 1 d20",
+    "damageTitle": "Danno",
     "dying": "A terra: tira le salvezze contro morte",
     "stable": "Stabile (a 0 PF)",
     "dead": "Morto",

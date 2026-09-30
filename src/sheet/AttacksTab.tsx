@@ -30,7 +30,7 @@ export function AttacksTab({ rs, d }: TabProps) {
 // Tiro per colpire e per il danno di un attacco (usato dalla scheda e dalla tab Equip)
 export function AttackRollDialog({ a, rs, onClose }: { a: AttackOption; rs: TabProps["rs"]; onClose: () => void }) {
   return (
-    <RollDialog title={`${a.label} — ${t.attackRoll}`} bonus={a.toHit} mode={a.mode} modeSources={a.modeSources}
+    <RollDialog title={`${a.label} — ${t.attackRoll}`} bonus={a.toHit} mode={a.mode} modeSources={a.modeSources} hint={t.attackD20}
       note={[...a.notes, ...a.riders].join(" · ") || undefined} onClose={onClose} extra={<DamageSection a={a} rs={rs} />} />
   );
 }
@@ -40,6 +40,7 @@ function DamageSection({ a, rs }: { a: AttackOption; rs: TabProps["rs"] }) {
   const [crit, setCrit] = useState(false);
   return (
     <div style={{ marginTop: 12 }}>
+      <h3>{t.damageTitle}</h3>
       <label className="xp-check"><input type="checkbox" checked={crit} onChange={(e) => setCrit(e.target.checked)} /><span>{t.crit} ({a.critRange < 20 ? `${a.critRange}–20` : "20"})</span></label>
       <DamageRoller dice={a.damage.dice} bonus={a.damage.bonus.value} type={rs.damageTypes.get(a.damage.type)?.name.it ?? a.damage.type} crit={crit} />
     </div>

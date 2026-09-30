@@ -17,14 +17,15 @@ export function SourceList({ s }: { s: Sourced }) {
 }
 
 // Tiro di d20: mostra formula, vantaggio/svantaggio (con il motivo), risultato e da dove viene il bonus
-export function RollDialog({ title, bonus, mode, modeSources, note, extra, onClose }: {
-  title: string; bonus: Sourced; mode: RollMode; modeSources: string[]; note?: string; extra?: React.ReactNode; onClose: () => void;
+export function RollDialog({ title, bonus, mode, modeSources, note, extra, hint, onClose }: {
+  title: string; bonus: Sourced; mode: RollMode; modeSources: string[]; note?: string; extra?: React.ReactNode; hint?: string; onClose: () => void;
 }) {
   const [m, setM] = useState<RollMode>(mode);
   const [res, setRes] = useState<D20Roll | null>(null);
   return (
     <Dialog title={title} onClose={onClose}>
       <p className="pl-formula">d20 {sign(bonus.value)}</p>
+      {hint && <p className="xp-muted">{hint}</p>}
       <Segmented<RollMode> label="Modalità" value={m} onChange={setM}
         options={(["disadvantage", "normal", "advantage"] as const).map((v) => ({ value: v, label: t.mode[v] }))} />
       {modeSources.length > 0 && <p className="xp-muted">{modeSources.join(" · ")}</p>}

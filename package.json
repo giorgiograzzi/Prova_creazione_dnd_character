@@ -10,7 +10,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "validate:data": "tsx scripts/validate-data.ts",
-    "extract:data": "tsx scripts/extract-data.ts"
+    "extract:data": "tsx scripts/extract-data.ts && tsx scripts/extract-step5.ts"
   },
   "dependencies": {
     "dexie": "^4.4.6",

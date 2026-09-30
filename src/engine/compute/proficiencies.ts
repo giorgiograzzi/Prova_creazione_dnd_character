@@ -1,6 +1,8 @@
 import type { Ability } from "../schema";
 import type { Ctx } from "./context";
 
+const GROUPS = new Set(["artisan", "gaming", "musical"]);
+
 export interface Profs {
   saves: Set<Ability>;
   skills: Set<string>;
@@ -23,7 +25,8 @@ export function computeProfs(x: Ctx): Profs {
   const bg = x.rs.backgrounds.get(x.ch.backgroundId);
   if (bg) {
     bg.skills.forEach((s) => p.skills.add(s));
-    p.tools.add(bg.tool);
+    // "artisan"/"gaming"/"musical" = strumento a scelta: arriva dalla scelta del background
+    if (!GROUPS.has(bg.tool)) p.tools.add(bg.tool);
   }
   for (const { effect: e } of x.active) {
     if (e.op === "grantSkillProficiency") e.skills.forEach((s) => (e.expertise ? p.expertise : p.skills).add(s));

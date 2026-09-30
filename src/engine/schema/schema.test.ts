@@ -15,11 +15,13 @@ describe("condizioni", () => {
     expect(parseCondition("weaponProperty:finesse")).toEqual({ t: "weaponProperty", value: "finesse" });
     expect(parseCondition("equipped:greatsword")).toEqual({ t: "equipped", value: "greatsword" });
     expect(parseCondition("hasFeature:rage")).toEqual({ t: "hasFeature", value: "rage" });
+    expect(parseCondition("trained:medium")).toEqual({ t: "trained", value: "medium" });
   });
   it("rifiuta condizioni sbagliate", () => {
     expect(() => parseCondition("wearingArmor:tutta")).toThrow();
     expect(() => parseCondition("boh")).toThrow();
     expect(() => parseCondition("ability:xyz>=13")).toThrow();
+    expect(() => parseCondition("trained:tutte")).toThrow();
   });
 });
 

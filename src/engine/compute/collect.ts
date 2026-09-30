@@ -1,4 +1,4 @@
-import type { Choice, Effect } from "../schema";
+import { SKILLS, type Choice, type Effect } from "../schema";
 import type { Character } from "../types";
 import type { Ruleset } from "../ruleset";
 
@@ -15,11 +15,13 @@ export interface Collected {
   feats: Set<string>;
 }
 
+const SKILL_IDS = new Set<string>(SKILLS);
+
 type Owner = { label: string; classId?: string };
 type Holder = { name: { it: string }; effects: Effect[]; choices: Choice[] };
 
 // Convenzione per le scelte "source": gli id scelti diventano effetti standard.
-//   skills / expertise / tools:* / weapons:* / cantrips:* / spells:* / feats:*
+//   skills / expertise / skillsTools / tools:* / weapons:* / cantrips:* / spells:* / freespells / resistance / feats:*
 // Le altre (languages, mastery...) non hanno effetti sul calcolo.
 function sourceEffects(source: string, picked: string[]): Effect[] {
   const kind = source.split(":")[0];
@@ -31,6 +33,19 @@ function sourceEffects(source: string, picked: string[]): Effect[] {
     case "cantrips": return picked.map((s) => ({ op: "grantSpell", spell: s, mode: "cantrip" as const }));
     case "spells": return picked.map((s) => ({ op: "grantSpell", spell: s, mode: "known" as const }));
     case "feats": return picked.map((f) => ({ op: "grantFeat", feat: f }));
+    // abilità e strumenti in qualsiasi combinazione (talento Esperto)
+    case "skillsTools": {
+      const skills = picked.filter((p) => SKILL_IDS.has(p)), tools = picked.filter((p) => !SKILL_IDS.has(p));
+      return [
+        ...(skills.length ? [{ op: "grantSkillProficiency", skills: skills as never, expertise: false } as Effect] : []),
+        ...(tools.length ? [{ op: "grantToolProficiency", tools } as Effect] : []),
+      ];
+    }
+    // incantesimo sempre preparato, lanciabile 1 volta per Riposo Lungo senza slot
+    case "freespells": return picked.map((s) => ({
+      op: "grantSpell", spell: s, mode: "alwaysPrepared" as const, freeCast: { uses: 1, recharge: "long_rest" as const },
+    }));
+    case "resistance": return [{ op: "resistance", types: picked }];
     default: return [];
   }
 }

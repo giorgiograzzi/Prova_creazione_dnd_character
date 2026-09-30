@@ -48,7 +48,10 @@ export function finalScores(ch: Character, collected: Collected, cond: CondCtx) 
   const cap: Record<string, number> = {};
   const parts: Ctx["parts"] = { str: [], dex: [], con: [], int: [], wis: [], cha: [] };
   for (const a of ABILITIES) parts[a].push({ label: "Base", value: ch.baseScores[a] });
-  for (const s of ch.asi) parts[s.ability].push({ label: s.source, value: s.amount });
+  for (const s of ch.asi) {
+    parts[s.ability].push({ label: s.source, value: s.amount });
+    cap[s.ability] = Math.max(cap[s.ability] ?? 20, s.cap ?? 20);
+  }
   for (const { effect, label } of collected.entries) {
     if (effect.op !== "abilityScoreIncrease" || !holds(effect.when, cond)) continue;
     for (const a of effect.abilities) {

@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-4 completati.** Prossimo: step 5 (talenti e background). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-5 completati.** Prossimo: step 6 (specie). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -51,7 +51,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - **Obiettivo**: abilità, linguaggi, taglie, danni, condizioni (nomi), 37 armi con proprietà e maestrie (8 proprietà di maestria + regole proprietà), armature e scudo, strumenti, oggetti, dotazioni, monete. Tutto in `data/private/` (non tracciato), generato da `scripts/extract-data.ts`.
 - **Fatto**: `validate:data` (schema + riferimenti incrociati), 10 voci verificate, esito riportato.
 
-### 5. Dati cap. B — Talenti e background
+### 5. Dati cap. B — Talenti e background ✅
 - 16 background (3 caratteristiche, talento, abilità, strumento, kit A/B), talenti origine/generali/stili/doni epici con prerequisiti e ripetibilità.
 - **Fatto**: come step 4.
 

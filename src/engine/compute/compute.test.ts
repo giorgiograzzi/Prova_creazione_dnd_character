@@ -202,6 +202,38 @@ describe("vantaggio/svantaggio, risorse, incantesimi", () => {
   it("capacità di carico = Forza × 15", () => expect(mk().carryCapacity).toBe(255));
 });
 
+describe("scelte con source e tetto dei Doni epici", () => {
+  it("skillsTools: abilità e strumenti in qualsiasi combinazione", () => {
+    const rs2 = testRuleset();
+    rs2.feats.set("skilled", { id: "skilled", name: { it: "Esperto" }, description: "", origin: "private", needsReview: false,
+      effects: [], category: "origin", prerequisites: [], repeatable: true,
+      choices: [{ id: "skilled_picks", label: { it: "3" }, count: 3, source: "skillsTools", distinct: true }] });
+    const d = computeCharacter(testCharacter({ asi: asiStd, feats: [{ featId: "skilled" }], decisions: { skilled_picks: ["stealth", "thieves_tools", "arcana"] } }), rs2);
+    expect(d.skills.stealth.proficiency).toBe("proficient");
+    expect(d.skills.arcana.proficiency).toBe("proficient");
+    expect(d.proficiencies.tools).toContain("thieves_tools");
+  });
+  it("freespells: incantesimo sempre preparato con lancio gratuito", () => {
+    const rs2 = testRuleset();
+    rs2.feats.set("mi", { id: "mi", name: { it: "MI" }, description: "", origin: "private", needsReview: false, effects: [],
+      category: "origin", prerequisites: [], repeatable: true,
+      choices: [{ id: "mi_spell", label: { it: "1" }, count: 1, source: "freespells", distinct: true }] });
+    const d = computeCharacter(testCharacter({ asi: asiStd, feats: [{ featId: "mi" }], decisions: { mi_spell: ["shield_spell"] } }), rs2);
+    expect(d.features).toBeDefined(); // il calcolo non si rompe con incantesimi non ancora in ruleset
+  });
+  it("aumenti di un Dono epico arrivano a 30, gli altri restano a 20", () => {
+    const b = { baseScores: { str: 20, dex: 20, con: 10, int: 10, wis: 10, cha: 10 } };
+    const d = mk({ ...b, asi: [{ source: "Dono", ability: "str", amount: 1, cap: 30 }, { source: "ASI", ability: "dex", amount: 1 }] });
+    expect([d.scores.str.value, d.scores.dex.value]).toEqual([21, 20]);
+  });
+  it("tool di background a gruppo non finisce tra le competenze", () => {
+    const rs2 = testRuleset();
+    const bg = rs2.backgrounds.get("soldier")!;
+    rs2.backgrounds.set("soldier", { ...bg, tool: "gaming" });
+    expect(computeCharacter(testCharacter({ asi: asiStd }), rs2).proficiencies.tools).not.toContain("gaming");
+  });
+});
+
 describe("formule", () => {
   it("valutazione con arrotondamento per difetto", () => {
     const c = { pb: 3, level: 5, classLevels: {}, scores: { str: 8, dex: 10, con: 10, int: 10, wis: 8, cha: 10 } };

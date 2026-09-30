@@ -30,7 +30,7 @@ export interface Character {
   backgroundId: string;
   baseScores: Record<Ability, number>; // prima degli aumenti
   decisions: Record<string, string[]>; // choiceId → opzioni scelte (id univoci per scelta)
-  asi: { source: string; ability: Ability; amount: number }[]; // aumenti scelti (background, ASI di livello)
+  asi: { source: string; ability: Ability; amount: number; cap?: number }[]; // cap: 20 (default), 30 Doni epici // aumenti scelti (background, ASI di livello)
   feats: { featId: string; choices?: Record<string, string[]> }[];
   inventory: { itemId: string; qty: number; state: EquipState; attuned?: boolean }[];
   coins: { cp: number; sp: number; ep: number; gp: number; pp: number };

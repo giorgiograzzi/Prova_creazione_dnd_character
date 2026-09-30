@@ -84,3 +84,12 @@ Convenzioni:
   `skills`, `languages`, `sizes`, `damageTypes`, `conditions`, `weaponProperties`, `masteries`, `coins`.
 - `Ruleset` è derivato da `KINDS` in `ruleset.ts`: aggiungere un tipo di dato = una riga lì.
 - I test su dati privati (`data.private.test.ts`) si saltano se `data/private` non esiste.
+
+## Talenti e background (step 5)
+- `feats.json`, `backgrounds.json` da `scripts/extract-step5.ts` (dopo lo step 4). Effetti numerici in `scripts/lib/feat-rules.ts`.
+- Prerequisiti dei talenti = lista di condizioni (tutte da soddisfare). Nuovo atomo `trained:<light|medium|heavy|shield>`
+  (il contesto delle condizioni riceve `armorTraining`, lo fornirà il motore di creazione).
+- Background: `equipment` = `{ A: { items:[{item, qty, note?}], gp }, B: { gp: 50 } }`; `$tool` = strumento scelto,
+  `$gaming_set` = un set da gioco a scelta. Strumento a gruppo (`artisan|gaming|musical`) = scelta `<id>_tool` (`source: tools:<gruppo>`).
+- Scelte `source` aggiuntive: `skillsTools` (talento Esperto), `freespells` (sempre preparato + 1 lancio gratuito per Riposo Lungo), `resistance`.
+- `Character.asi[].cap`: 20 di default, 30 per i Doni epici.

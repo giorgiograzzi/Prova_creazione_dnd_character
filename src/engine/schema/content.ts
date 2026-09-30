@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { choiceSchema } from "./choice";
-import { effectSchema } from "./effect";
+import { condition, effectSchema } from "./effect";
 import {
   ability, armorTraining, damageType, id, SCHEMA_VERSION, skill, text,
 } from "./primitives";
@@ -27,19 +27,26 @@ export const speciesSchema = z.object({
   traits: z.array(featureSchema).default([]), // con livello di sblocco (1/3/5)
 });
 
+// Equipaggiamento iniziale: opzione A/B/C = oggetti + monete (mo). "$tool" = lo strumento scelto.
+export const equipmentSet = z.object({
+  items: z.array(z.object({ item: z.string(), qty: z.number().int().min(1).default(1), note: z.string().optional() })).default([]),
+  gp: z.number().default(0),
+});
+
 export const backgroundSchema = z.object({
   ...base,
   abilityOptions: z.tuple([ability, ability, ability]), // le 3 caratteristiche aumentabili
   skills: z.array(skill).length(2),
-  tool: z.string(), // id o gruppo ("artisan", "musical", "gaming")
+  tool: z.string(), // id, oppure gruppo a scelta: "artisan" | "gaming" | "musical"
   feat: id,
-  equipment: z.partialRecord(z.enum(["A", "B", "C"]), z.array(z.string())),
+  featConfig: z.record(z.string(), z.string()).optional(), // es. { list: "cleric" } per Iniziato alla magia
+  equipment: z.partialRecord(z.enum(["A", "B", "C"]), equipmentSet),
 });
 
 export const featSchema = z.object({
   ...base,
   category: z.enum(["origin", "general", "fighting_style", "epic_boon"]),
-  prerequisites: z.array(z.string()).default([]), // condizioni
+  prerequisites: z.array(condition).default([]), // condizioni, tutte da soddisfare
   repeatable: z.boolean().default(false),
   abilityIncrease: z.array(ability).optional(), // "+1 a una tra ..."
 });
@@ -59,7 +66,7 @@ export const classSchema = z.object({
   caster: z.enum(["none", "full", "half", "third", "pact"]).default("none"),
   spellAbility: ability.optional(),
   multiclassRequirement: z.string().optional(), // solo annotato (step 17)
-  equipment: z.partialRecord(z.enum(["A", "B", "C"]), z.array(z.string())),
+  equipment: z.partialRecord(z.enum(["A", "B", "C"]), equipmentSet),
   features: z.array(featureSchema),
   // Colonne della tabella 1-20 (ire, dadi, trucchetti, preparati...); 20 valori ciascuna
   table: z.record(z.string(), z.array(z.union([z.number(), z.string()])).length(20)).default({}),

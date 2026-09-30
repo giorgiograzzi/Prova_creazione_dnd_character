@@ -10,6 +10,7 @@ export interface CondCtx {
   shield?: Armor;
   equipped: Set<string>; // id e categorie degli oggetti indossati/impugnati
   weapon?: Weapon; // arma considerata (step 9); assente = condizioni sull'arma false
+  armorTraining?: Set<string>; // addestramento in armature (prerequisiti dei talenti)
   features: Set<string>;
   feats: Set<string>;
 }
@@ -25,6 +26,7 @@ export function evalCondition(c: Condition, x: CondCtx): boolean {
     case "wearingArmor":
       return c.value === "none" ? !x.bodyArmor : c.value === "any" ? !!x.bodyArmor : x.bodyArmor?.category === c.value;
     case "shield": return !!x.shield;
+    case "trained": return !!x.armorTraining?.has(c.value);
     case "equipped": return x.equipped.has(c.value);
     case "weaponProperty": return !!x.weapon?.properties.includes(c.value);
     case "attackType": return x.weapon?.kind === c.value;

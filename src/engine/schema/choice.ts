@@ -18,7 +18,7 @@ export const choiceSchema = z.object({
   label: text,
   count: z.number().int().min(1).default(1),
   options: z.array(optionSchema).optional(),
-  source: z.string().regex(/^[a-z_]+(:[a-z0-9_]+)*$/).optional(),
+  source: z.string().regex(/^[a-zA-Z_]+(:[a-z0-9_]+)*$/).optional(),
   group: id.optional(), // opzioni "una tra": scegliere una esclude le altre del gruppo
   distinct: z.boolean().default(true), // niente duplicati (es. abilità già competenti)
   when: condition.optional(),

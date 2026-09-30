@@ -1,6 +1,7 @@
 // Condizioni sugli effetti: stringhe come "wearingArmor:none && !shield".
 // Grammatica: or := and ('||' and)* ; and := not ('&&' not)* ; not := '!'? atom
 //   wearingArmor:none|light|medium|heavy|any   shield   equipped:<id|categoria>
+//   trained:light|medium|heavy|shield (addestramento nelle armature)
 //   weaponProperty:<prop>   attackType:melee|ranged   hasFeature:<id>   hasFeat:<id>
 //   level>=N   classLevel:<classe>>=N   ability:<car>>=N   (operatori: >= <= == > <)
 export type Cmp = ">=" | "<=" | "==" | ">" | "<";
@@ -9,6 +10,7 @@ export type Condition =
   | { t: "not"; item: Condition }
   | { t: "wearingArmor"; value: "none" | "light" | "medium" | "heavy" | "any" }
   | { t: "shield" }
+  | { t: "trained"; value: "light" | "medium" | "heavy" | "shield" }
   | { t: "equipped"; value: string }
   | { t: "weaponProperty"; value: string }
   | { t: "attackType"; value: "melee" | "ranged" }
@@ -34,6 +36,7 @@ function atom(s: string): Condition {
   const [, k, v] = m as unknown as [string, string, string];
   if (k === "wearingArmor" && ARMOR.includes(v)) return { t: k, value: v as never };
   if (k === "attackType" && (v === "melee" || v === "ranged")) return { t: k, value: v };
+  if (k === "trained" && ["light", "medium", "heavy", "shield"].includes(v)) return { t: k, value: v as never };
   if ((k === "equipped" || k === "weaponProperty" || k === "hasFeature" || k === "hasFeat") && ID.test(v))
     return { t: k, value: v };
   throw bad();

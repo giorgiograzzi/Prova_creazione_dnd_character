@@ -1,0 +1,50 @@
+import type { z } from "zod";
+import {
+  armorSchema, backgroundSchema, classSchema, featSchema, itemSchema, speciesSchema,
+  spellSchema, subclassSchema, termSchema, toolSchema, weaponSchema,
+} from "./schema";
+
+const KINDS = {
+  species: speciesSchema, backgrounds: backgroundSchema, classes: classSchema,
+  subclasses: subclassSchema, feats: featSchema, weapons: weaponSchema,
+  armors: armorSchema, items: itemSchema, spells: spellSchema, tools: toolSchema,
+  // glossario (tutti con termSchema)
+  skills: termSchema, languages: termSchema, sizes: termSchema, damageTypes: termSchema,
+  conditions: termSchema, weaponProperties: termSchema, masteries: termSchema, coins: termSchema,
+} as const;
+
+export type Kind = keyof typeof KINDS;
+export type Ruleset = { [K in Kind]: Map<string, z.infer<(typeof KINDS)[K]>> } & {
+  errors: string[]; // voci scartate perché non valide: l'app parte lo stesso
+};
+// Un file di dati: { "kind": "weapons", "entries": [...] }
+export interface DataFile { kind: Kind; entries: unknown[] }
+
+export function emptyRuleset(): Ruleset {
+  const rs: Record<string, unknown> = { errors: [] };
+  for (const k of Object.keys(KINDS)) rs[k] = new Map();
+  return rs as Ruleset;
+}
+
+// Costruisce il ruleset da file già letti. Tollerante: se private/ manca (nessun file)
+// o una voce è invalida, l'errore finisce in `errors` e il resto funziona.
+export function buildRuleset(files: unknown[]): Ruleset {
+  const rs = emptyRuleset();
+  for (const f of files) {
+    const file = f as Partial<DataFile>;
+    const schema = file.kind ? (KINDS[file.kind] as z.ZodType | undefined) : undefined;
+    if (!schema || !Array.isArray(file.entries)) {
+      rs.errors.push(`File dati non riconosciuto (kind=${String(file.kind)})`);
+      continue;
+    }
+    const map = rs[file.kind!] as Map<string, unknown>;
+    for (const entry of file.entries) {
+      const r = schema.safeParse(entry);
+      const eid = (entry as { id?: string })?.id ?? "?";
+      if (!r.success) rs.errors.push(`${file.kind}/${eid}: ${r.error.issues[0]?.message}`);
+      else if (map.has(eid)) rs.errors.push(`${file.kind}/${eid}: id duplicato`);
+      else map.set(eid, r.data);
+    }
+  }
+  return rs;
+}

@@ -1,8 +1,4 @@
-import { useState } from "react";
-import { MAX_LEVEL, levelFromXp, totalLevel, xpForLevel } from "../engine/levelup";
 import { setCoins, setOverride, OVERRIDE_KEYS } from "../engine/play";
-import { fmt } from "../ui/format";
-import { LevelUpDialog } from "./LevelUpDialog";
 import it from "../i18n/it.json";
 import { Button } from "../ui/xp";
 import type { TabProps } from "./types";
@@ -12,26 +8,11 @@ const t = it.play;
 const COINS = ["pp", "gp", "ep", "sp", "cp"] as const;
 const NAMES: Record<string, string> = { ac: "Classe Armatura", "hp.max": "PF massimi", initiative: "Iniziativa", "speed.walk": "Velocità", passivePerception: "Percezione passiva" };
 
-export function MiscTab({ ch, rs, d, update, onReopen }: TabProps & { onReopen: () => void }) {
-  const [lvl, setLvl] = useState(false);
-  const L = it.levelup;
-  const total = totalLevel(ch);
-  const xpLevel = ch.xp !== undefined ? levelFromXp(rs, ch.xp) : undefined;
+export function MiscTab({ ch, d, update, onReopen }: TabProps & { onReopen: () => void }) {
   const forced = OVERRIDE_KEYS.filter((k) => ch.overrides[k] !== undefined);
   return (
     <>
       {d.warnings.length > 0 && <div className="xp-banner"><b>{t.warnings}:</b> {d.warnings.join(" ")}</div>}
-      <h3>{L.progress}</h3>
-      <p>{L.total}: <b>{total}</b></p>
-      <div className="pl-row">
-        <label style={{ display: "grid", gap: 2 }}>{L.xp}
-          <input className="wz-num" style={{ width: 140 }} type="number" inputMode="numeric" min={0} value={ch.xp ?? ""} placeholder="—"
-            onChange={(e) => update((c) => { const { xp: _x, ...rest } = c; void _x; return e.target.value === "" ? rest : { ...rest, xp: Math.max(0, num(e.target.value)) }; })} />
-        </label>
-      </div>
-      {xpLevel !== undefined && <p className="xp-muted">{xpLevel >= MAX_LEVEL ? L.xpMax : fmt(L.xpHelp, { xp: ch.xp!, lv: xpLevel, next: xpForLevel(rs, xpLevel + 1) ?? "—" })}{xpLevel > total ? ` ${fmt(L.xpReady, { n: xpLevel })}` : ""}</p>}
-      <div className="xp-actions" style={{ justifyContent: "flex-start" }}><Button variant="primary" disabled={total >= MAX_LEVEL} onClick={() => setLvl(true)}>{total >= MAX_LEVEL ? L.max : L.button}</Button></div>
-      {lvl && <LevelUpDialog ch={ch} rs={rs} onApply={(c) => update(() => c)} onClose={() => setLvl(false)} />}
       <h3>{t.coins}</h3>
       <div className="pl-row">
         {COINS.map((k) => (

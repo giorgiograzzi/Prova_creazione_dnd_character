@@ -53,6 +53,10 @@ export interface Character {
   };
   overrides: Record<string, number>; // valori forzati a mano, visibili e rimovibili
   notes: string;
+  // true = creazione in corso o riaperta per modifiche (livello, scelte): la scheda giocabile non si apre; false = creazione chiusa.
+  // Assente nei salvataggi vecchi: allora vale "chiusa" se la prima classe ha i PF per livello.
+  editing?: boolean;
+  created?: boolean; // la creazione è già stata chiusa almeno una volta (equipaggiamento e monete iniziali assegnati)
   xp?: number; // punti esperienza (opzionale: molti gruppi salgono di livello a discrezione del DM)
 }
 

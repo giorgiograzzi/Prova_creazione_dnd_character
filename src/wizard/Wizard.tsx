@@ -11,6 +11,9 @@ import { AsiView, QuestionView } from "./QuestionView";
 import { ScoresStep } from "./ScoresStep";
 import { Summary } from "./Summary";
 import { applyAsiDraft, choose, finalizeCharacter, gamingSetsNeeded } from "./logic";
+import { MAX_LEVEL, levelFromXp, totalLevel, xpForLevel } from "../engine/levelup";
+import { LevelUpDialog } from "../sheet/LevelUpDialog";
+import { num } from "../sheet/util";
 
 const t = it.wizard;
 type View = StepId | "summary";
@@ -26,6 +29,7 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
   const [confirm, setConfirm] = useState<DecisionResult | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Partial<Record<Ability, number>>>>({});
   const [gaming, setGaming] = useState("");
+  const [lvl, setLvl] = useState(false);
   const idx = VIEWS.indexOf(view);
   const go = (v: View) => { setErrors([]); setView(v); };
 
@@ -50,6 +54,21 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
       return (
         <>
           <Summary ch={fin.ok ? fin.character : ch} rs={rs} />
+          <h3>{t.sum.progress}</h3>
+          <p>{it.levelup.total}: <b>{totalLevel(ch)}</b></p>
+          <div className="pl-row">
+            <label style={{ display: "grid", gap: 2 }}>{it.levelup.xp}
+              <input className="wz-num" style={{ width: 140 }} type="number" inputMode="numeric" min={0} value={ch.xp ?? ""} placeholder="—"
+                onChange={(e) => { const { xp: _x, ...rest } = ch; void _x; onChange(e.target.value === "" ? rest : { ...rest, xp: Math.max(0, num(e.target.value)) }); }} />
+            </label>
+          </div>
+          {ch.xp !== undefined && (() => { const lv = levelFromXp(rs, ch.xp); return (
+            <p className="xp-muted">{lv >= MAX_LEVEL ? it.levelup.xpMax : fmt(it.levelup.xpHelp, { xp: ch.xp, lv, next: xpForLevel(rs, lv + 1) ?? "—" })}{lv > totalLevel(ch) ? ` ${fmt(it.levelup.xpReady, { n: lv })}` : ""}</p>
+          ); })()}
+          <div className="xp-actions" style={{ justifyContent: "flex-start" }}>
+            <Button disabled={totalLevel(ch) >= MAX_LEVEL || !ch.classes.length} onClick={() => setLvl(true)}>{totalLevel(ch) >= MAX_LEVEL ? it.levelup.max : it.levelup.button}</Button>
+          </div>
+          {lvl && <LevelUpDialog ch={ch} rs={rs} onApply={onChange} onClose={() => setLvl(false)} />}
           {needGaming && (
             <Field label={t.gamingSet}>
               <select className="xp-select" value={gaming} onChange={(e) => setGaming(e.target.value)}>

@@ -71,7 +71,7 @@ export function applyAsiDraft(ch: Character, rs: Ruleset, key: string, draft: Pa
 }
 
 // ---- fine della creazione ----
-export const isFinalized = (ch: Character) => (ch.classes[0]?.hpRolls.length ?? 0) > 0;
+export const isFinalized = (ch: Character) => (ch.editing === undefined ? (ch.classes[0]?.hpRolls.length ?? 0) > 0 : !ch.editing);
 
 export function gamingSetsNeeded(ch: Character, rs: Ruleset): boolean {
   return startingEquipment(ch, rs).pending.includes("$gaming_set");
@@ -82,15 +82,22 @@ export interface Finalized { ok: boolean; errors: string[]; character: Character
 export function finalizeCharacter(ch: Character, rs: Ruleset, opts: { gaming_set?: string } = {}): Finalized {
   const prog = creationProgress(ch, rs);
   if (!prog.complete) return { ok: false, errors: prog.steps.flatMap((s) => [...s.problems, ...(s.missing.length ? [it.wizard.stepMissing.replace("{s}", it.wizard.steps[s.step])] : [])]), character: ch };
+  // Modifica di un personaggio già creato: equipaggiamento, monete, PF attuali e Dadi Vita spesi restano quelli di gioco
+  if (ch.created) {
+    const base = fillHpRolls({ ...ch, editing: false, created: true }, rs, "avg");
+    const d = computeCharacter(base, rs);
+    const total = base.classes.reduce((n, c) => n + c.level, 0);
+    return { ok: true, errors: [], character: { ...base, state: { ...base.state, hp: Math.min(base.state.hp, d.hp.max.value), hitDiceUsed: Math.min(base.state.hitDiceUsed, total) } } };
+  }
   const eq = startingEquipment(ch, rs, opts);
   const still = eq.pending.filter((p) => p !== "$gaming_set" || !opts.gaming_set);
   if (still.length) return { ok: false, errors: [`Manca una scelta per l'equipaggiamento: ${still.join(", ")}`], character: ch };
-  const base = fillHpRolls({ ...ch, inventory: eq.inventory, coins: { ...ch.coins, gp: eq.gp } }, rs, "avg");
+  const base = fillHpRolls({ ...ch, inventory: eq.inventory, coins: { ...ch.coins, gp: eq.gp }, editing: false, created: true }, rs, "avg");
   const hp = computeCharacter(base, rs).hp.max.value;
   return { ok: true, errors: [], character: { ...base, state: { ...base.state, hp, tempHp: 0, hitDiceUsed: 0 } } };
 }
-// Riapre la creazione per modificare le scelte (le PF si rifanno alla chiusura)
-export const reopenCreation = (ch: Character): Character => ({ ...ch, classes: ch.classes.map((c) => ({ ...c, hpRolls: [] })) });
+// Riapre la creazione per modificare scelte e livello: PF già tirati, equipaggiamento, monete e stato di gioco restano
+export const reopenCreation = (ch: Character): Character => ({ ...ch, editing: true, created: true });
 
 // Solo per i test: sceglie la prima opzione attiva di ogni domanda incompleta, finché non resta niente
 export function autoComplete(ch: Character, rs: Ruleset, opts: { scores?: Scores } = {}): Character {

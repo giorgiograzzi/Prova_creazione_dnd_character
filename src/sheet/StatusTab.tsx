@@ -8,8 +8,6 @@ import it from "../i18n/it.json";
 import { fmt } from "../ui/format";
 import { Button, Check, Dialog } from "../ui/xp";
 import { concentrationDc, endConcentration } from "../engine/magic";
-import { MAX_LEVEL, totalLevel } from "../engine/levelup";
-import { LevelUpDialog } from "./LevelUpDialog";
 import { RollDialog, SourcesDialog } from "./dialogs";
 import type { TabProps } from "./types";
 import { num, sign } from "./util";
@@ -24,7 +22,7 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
   const [amount, setAmount] = useState("");
   const [crit, setCrit] = useState(false);
   const [note, setNote] = useState("");
-  const [dlg, setDlg] = useState<null | { kind: "sources"; title: string; value: Sourced; key?: OverrideKey } | { kind: "init" } | { kind: "short" } | { kind: "long" } | { kind: "save" } | { kind: "level" }>(null);
+  const [dlg, setDlg] = useState<null | { kind: "sources"; title: string; value: Sourced; key?: OverrideKey } | { kind: "init" } | { kind: "short" } | { kind: "long" } | { kind: "save" }>(null);
   const s = ch.state;
   const max = d.hp.max.value;
   const dying = isDying(ch), stable = isStable(ch), dead = isDead(ch, d);
@@ -100,7 +98,6 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
       <div className="xp-actions" style={{ justifyContent: "flex-start", flexWrap: "wrap", marginTop: 12 }}>
         <Button onClick={() => setDlg({ kind: "short" })}>{t.shortRest}</Button>
         <Button onClick={() => setDlg({ kind: "long" })}>{t.longRest}</Button>
-        <Button disabled={totalLevel(ch) >= MAX_LEVEL} onClick={() => setDlg({ kind: "level" })}>{it.levelup.button} ({totalLevel(ch)})</Button>
       </div>
 
       {Object.keys(d.resources).length > 0 && (
@@ -142,7 +139,6 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
       )}
       {dlg?.kind === "init" && <RollDialog title={t.init} bonus={d.initiative} mode={d.conditions.initiativeMode.mode} modeSources={d.conditions.initiativeMode.modeSources} onClose={() => setDlg(null)} />}
       {dlg?.kind === "save" && <DeathSaveDialog onRoll={(n) => { const r = deathSave(ch, n); update(() => r.character); }} onClose={() => setDlg(null)} />}
-      {dlg?.kind === "level" && <LevelUpDialog ch={ch} rs={rs} onApply={(c) => update(() => c)} onClose={() => setDlg(null)} />}
       {dlg?.kind === "short" && <ShortRest {...{ ch, d, update }} onClose={() => setDlg(null)} />}
       {dlg?.kind === "long" && (
         <Dialog title={t.longRest} onClose={() => setDlg(null)}>

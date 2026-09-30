@@ -40,13 +40,14 @@ export function classOptions(ch: Character, rs: Ruleset): OptionState[] {
   });
 }
 
-// Punti Ferita per livello: "media" (valore fisso) o tiro; il primo livello della prima classe è sempre il massimo
+// Punti Ferita per livello: "media" (valore fisso) o tiro; il primo livello della prima classe è sempre il massimo. Quelli già scelti restano.
 export function fillHpRolls(ch: Character, rs: Ruleset, mode: "avg" | "roll", rng: () => number = Math.random): Character {
   return {
     ...ch,
     classes: ch.classes.map((cl, ci) => {
       const die = rs.classes.get(cl.classId)?.hitDie ?? 8;
-      return { ...cl, hpRolls: Array.from({ length: cl.level }, (_, i) => (ci === 0 && i === 0 ? die : mode === "avg" ? "avg" as const : 1 + Math.floor(rng() * die))) };
+      // i PF già scelti (a un livello precedente o in una modifica) restano; si riempiono solo i livelli mancanti
+      return { ...cl, hpRolls: Array.from({ length: cl.level }, (_, i) => (ci === 0 && i === 0 ? die : cl.hpRolls[i] ?? (mode === "avg" ? "avg" as const : 1 + Math.floor(rng() * die)))) };
     }),
   };
 }

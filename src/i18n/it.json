@@ -154,7 +154,8 @@
       "errors": "Non si può ancora chiudere",
       "done": "Creazione completata",
       "reopen": "Modifica la creazione",
-      "reopenConfirm": "Riaprendo la creazione, alla chiusura equipaggiamento e Punti Ferita verranno rifatti da capo. Continuare?"
+      "reopenConfirm": "Riaprendo la creazione puoi cambiare scelte e livello. I Punti Ferita già tirati, l'equipaggiamento, le monete e lo stato di gioco restano quelli attuali. Continuare?",
+      "progress": "Livello e avanzamento"
     },
     "noCreation": "Mancano le regole di creazione (file creation.json in data/private): allineamenti, array standard e acquisto a punti non sono disponibili. Sul server lancia «npm run extract:data» (servono i PDF in docs/rules), poi rifai la build.",
     "stepMissing": "Passo «{s}»: mancano delle scelte"

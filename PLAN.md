@@ -72,6 +72,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - **Fatto**: test su CA (es. "18 = Cotta di maglia 16 + Scudo 2"), attacchi per arma, tempi indossa/togli.
 
 ### 10. Motore creazione (`creation/`)
+- Legge il ruleset **effettivo** (ufficiale + homebrew attivi, vedi step 18): nessuna distinzione di codice tra le due fonti.
 - `availableOptions(stepId, character)` con `enabled` e `disabledReason`; `validateDecisions()` con reset + avviso + annulla; punteggi (tiro 4d6, array, point buy 27) con +2/+1 o +1/+1/+1 solo sui 3 ammessi, tetto 20; competenze duplicate; incantatori (trucchetti/preparati).
 - **Fatto**: test dei percorsi di esclusione/invalidazione.
 
@@ -85,6 +86,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 ### 13. Wizard di creazione (UI)
 - 7 passi in ordine ufficiale, barra avanzamento, opzioni escluse visibili e disattivate con motivo, bozza salvata, riepilogo con anteprima.
+- Ogni passo elenca anche le voci **Homebrew** attive del tipo corrispondente (specie, classe, sottoclasse, background, talenti, equipaggiamento, incantesimi) con badge e filtro "Ufficiale / Homebrew / Tutti".
 - **Fatto**: creo un personaggio completo per almeno 3 classi (una incantatrice).
 
 ### 14. Scheda giocabile
@@ -114,9 +116,22 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - `levelUp` su `classes[]` (PF media/tiro, sottoclasse al 3, ASI/talento ai livelli previsti, Dono epico, slot, maestrie...), anteprima differenze; commenti dove servirà il multiclasse (slot combinati, prerequisiti).
 - **Fatto**: **test golden**: un personaggio per ognuna delle 12 classi a liv. 1, 5, 11, 20 con valori verificati a mano sul manuale.
 
-### 18. Homebrew v1
-- Editor guidato (armi/oggetti, talenti, incantesimi semplici) con anteprima e Zod, catalogo effetti predefiniti, badge, attiva/disattiva/duplica/modifica/elimina, export/import `.json` versionato, 3-4 esempi + template commentato in `data/homebrew/`.
-- **Fatto**: creo arma, talento, incantesimo homebrew, li uso nel PG, li esporto e reimporto.
+### 18. Homebrew (creare qualunque cosa giocabile)
+- **Principio**: la sezione Homebrew può creare **ogni tipo di contenuto che entra in un personaggio giocabile**, con lo stesso schema e gli stessi effetti dei dati ufficiali. Un contenuto homebrew attivo è una voce del ruleset a tutti gli effetti: compare **nella creazione PG** (wizard, step 13), nel level-up (step 17), in Equip (step 15) e in Magie (step 16), con badge "Homebrew", senza codice speciale.
+- **Tipi creabili** (estende `homebrewPackSchema`, oggi solo `weapons, armors, items, feats, spells`):
+  - **Personaggio**: specie (con scelte interne e tratti a livello), background (3 caratteristiche, talento, abilità, strumento, kit), classi complete (tabella 1-20, PF, competenze, privilegi, scelte al 1°, equipaggiamento A/B, incantesimi), sottoclassi (per classi ufficiali o homebrew), talenti (origine/generali/stile di combattimento/dono epico), privilegi e tratti singoli (anche attivabili/a usi, step 14b).
+  - **Equipaggiamento**: armi (con proprietà e maestria), armature e scudi, strumenti, oggetti, dotazioni/kit, oggetti magici (con sintonia).
+  - **Magia**: incantesimi (livello, scuola, componenti, durata, livelli superiori) e loro aggiunta alle liste di classe.
+  - **Fondamenti**: linguaggi, abilità, tipi di danno, condizioni personalizzate.
+- **Editor guidato**: un modulo per tipo, con anteprima "come apparirà nella scheda", validazione Zod in tempo reale, **catalogo effetti predefiniti** (le `op` del file 03: modifier, grantProficiency, grantFeature/Feat/Spell, setSpeed, grantSense, grantResistance, acFormula, abilityScoreIncrease, prerequisite, risorse con ricarica...) + campo testo libero per ciò che l'app non sa calcolare (marcato "solo descrizione"). Le classi si costruiscono a **passi** (base → tabella livelli → privilegi → sottoclassi) con bozza salvata.
+- **Gestione**: badge, attiva/disattiva, duplica (anche una voce ufficiale come punto di partenza), modifica, elimina, raggruppamento in pacchetti, export/import `.json` versionato con anteprima e migrazioni (`schemaVersion`), 3-4 esempi + template commentato in `data/homebrew/`.
+- **Integrazione con la creazione PG**:
+  - Il ruleset effettivo = ufficiale + pacchetti homebrew attivi; il motore (`availableOptions`, `validateDecisions`, `computeCharacter`) lo legge da un'unica sorgente, quindi ogni voce homebrew è selezionabile dove il tipo lo prevede (specie allo step Specie, classe allo step Classe, ecc.), con prerequisiti ed esclusioni validati come per le voci ufficiali.
+  - Id homebrew con prefisso di pacchetto (`hb:<pacchetto>:<id>`) per evitare collisioni con i dati ufficiali.
+  - Un personaggio salva quali voci homebrew usa: se un pacchetto viene disattivato/eliminato/mancante, avviso con elenco delle voci coinvolte (reset + annulla, come da step 10), mai errore muto.
+  - Le voci homebrew usate da un PG viaggiano nel suo export/backup, così il personaggio si importa anche su un altro dispositivo.
+- **Sequenza**: il caricamento del ruleset con homebrew va predisposto già negli step 10-11 (un solo punto di merge in `loadRuleset`); l'editor completo arriva qui, ma il wizard (13) e il level-up (17) non devono conoscere la differenza tra ufficiale e homebrew.
+- **Fatto**: creo specie, background, classe con sottoclasse, talento, arma, oggetto magico e incantesimo homebrew; li trovo tutti nel wizard di creazione, faccio un PG completo che li usa (con livello-up), lo esporto/reimporto su profilo pulito, e disattivando un pacchetto ricevo l'avviso corretto. Test motore su merge ruleset, prefissi id, invalidazione.
 
 ### 19. PWA e Docker
 - Installabilità e offline completo, promemoria backup; `Dockerfile` multi-stage + nginx (fallback SPA, cache service worker), `docker-compose.yml`, `.env.example`. **Ti chiedo la porta prima di fissarla.**

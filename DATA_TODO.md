@@ -8,12 +8,10 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 - Niente per ora. (Le condizioni sono arrivate con la spec `05_conditions.json`, vedi in fondo.)
 
 ## 2. Da fare in uno step già in piano
-- **Step 8 (incantesimi)**
-  - `CANTRIPS` in `scripts/lib/species-rules.ts` (trucchetto o 1° livello nei lignaggi) → sostituire con i livelli veri.
-  - Gli elenchi degli incantesimi sempre preparati delle sottoclassi includono trucchetti (es. `fire_bolt`, `ray_of_frost`, `acid_splash`):
-    ora sono tutti `alwaysPrepared`, da separare per livello.
-  - I filtri delle scelte (`Choice.filter`: livello, scuola, rituale, lista) sono già nei dati: servono i dati degli incantesimi per applicarli.
-  - Arcani firma del Mago (20°), Arcanum mistico, Maestria degli incantesimi: scelte di incantesimi con ricarica particolare, non codificate.
+- **Step 16 (Magie)**
+  - Uso in gioco: slot spesi (`state.slotsUsed` c'è già), Riposo Breve/Lungo, rituali (+10 minuti, nessuno slot), regola "uno slot per turno", concentrazione.
+  - Arcani firma del Mago (20°), Arcanum mistico, Maestria degli incantesimi (18°): scelte di incantesimi con ricarica particolare, non codificate.
+  - Slot del patto: ricarica con Riposo Breve; Astuzia magica (recupero metà).
 - **Step 9 (armi e attacchi)**
   - Lancia da cavaliere: "A due mani solo se non in sella" (ora solo testo in `description`).
   - Competenze con filtro: `martial[light]` (Monaco), `martial[finesse|light]` (Ladro).
@@ -37,6 +35,10 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
   - **Condizioni con fonte** (Affascinato, Spaventato, Afferrato) e situazionali (linea di vista, distanza): il motore le mostra come testo, con la fonte se indicata in `state.conditionSources`; il tracciamento delle fonti è della scheda (step 14).
   - Un Riposo Lungo toglie 1 livello di Esaurimento (`removal` nei dati): da applicare nella scheda (step 14).
 
+## Nota sugli incantesimi (step 8)
+390 incantesimi dal riepilogo `04_Incantesimi`: i testi sono riassunti in parole nostre (non il testo del manuale). Per 10 incantesimi la risoluzione non entra nell'enum e resta in
+`resolutionRaw` (Indagare, "TS Des / Cos", "TS vario/vari"). L'estrazione verifica ogni incantesimo contro le liste per classe del PDF (nome, livello, classe, ◆ Concentrazione, ® Rituale).
+
 ## Chiuso in questa revisione
 - Id dei privilegi nei prerequisiti dei talenti (`spellcasting`, `pact_magic`, `fighting_style`): ora `validate:data` controlla ogni `hasFeature:`/`hasFeat:` in tutte le condizioni.
 - Caratteristica da incantatore delle specie: la scelta `spell_ability` arriva ai `grantSpell` (`abilityFrom`); `Derived.grantedSpells` dà caratteristica, CD e attacco
@@ -51,6 +53,9 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
   Circolo delle Stelle, Guerriero psionico; scelta di Scoperte magiche (Sapienza).
 - Terreno del Circolo della Terra: resistenza di Protezione della natura dal 10°.
 - Scurovisione "60 ft o +60" (Cacciatore delle tenebre, Ombra): effetto `sense` additivo.
+- **Step 8**: incantesimi (390) e tabelle degli slot del multiclasse; trucchetto / 1° livello dei lignaggi ora dai livelli veri (niente più elenco fisso); i trucchetti negli elenchi
+  delle sottoclassi sono `cantrip`; filtri delle scelte (`spellsMatching`, `spellChoiceCandidates`); slot per livello, multiclasse e slot del patto (`Derived.spellSlots`);
+  ogni incantesimo concesso dai dati viene verificato (esistenza e modo coerente col livello).
 - Recuperi parziali (Ira, Incanalare divinità, Forma selvatica, Recupero energie).
 - **Condizioni** (15): dati veri dalla spec `docs/rules/05_conditions.json` (PHB 2024 App. C) con effetti tipizzati, condizioni incluse, immunità,
   Esaurimento a livelli (-2 × livello ai Tiri D20, -5 ft × livello, morte al 6°) e vincoli di fuga. Il motore le applica a velocità, TS, prove, iniziativa,

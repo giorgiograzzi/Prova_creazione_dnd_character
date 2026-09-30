@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { computeCharacter } from "./index";
 import { combineMode } from "./rolls";
+import { casterLevelOf } from "./slots";
+import { spellChoiceCandidates, spellsMatching } from "../spells";
 import { evalValue } from "./formula-eval";
 import { testCharacter, testRuleset } from "./testkit";
 import type { Character } from "../types";
@@ -338,6 +340,31 @@ describe("condizioni", () => {
     const d = run({ conditions: ["boh"] });
     expect(d.conditions.active).toEqual([]);
     expect(d.speed.walk.value).toBe(30);
+  });
+});
+
+describe("incantesimi: filtri delle scelte e livello da incantatore", () => {
+  const ids = (l: { id: string }[]) => l.map((x) => x.id).sort();
+  it("filtro per livello, scuola, rituale e lista di classe", () => {
+    expect(ids(spellsMatching(rs, { level: 1, schools: ["enchantment", "divination"] }))).toEqual(["charm", "omen"]);
+    expect(ids(spellsMatching(rs, { level: 1, ritual: true }))).toEqual(["omen"]);
+    expect(ids(spellsMatching(rs, { level: 0 }, {}, "wizard"))).toEqual(["spark"]);
+    expect(ids(spellsMatching(rs, { classes: ["cleric", "bard"], level: 1 }))).toEqual(["charm", "omen", "ward"]);
+  });
+  it("classFrom: la lista arriva da un'altra scelta; senza scelta nessun risultato", () => {
+    const f = { level: 1, classFrom: "list" };
+    expect(spellsMatching(rs, f, {})).toEqual([]);
+    expect(ids(spellsMatching(rs, f, { list: ["cleric"] }))).toEqual(["omen", "ward"]);
+  });
+  it("candidati di una scelta per sorgente", () => {
+    const c = (source: string, filter?: object) => ({ id: "x", label: { it: "x" }, count: 1, distinct: true, source, ...(filter ? { filter } : {}) }) as never;
+    expect(ids(spellChoiceCandidates(rs, c("cantrips:cleric")))).toEqual(["comfort"]);
+    expect(ids(spellChoiceCandidates(rs, c("spells:wizard")))).toEqual(["bolt", "charm", "ward"]); // niente trucchetti
+    expect(ids(spellChoiceCandidates(rs, c("freespells", { level: 1, schools: ["abjuration"] })))).toEqual(["ward"]);
+    expect(spellChoiceCandidates(rs, c("skills"))).toEqual([]);
+  });
+  it("livello da incantatore combinato: pieno, metà per eccesso, un terzo per difetto", () => {
+    expect([casterLevelOf("full", 5), casterLevelOf("half", 3), casterLevelOf("half", 4), casterLevelOf("third", 8), casterLevelOf("third", 9)]).toEqual([5, 2, 2, 2, 3]);
   });
 });
 

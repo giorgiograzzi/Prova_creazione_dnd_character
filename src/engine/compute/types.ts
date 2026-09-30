@@ -52,6 +52,8 @@ export interface Derived {
   resources: Record<string, { max: Sourced; used: number; remaining: number; recharge: string }>;
   // Incantesimi concessi da specie, classi, sottoclassi, talenti (con la caratteristica risolta dalle scelte)
   grantedSpells: GrantedSpell[];
+  // Slot per livello (indice 0 = 1°): totale, spesi, rimasti; Warlock: slot del patto a parte
+  spellSlots: { casterLevel: number; slots: number[]; used: number[]; remaining: number[]; pact?: { count: number; level: number } };
   spellcasting: { classId: string; ability: Ability; dc: Sourced; attack: Sourced }[];
   carryCapacity: number;
   proficiencies: { weapons: string[]; tools: string[]; armor: string[] };

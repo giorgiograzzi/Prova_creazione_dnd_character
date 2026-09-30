@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-7 completati** (12 classi, 48 sottoclassi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Prossimo: step 8 (incantesimi). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-8 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 8 completato (incantesimi). Prossimo: step 9 (equipaggiamento e attacchi). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -63,7 +63,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - Tabelle 1-20 (PF, privilegi, colonne, slot), scelte al 1° livello, equipaggiamento A/B(/C), sottoclassi, multiclasse (solo annotato).
 - **Fatto**: come step 4 per ciascun batch.
 
-### 8. Dati cap. E — Incantesimi (fonte: file 04)
+### 8. Dati cap. E — Incantesimi (fonte: file 04) ✅
 - Elenco, livello, scuola, lista di classe, testo breve. **Serve la fonte**; fino ad allora solo gli id citati nei dati (validati come "riferimento noto").
 - **Fatto**: come step 4, oppure rinviato a tua decisione.
 

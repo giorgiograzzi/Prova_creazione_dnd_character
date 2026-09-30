@@ -22,6 +22,17 @@ const TEST_CONDITIONS = [
   cond("exhaustion", "Esaurimento", [{ type: "d20_test_modifier", formula: "-2 * exhaustion_level" }, { type: "speed_modifier", formula: "-5 * exhaustion_level" }, { type: "death_at_level", level: 6 }], { stackable: true }),
 ];
 
+const sp = (id: string, level: number, school: string, classes: string[], extra: object = {}) => ({
+  id, name: t(id), level, school, classes, castingTime: { unit: "action" }, range: "60 ft",
+  components: { v: true, s: true, m: false }, duration: "Istantanea", resolution: "none", summary: "riassunto", ...extra,
+});
+// Mini catalogo di prova (parole nostre)
+const TEST_SPELLS = [
+  sp("spark", 0, "evocation", ["wizard", "sorcerer"]), sp("comfort", 0, "abjuration", ["cleric", "bard"]),
+  sp("charm", 1, "enchantment", ["bard", "wizard"]), sp("ward", 1, "abjuration", ["cleric", "wizard"]),
+  sp("omen", 1, "divination", ["cleric", "bard"], { ritual: true }), sp("bolt", 3, "evocation", ["wizard"]),
+];
+
 // Dati minimi in memoria (i veri dati arrivano dagli step 4-7)
 export function testRuleset(): Ruleset {
   const cls = (id: string, hitDie: number, extra: object = {}) => ({
@@ -68,6 +79,7 @@ export function testRuleset(): Ruleset {
       feat("fleet", [{ op: "speedBonus", value: 10 }]),
     ] },
     { kind: "conditions", entries: TEST_CONDITIONS },
+    { kind: "spells", entries: TEST_SPELLS },
     { kind: "armors", entries: [
       armor("leather", "light", 11, null),
       armor("scale_mail", "medium", 14, 2, { stealthDisadvantage: true }),

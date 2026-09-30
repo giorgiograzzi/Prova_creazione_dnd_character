@@ -5,3 +5,4 @@ export * from "./ruleset";
 export type * from "./types";
 export * from "./compute";
 export * from "./validate";
+export * from "./spells";

@@ -207,8 +207,16 @@ export const spellSchema = z.object({
     "save_str", "save_dex", "save_con", "save_int", "save_wis", "save_cha",
     "attack_melee", "attack_ranged", "none",
   ]),
+  resolutionRaw: z.string().optional(), // testo originale ("TS Des / Cos", "TS vario"...) quando l'enum non basta
   summary: z.string(),
   higherLevels: z.string().optional(),
+});
+
+// Tabelle degli slot per il multiclasse (livello da incantatore combinato → slot di 1°, 2°, ...)
+export const slotTableSchema = z.object({
+  id, name: text, origin: z.enum(["srd", "private", "homebrew"]).default("private"),
+  // righe per livello (1-20, per il terzo incantatore dal 3°): i livelli assenti hanno riga vuota
+  slots: z.array(z.array(z.number().int())).length(20),
 });
 
 // Homebrew: come i dati, ma in un pacchetto .json versionato

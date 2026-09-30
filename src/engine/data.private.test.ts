@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { buildRuleset } from "./ruleset";
 import { checkReferences } from "./validate";
 import { buildCtx, computeCharacter, evalValue } from "./compute";
+import { spellChoiceCandidates } from "./spells";
 import { testCharacter } from "./compute/testkit";
 
 // Questi test girano solo dove esiste data/private (non tracciata): altrove vengono saltati.
@@ -522,6 +523,100 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
       const d = run({ conditions: ["poisoned", "deafened"] });
       expect(d.skills.perception.mode).toBe("disadvantage");
       expect(d.conditions.autoFailChecks.join()).toMatch(/udito/);
+    });
+  });
+
+  describe("incantesimi (step 8)", () => {
+    const R = fullRuleset();
+    const cls = (classId: string, level: number, extra: object = {}) => ({ classId, level, hpRolls: [], ...extra });
+    const mk = (classes: ReturnType<typeof cls>[], over: object = {}) => testCharacter({ classes, ...over });
+    const slots = (ch: ReturnType<typeof mk>) => computeCharacter(ch, R).spellSlots;
+
+    it("390 incantesimi: 34 trucchetti, 64 di 1°... 16 di 9°; 159 a Concentrazione, 31 rituali", () => {
+      const by = (l: number) => [...R.spells.values()].filter((x) => x.level === l).length;
+      expect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(by)).toEqual([34, 64, 62, 52, 41, 48, 34, 21, 18, 16]);
+      expect([...R.spells.values()].filter((x) => x.concentration)).toHaveLength(159);
+      expect([...R.spells.values()].filter((x) => x.ritual)).toHaveLength(31);
+    });
+    it("liste per classe (Paladino e Ranger senza trucchetti)", () => {
+      const n = (c: string, lv?: number) => [...R.spells.values()].filter((x) => x.classes.includes(c as never) && (lv === undefined || x.level === lv)).length;
+      expect(["bard", "cleric", "druid", "paladin", "ranger", "sorcerer", "warlock", "wizard"].map((c) => n(c))).toEqual([139, 117, 135, 51, 61, 149, 88, 241]);
+      expect([n("paladin", 0), n("ranger", 0), n("wizard", 0)]).toEqual([0, 0, 20]);
+    });
+    it("schede: Palla di fuoco, Identificare (costo), Scudo (reazione), Controincantesimo", () => {
+      const f = R.spells.get("fireball")!;
+      expect([f.level, f.school, f.resolution, f.castingTime.unit, f.range]).toEqual([3, "evocation", "save_dex", "action", "150 ft"]);
+      expect(f.name).toEqual({ it: "Palla di fuoco", en: "Fireball" });
+      expect(R.spells.get("identify")!).toMatchObject({ ritual: true, castingTime: { unit: "minute", amount: 1 }, components: { materialCost: 100, materialConsumed: false } });
+      expect(R.spells.get("shield")!.castingTime).toMatchObject({ unit: "reaction", trigger: expect.stringContaining("colpito") });
+      expect(R.spells.get("revivify")!.components).toMatchObject({ materialCost: 300, materialConsumed: true });
+      expect(R.spells.get("chill_touch")!).toMatchObject({ level: 0, resolution: "attack_melee" });
+      expect(R.spells.get("acid_splash")!.higherLevels).toMatch(/2d6/);
+    });
+    it("ogni incantesimo concesso dai dati esiste, con il modo giusto (trucchetto solo al livello 0)", () => {
+      expect(checkReferences(R)).toEqual([]);
+      const sub = R.subclasses.get("land")!.choices[0]!.options![0]!.effects.filter((e) => e.op === "grantSpell");
+      expect(sub.find((e) => e.op === "grantSpell" && e.spell === "fire_bolt")).toMatchObject({ mode: "cantrip" });
+      expect(sub.find((e) => e.op === "grantSpell" && e.spell === "blur")).toMatchObject({ mode: "alwaysPrepared" });
+    });
+    it("lignaggi della specie: trucchetti a volontà, incantesimi di 1°+ con lancio gratuito", () => {
+      const sp = (species: string, dec: object) => computeCharacter(mk([cls("fighter", 5)], { speciesId: species, decisions: dec }), R).grantedSpells;
+      const gnome = sp("gnome", { gnomish_lineage: ["forest_gnome"], spell_ability: ["int"] });
+      expect(gnome.find((x) => x.spell === "minor_illusion")).toMatchObject({ mode: "cantrip" });
+      expect(gnome.find((x) => x.spell === "speak_with_animals")).toMatchObject({ mode: "alwaysPrepared" });
+      const inf = sp("tiefling", { fiendish_legacy: ["infernal"], spell_ability: ["cha"] });
+      expect(inf.find((x) => x.spell === "fire_bolt")).toMatchObject({ mode: "cantrip" });
+      expect(inf.find((x) => x.spell === "fire_bolt")!.freeCast).toBeUndefined();
+      expect(inf.find((x) => x.spell === "hellish_rebuke")).toMatchObject({ mode: "alwaysPrepared", freeCast: { recharge: "long_rest" } });
+    });
+    it("candidati delle scelte: liste di classe, Iniziato alla magia, Toccato dai folletti, Incantatore rituale", () => {
+      const choice = (featId: string, id: string) => R.feats.get(featId)!.choices.find((c) => c.id === id)!;
+      const ids = (l: { id: string }[]) => l.map((x) => x.id);
+      const cant = spellChoiceCandidates(R, R.classes.get("bard")!.choices.find((c) => c.id === "bard_cantrips")!);
+      expect(cant).toHaveLength(13);
+      expect(cant.every((x) => x.level === 0 && x.classes.includes("bard"))).toBe(true);
+      expect(spellChoiceCandidates(R, choice("magic_initiate", "magic_initiate_cantrips"), {})).toEqual([]); // lista non ancora scelta
+      const cl = spellChoiceCandidates(R, choice("magic_initiate", "magic_initiate_cantrips"), { magic_initiate_list: ["cleric"] });
+      expect(ids(cl)).toContain("guidance");
+      expect(ids(cl)).not.toContain("fire_bolt");
+      const fey = spellChoiceCandidates(R, choice("fey_touched", "fey_touched_spell"));
+      expect(fey.every((x) => x.level === 1 && ["enchantment", "divination"].includes(x.school))).toBe(true);
+      expect(ids(fey)).toEqual(expect.arrayContaining(["charm_person", "command", "detect_magic"]));
+      expect(ids(fey)).not.toContain("shield");
+      const rit = spellChoiceCandidates(R, choice("ritual_caster", "ritual_caster_spells"));
+      expect(ids(rit).sort()).toEqual(["alarm", "comprehend_languages", "detect_magic", "detect_poison_and_disease", "find_familiar", "identify", "illusory_script", "purify_food_and_drink", "speak_with_animals", "tensers_floating_disk", "unseen_servant"]);
+      const lore = spellChoiceCandidates(R, R.subclasses.get("lore")!.features.find((f) => f.id === "magical_discoveries")!.choices[0]!);
+      expect(ids(lore)).toContain("cure_wounds");
+      expect(ids(lore)).toContain("fireball");
+      expect(ids(lore)).not.toContain("eldritch_blast"); // solo Warlock: fuori dalle liste ammesse (Chierico, Druido, Mago)
+    });
+    it("slot con una sola classe: tabella della classe (o della sottoclasse per i terzi incantatori)", () => {
+      expect(slots(mk([cls("cleric", 5)]))).toMatchObject({ slots: [4, 3, 2], casterLevel: 5 });
+      expect(slots(mk([cls("paladin", 5)])).slots).toEqual([4, 2]);
+      expect(slots(mk([cls("fighter", 3, { subclassId: "eldritch_knight" })])).slots).toEqual([2]);
+      expect(slots(mk([cls("fighter", 3)])).slots).toEqual([]);
+      expect(slots(mk([cls("barbarian", 20)]))).toMatchObject({ slots: [], casterLevel: 0 });
+    });
+    it("slot in multiclasse: livello combinato e tabella dell'incantatore completo", () => {
+      expect(slots(mk([cls("wizard", 3), cls("cleric", 2)]))).toMatchObject({ casterLevel: 5, slots: [4, 3, 2] });
+      expect(slots(mk([cls("paladin", 4), cls("ranger", 3)]))).toMatchObject({ casterLevel: 4, slots: [4, 3] }); // 2 + 2
+      expect(slots(mk([cls("fighter", 9, { subclassId: "eldritch_knight" }), cls("wizard", 1)]))).toMatchObject({ casterLevel: 4, slots: [4, 3] }); // 3 + 1
+      expect(slots(mk([cls("wizard", 20), cls("bard", 1)])).slots).toEqual([4, 3, 3, 3, 3, 2, 2, 1, 1]); // 21 → tetto 20
+    });
+    it("slot del patto separati dal resto; slot spesi", () => {
+      expect(slots(mk([cls("warlock", 11)]))).toMatchObject({ slots: [], pact: { count: 3, level: 5 } });
+      const both = slots(mk([cls("wizard", 5), cls("warlock", 3)]));
+      expect(both).toMatchObject({ slots: [4, 3, 2], pact: { count: 2, level: 2 } });
+      const spent = computeCharacter(mk([cls("wizard", 5)], { state: { ...testCharacter().state, slotsUsed: { 1: 2, 3: 5 } } }), R).spellSlots;
+      expect(spent.used).toEqual([2, 0, 2]); // non si spendono più slot di quanti ce ne sono
+      expect(spent.remaining).toEqual([2, 3, 0]);
+    });
+    it("tabelle degli slot del multiclasse presenti e coerenti con le classi", () => {
+      const full = R.slotTables.get("full_caster")!.slots;
+      for (const id of ["wizard", "bard", "cleric", "druid", "sorcerer"]) expect(R.classes.get(id)!.spellSlots, id).toEqual(full);
+      const half = R.slotTables.get("half_caster")!.slots;
+      for (const id of ["paladin", "ranger"]) expect(R.classes.get(id)!.spellSlots, id).toEqual(half);
+      expect(R.slotTables.get("third_caster")!.slots.slice(2)).toEqual(R.subclasses.get("eldritch_knight")!.spellSlots!.slice(2));
     });
   });
 });

@@ -4,6 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { CLASS_RULES, type FeatureRule, type OptionList, type Table } from "./lib/class-rules";
 import { equipment, itemNames, readKind } from "./lib/equipment";
 import { bodyLines, pdfPages } from "./lib/pdf-text";
+import { fixSpellModes } from "./lib/spells";
 
 const SRC = process.env.RULES_DIR ?? "docs/rules";
 const OUT = "data/private";
@@ -368,5 +369,7 @@ function merge(kind: string, fresh: Json[]) {
   writeFileSync(path, JSON.stringify({ kind, entries: all }, null, 1) + "\n");
   console.log(`${kind.padEnd(17)} ${all.length} (${fresh.length} aggiornate)`);
 }
+fixSpellModes(classes, "classes");
+fixSpellModes(subclasses, "subclasses");
 merge("classes", classes);
 merge("subclasses", subclasses);

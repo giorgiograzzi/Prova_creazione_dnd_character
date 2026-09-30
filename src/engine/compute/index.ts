@@ -4,3 +4,4 @@ export { evalValue, abilityMod } from "./formula-eval";
 export { evalCondition, holds } from "./condition-eval";
 export { combineMode } from "./rolls";
 export type { Derived } from "./types";
+export { computeSlots, casterLevelOf } from "./slots";

@@ -136,3 +136,11 @@ Convenzioni:
   combina Vantaggio/Svantaggio (si annullano) e restituisce `Derived.conditions`. Applicazioni: bonus d20 di TS, prove e iniziativa (Esaurimento; la Percezione passiva no),
   modi di TS e prove, `autoFail` dei TS, Velocità (0 o -5 ft × livello), resistenza a tutti i danni (`"all"`), azioni negate.
 - Un effetto con `when`/`unless` (fonte in vista, attaccante entro 5 ft, ...) non è calcolabile: va in `conditions.situational` come testo, con la fonte da `state.conditionSources`.
+
+## Incantesimi (step 8)
+- `spells.json` (390) e `slotTables.json` (`full_caster` = tabella multiclasse, `half_caster`, `third_caster`) da `scripts/extract-spells.ts`, che si ferma se le liste per classe del PDF non coincidono.
+  Scuole: `Evocazione`→`conjuration`, `Invocazione`→`evocation` (come nel PDF). Costi dei materiali in mo (`materialCost`), `materialConsumed`.
+- `scripts/lib/spells.ts` `fixSpellModes`: i `grantSpell` dei dati devono riferirsi a incantesimi esistenti; trucchetto ⇔ livello 0. `extract:data` estrae gli incantesimi prima di specie, classi e talenti.
+- `src/engine/spells.ts`: `spellsMatching(rs, filter, decisions, list)` e `spellChoiceCandidates(rs, choice, decisions)` per le scelte (`cantrips:<lista>`, `spells:<lista>`, `freespells`, `alwaysspells`, `filter`).
+- `compute/slots.ts` → `Derived.spellSlots {casterLevel, slots, used, remaining, pact?}`: una sola classe incantatrice = la sua tabella; più classi = tabella dell'incantatore completo sul livello combinato
+  (pieno + metà per eccesso + un terzo per difetto); Warlock a parte (`pactSlots`).

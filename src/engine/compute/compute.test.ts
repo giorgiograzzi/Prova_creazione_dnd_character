@@ -234,6 +234,42 @@ describe("scelte con source e tetto dei Doni epici", () => {
   });
 });
 
+describe("meccanismi nuovi (senza dati privati)", () => {
+  const fx = (over: object) => ({ id: "t", name: { it: "T" }, description: "", origin: "private", needsReview: false, category: "general", prerequisites: [], repeatable: false, effects: [], choices: [], ...over }) as never;
+  it("upgradeToExpertise: competenza, o Maestria se già competente", () => {
+    const rs2 = testRuleset();
+    rs2.feats.set("km", fx({ id: "km", effects: [
+      { op: "grantSkillProficiency", skills: ["athletics"], expertise: false, upgradeToExpertise: true },
+      { op: "grantSkillProficiency", skills: ["arcana"], expertise: false, upgradeToExpertise: true }] }));
+    const d = computeCharacter(testCharacter({ asi: asiStd, feats: [{ featId: "km" }] }), rs2); // Atletica dal background
+    expect([d.skills.athletics.proficiency, d.skills.arcana.proficiency]).toEqual(["expertise", "proficient"]);
+  });
+  it("senso additivo: si somma a quello che hai già", () => {
+    const rs2 = testRuleset();
+    rs2.feats.set("dv", fx({ id: "dv", effects: [{ op: "sense", kind: "darkvision", range: 60, additive: true }] }));
+    expect(computeCharacter(testCharacter({ asi: asiStd, feats: [{ featId: "dv" }] }), rs2).senses.darkvision?.value).toBe(60);
+    expect(computeCharacter(testCharacter({ asi: asiStd, speciesId: "dwarf", feats: [{ featId: "dv" }] }), rs2).senses.darkvision?.value).toBe(180);
+  });
+  it("grantSpell con abilityFrom: la caratteristica arriva dalla scelta; CD e attacco calcolati", () => {
+    const rs2 = testRuleset();
+    rs2.feats.set("sp", fx({ id: "sp", effects: [{ op: "grantSpell", spell: "light", mode: "cantrip", abilityFrom: "sp_ab" }],
+      choices: [{ id: "sp_ab", label: { it: "C" }, count: 1, distinct: true, options: [{ id: "wis", name: { it: "Sag" }, effects: [] }] }] }));
+    const ch = testCharacter({ asi: asiStd, baseScores: { str: 10, dex: 10, con: 10, int: 10, wis: 16, cha: 10 }, feats: [{ featId: "sp", choices: { sp_ab: ["wis"] } }] });
+    expect(computeCharacter(ch, rs2).grantedSpells[0]).toMatchObject({ spell: "light", ability: "wis", dc: 8 + 3 + 2, attack: 5 });
+    expect(computeCharacter(testCharacter({ asi: asiStd, feats: [{ featId: "sp" }] }), rs2).grantedSpells[0]!.ability).toBeUndefined();
+  });
+  it("talento ripetibile: scelte separate per acquisizione; non ripetibile non si duplica", () => {
+    const rs2 = testRuleset();
+    rs2.feats.set("rs", fx({ id: "rs", repeatable: true, choices: [{ id: "rs_c", label: { it: "S" }, count: 1, distinct: true,
+      options: ["str", "dex"].map((a) => ({ id: a, name: { it: a }, effects: [{ op: "grantSaveProficiency", abilities: [a] }] })) }] }));
+    const d = computeCharacter(testCharacter({ asi: asiStd, classes: [{ classId: "wizard", level: 1, hpRolls: [] }],
+      feats: [{ featId: "rs", choices: { rs_c: ["str"] } }, { featId: "rs", choices: { rs_c: ["dex"] } }] }), rs2);
+    expect(d.saves.str.proficient && d.saves.dex.proficient).toBe(true);
+    const one = computeCharacter(testCharacter({ asi: asiStd, feats: [{ featId: "alert" }, { featId: "alert" }] }), rs2).initiative.value;
+    expect(one).toBe(2 + 2); // Des +2, Allerta una sola volta
+  });
+});
+
 describe("formule", () => {
   it("valutazione con arrotondamento per difetto", () => {
     const c = { pb: 3, level: 5, classLevels: {}, scores: { str: 8, dex: 10, con: 10, int: 10, wis: 8, cha: 10 } };

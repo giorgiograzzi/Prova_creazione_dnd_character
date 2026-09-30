@@ -15,7 +15,7 @@ const e = <T extends string, S extends z.ZodRawShape>(op: T, shape: S) =>
 // Le scelte del giocatore si referenziano con "$choiceId" al posto del valore.
 export const effectSchema = z.discriminatedUnion("op", [
   e("resistance", { types: z.array(damageType).min(1) }),
-  e("sense", { kind: senseKind, range: value }),
+  e("sense", { kind: senseKind, range: value, additive: z.boolean().default(false) }), // additive: se hai già il senso, si somma (es. "Scurovisione 60 ft o +60")
   e("setSpeed", { mode: z.enum(["walk", "fly", "swim", "climb"]).default("walk"), value }),
   e("speedBonus", { value }),
   e("hpMaxPerLevel", { value, classId: id.optional() }),
@@ -30,7 +30,10 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("critRange", { min: z.number().int().min(2).max(20) }),
   e("unarmedDie", { die: z.union([z.string().regex(/^\d*d\d+$/), z.number()]) }),
   e("extraCantrips", { count: z.number().int().min(1) }),
-  e("grantSkillProficiency", { skills: z.array(skill).min(1), expertise: z.boolean().default(false) }),
+  e("grantSkillProficiency", {
+    skills: z.array(skill).min(1), expertise: z.boolean().default(false),
+    upgradeToExpertise: z.boolean().default(false), // se sei già competente, diventa Maestria (Mente acuta, Osservatore)
+  }),
   e("grantSaveProficiency", { abilities: z.array(ability).min(1) }),
   e("grantWeaponProficiency", { weapons: z.array(z.string()).min(1) }), // id o categoria
   e("grantToolProficiency", { tools: z.array(z.string()).min(1) }),
@@ -41,6 +44,7 @@ export const effectSchema = z.discriminatedUnion("op", [
   }),
   e("grantSpell", {
     spell: id, mode: z.enum(["cantrip", "alwaysPrepared", "known"]), ability: ability.optional(),
+    abilityFrom: id.optional(), // id di una scelta (options di caratteristiche) che fissa la caratteristica da incantatore
     freeCast: z.object({ uses: value, recharge }).optional(),
   }),
   e("grantFeature", { feature: id }),

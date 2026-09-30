@@ -6,6 +6,12 @@ export type RollMode = "advantage" | "disadvantage" | "normal";
 export interface Roll { bonus: Sourced; mode: RollMode; modeSources: string[] }
 export type Proficiency = "none" | "half" | "proficient" | "expertise";
 
+export interface GrantedSpell {
+  spell: string; mode: "cantrip" | "alwaysPrepared" | "known"; source: string;
+  ability?: Ability; dc?: number; attack?: number;
+  freeCast?: { uses: number; recharge: string };
+}
+
 export interface Derived {
   level: number;
   proficiencyBonus: Sourced;
@@ -21,6 +27,8 @@ export interface Derived {
   senses: Partial<Record<"darkvision" | "blindsight" | "truesight", Sourced>>;
   resistances: string[];
   resources: Record<string, { max: Sourced; used: number; remaining: number; recharge: string }>;
+  // Incantesimi concessi da specie, classi, sottoclassi, talenti (con la caratteristica risolta dalle scelte)
+  grantedSpells: GrantedSpell[];
   spellcasting: { classId: string; ability: Ability; dc: Sourced; attack: Sourced }[];
   carryCapacity: number;
   proficiencies: { weapons: string[]; tools: string[]; armor: string[] };

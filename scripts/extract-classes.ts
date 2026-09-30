@@ -315,6 +315,22 @@ heads.forEach((h, hi) => {
     }
     const sf = features(sb.slice(iH + 1, fend).filter((l) => !isHeader(l)).join(" "), `${id}/${sid}`);
     applyRules(sf, rule.subclassRules?.[sid], { ...table, ...(st?.table ?? {}) }); // le regole vedono anche la tabella della sottoclasse
+    // scelta "abilità della lista di classe" → le abilità della classe (o qualsiasi)
+    for (const f of sf) for (const c of f.choices) {
+      if (c.source !== "classSkills") continue;
+      if (skillList === "any") c.source = "skills";
+      else { delete c.source; c.options = skillList.map((sk2) => ({ id: sk2, name: { it: sk2 }, effects: [{ op: "grantSkillProficiency", skills: [sk2] }] })); }
+    }
+    // Circolo della Terra: la resistenza di "Protezione della natura" dipende dal terreno scelto
+    const ward = sf.find((f) => f.id === "natures_ward");
+    const terrChoice = subChoices.find((c) => c.id === `${sid}_terrain`);
+    if (ward && terrChoice) {
+      const TERR: Record<string, string> = { Arido: "arid", Polare: "polar", Temperato: "temperate", Tropicale: "tropical" };
+      const DMG: Record<string, string> = { fuoco: "fire", freddo: "cold", fulmine: "lightning", veleno: "poison" };
+      const found = [...ward.description.matchAll(/(Arido|Polare|Temperato|Tropicale) (fuoco|freddo|fulmine|veleno)/g)];
+      if (found.length !== 4) throw new Error(`${id}/${sid}: resistenze per terreno non riconosciute in natures_ward`);
+      for (const m of found) terrChoice.options.find((o: Json) => o.id === TERR[m[1]!])!.effects.push({ op: "resistance", types: [DMG[m[2]!]], when: `classLevel:${id}>=${ward.level}` });
+    }
     if (iMan >= 0) {
       const ol: OptionList = { heading: "Manovre", choiceId: `${sid}_maneuvers`, label: "Manovre", countFrom: "manovre_note", kind: "plain" };
       const txt = sb.slice(iMan + 1).filter((l) => !/^Manovra\s{3}/.test(l)).join(" ");

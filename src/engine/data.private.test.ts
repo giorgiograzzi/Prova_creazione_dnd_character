@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { buildRuleset } from "./ruleset";
 import { checkReferences } from "./validate";
-import { buildCtx, computeCharacter } from "./compute";
+import { buildCtx, computeCharacter, evalValue } from "./compute";
 import { testCharacter } from "./compute/testkit";
 
 // Questi test girano solo dove esiste data/private (non tracciata): altrove vengono saltati.
@@ -337,6 +337,116 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
     it("classi con lista di incantesimi: colonne trucchetti/preparati (tranne Paladino e Ranger)", () => {
       for (const id of ["bard", "cleric", "druid", "sorcerer", "warlock", "wizard"]) expect(R.classes.get(id)!.table.trucchetti, id).toBeDefined();
       for (const id of ["paladin", "ranger"]) expect(R.classes.get(id)!.table.trucchetti, id).toBeUndefined();
+    });
+  });
+
+  describe("correzioni del DATA_TODO", () => {
+    const R = fullRuleset();
+    const cls = (classId: string, level: number, extra: object = {}) => ({ classId, level, hpRolls: [], ...extra });
+    const mk = (classes: ReturnType<typeof cls>[], over: object = {}) => testCharacter({ classes, ...over });
+    const spellsOf = (ch: ReturnType<typeof mk>) => computeCharacter(ch, R).grantedSpells;
+
+    it("caratteristica da incantatore della specie: la scelta spell_ability arriva agli incantesimi concessi", () => {
+      const drow = spellsOf(mk([cls("fighter", 3)], { speciesId: "elf", decisions: { elven_lineage: ["drow"], spell_ability: ["wis"] } }));
+      const dl = drow.find((x) => x.spell === "dancing_lights")!;
+      expect(dl.ability).toBe("wis");
+      expect(dl.dc).toBe(8 + 0 + 2); // Sag 10 (+0), competenza +2
+      expect(drow.find((x) => x.spell === "faerie_fire")).toMatchObject({ ability: "wis", freeCast: { uses: 1, recharge: "long_rest" } });
+      expect(spellsOf(mk([cls("fighter", 1)], { speciesId: "elf", decisions: { elven_lineage: ["drow"] } }))[0]!.ability).toBeUndefined(); // scelta non ancora fatta
+      const t = spellsOf(mk([cls("fighter", 1)], { speciesId: "tiefling", decisions: { spell_ability: ["cha"], fiendish_legacy: ["infernal"] } }));
+      expect(t.find((x) => x.spell === "thaumaturgy")!.ability).toBe("cha");
+      const g = spellsOf(mk([cls("fighter", 1)], { speciesId: "gnome", decisions: { gnomish_lineage: ["forest_gnome"], spell_ability: ["int"] } }));
+      expect(g.find((x) => x.spell === "speak_with_animals")!.freeCast).toEqual({ uses: 2, recharge: "long_rest" }); // bonus competenza
+    });
+    it("incantesimi di classe e sottoclasse usano la caratteristica della classe", () => {
+      const life = spellsOf(mk([cls("cleric", 3, { subclassId: "life" })], { baseScores: { str: 10, dex: 10, con: 10, int: 10, wis: 16, cha: 10 } }));
+      expect(life.find((x) => x.spell === "bless")).toMatchObject({ ability: "wis", dc: 8 + 3 + 2, attack: 5 });
+    });
+    it("Iniziato alla magia: caratteristica dalla scelta; due acquisizioni con liste diverse", () => {
+      const ch = mk([cls("fighter", 1)], { feats: [
+        { featId: "magic_initiate", choices: { magic_initiate_ability: ["wis"], magic_initiate_cantrips: ["guidance", "resistance"], magic_initiate_spell: ["cure_wounds"] } },
+        { featId: "magic_initiate", choices: { magic_initiate_ability: ["int"], magic_initiate_cantrips: ["light", "mage_hand"], magic_initiate_spell: ["sleep"] } },
+      ] });
+      const sp = spellsOf(ch);
+      expect(sp.find((x) => x.spell === "guidance")!.ability).toBe("wis");
+      expect(sp.find((x) => x.spell === "mage_hand")!.ability).toBe("int");
+      expect(sp.find((x) => x.spell === "sleep")).toMatchObject({ ability: "int", mode: "alwaysPrepared", freeCast: { uses: 1, recharge: "long_rest" } });
+      expect(sp.filter((x) => x.mode === "cantrip")).toHaveLength(4);
+    });
+    it("Resiliente ripetuto: una scelta per acquisizione (For e Sag)", () => {
+      const d = computeCharacter(mk([cls("fighter", 8)], { baseScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+        feats: [{ featId: "resilient", choices: { resilient_save: ["wis"] } }, { featId: "resilient", choices: { resilient_save: ["cha"] } }] }), R);
+      expect([d.saves.wis.proficient, d.saves.cha.proficient, d.saves.int.proficient]).toEqual([true, true, false]);
+    });
+    it("un talento non ripetibile non si somma (background + talento scelto)", () => {
+      const once = computeCharacter(mk([cls("fighter", 1)], { backgroundId: "criminal" }), R).initiative.value; // Allerta dal background
+      const twice = computeCharacter(mk([cls("fighter", 1)], { backgroundId: "criminal", feats: [{ featId: "alert" }] }), R).initiative.value;
+      expect(twice).toBe(once);
+    });
+    it("Mente acuta / Osservatore: Maestria se sei già competente", () => {
+      const sage = { backgroundId: "sage" }; // Arcano e Storia dal background
+      const km = (pick: string) => computeCharacter(mk([cls("fighter", 4)], { ...sage, feats: [{ featId: "keen_mind", choices: { keen_mind_skill: [pick] } }] }), R);
+      expect(km("history").skills.history.proficiency).toBe("expertise");
+      expect(km("nature").skills.nature.proficiency).toBe("proficient");
+    });
+    it("Guerriero benedetto/druidico: 2 trucchetti con Car/Sag, in alternativa allo Stile", () => {
+      const p = R.classes.get("paladin")!.features.find((f) => f.id === "fighting_style")!;
+      expect(p.choices.map((c) => [c.id, c.group])).toEqual([["paladin_fighting_style", "paladin_style"], ["paladin_blessed_warrior", "paladin_style"]]);
+      const bw = spellsOf(mk([cls("paladin", 2)], { decisions: { paladin_blessed_warrior: ["guidance", "sacred_flame"] } }));
+      expect(bw.filter((x) => x.mode === "cantrip").map((x) => [x.spell, x.ability])).toEqual([["guidance", "cha"], ["sacred_flame", "cha"]]);
+      const dw = spellsOf(mk([cls("ranger", 2)], { decisions: { ranger_druidic_warrior: ["druidcraft"] } }));
+      expect(dw.find((x) => x.spell === "druidcraft")!.ability).toBe("wis");
+    });
+    it("Libro del Mago: 6 incantesimi al 1°, +2 a livello (formula)", () => {
+      const c = R.classes.get("wizard")!.features.find((f) => f.id === "spellcasting")!.choices[0]!;
+      const n = (l: number) => evalValue(c.countFormula!, { pb: 2, level: l, classLevels: { wizard: l }, scores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 } });
+      expect([n(1), n(2), n(5)]).toEqual([6, 8, 14]);
+    });
+    it("Studente della guerra: l'abilità è dalla lista del Guerriero", () => {
+      const c = R.subclasses.get("battle_master")!.features.find((f) => f.id === "student_of_war")!.choices.find((k) => k.id === "battle_master_skill")!;
+      expect(c.options!.map((o) => o.id).sort()).toEqual([...(R.classes.get("fighter")!.skillChoices.from as string[])].sort());
+    });
+    it("incantesimi sempre preparati scritti solo a parole: Fascino, Antichi Grandi, Abiurista, Illusionista, Stelle, Guerriero psionico", () => {
+      const has = (c: ReturnType<typeof cls>, spell: string) => spellsOf(mk([c])).find((x) => x.spell === spell);
+      expect(has(cls("bard", 3, { subclassId: "glamour" }), "mirror_image")).toBeDefined();
+      expect(has(cls("bard", 5, { subclassId: "glamour" }), "command")).toBeUndefined();
+      expect(has(cls("bard", 6, { subclassId: "glamour" }), "command")!.freeCast).toEqual({ uses: 1, recharge: "long_rest" });
+      expect(has(cls("bard", 20), "power_word_kill")).toBeDefined();
+      expect(has(cls("warlock", 10, { subclassId: "great_old_one" }), "hex")).toBeDefined();
+      expect(has(cls("wizard", 10, { subclassId: "abjurer" }), "counterspell")).toBeDefined();
+      expect(has(cls("wizard", 6, { subclassId: "illusionist" }), "summon_fey")!.freeCast).toBeDefined();
+      expect(has(cls("druid", 3, { subclassId: "stars" }), "guiding_bolt")).toBeDefined();
+      expect(has(cls("fighter", 18, { subclassId: "psi_warrior" }), "telekinesis")).toMatchObject({ ability: "int" });
+      expect(has(cls("bard", 6, { subclassId: "lore" }), "hex")).toBeUndefined();
+    });
+    it("Circolo della Terra: resistenza dal 10° secondo il terreno scelto", () => {
+      const r = (l: number, t: string) => computeCharacter(mk([cls("druid", l, { subclassId: "land" })], { decisions: { land_terrain: [t] } }), R).resistances;
+      expect(r(9, "arid")).toEqual([]);
+      expect(r(10, "arid")).toEqual(["fire"]);
+      expect(r(10, "polar")).toEqual(["cold"]);
+      expect(r(10, "temperate")).toEqual(["lightning"]);
+      expect(r(10, "tropical")).toEqual(["poison"]);
+    });
+    it("Scurovisione additiva: 60 ft, oppure +60 se l'hai già (Cacciatore delle tenebre, Ombra)", () => {
+      const dv = (species: string, c: ReturnType<typeof cls>) => computeCharacter(mk([c], { speciesId: species }), R).senses.darkvision?.value;
+      expect(dv("human", cls("ranger", 3, { subclassId: "gloom_stalker" }))).toBe(60);
+      expect(dv("dwarf", cls("ranger", 3, { subclassId: "gloom_stalker" }))).toBe(180); // 120 + 60
+      expect(dv("elf", cls("monk", 3, { subclassId: "shadow" }))).toBe(120); // 60 + 60
+      expect(dv("human", cls("ranger", 2))).toBeUndefined();
+    });
+    it("Maestro d'armi, Adepto elementale, Incantatore rituale, Tocco fatato: scelte con filtri", () => {
+      const f = (id: string) => R.feats.get(id)!;
+      expect(f("weapon_master").choices[0]).toMatchObject({ source: "weaponMastery", count: 1 });
+      expect(f("elemental_adept").choices[0]!.options!.map((o) => o.id)).toEqual(["acid", "cold", "fire", "lightning", "thunder"]);
+      expect(f("ritual_caster").choices[0]).toMatchObject({ countFormula: "pb", filter: { level: 1, ritual: true } });
+      expect(f("fey_touched").choices[1]!.filter).toEqual({ level: 1, schools: ["enchantment", "divination"] });
+      expect(f("shadow_touched").choices[1]!.filter!.schools).toEqual(["illusion", "necromancy"]);
+      const ft = spellsOf(mk([cls("fighter", 4)], { feats: [{ featId: "fey_touched", choices: { fey_touched_ability: ["cha"], fey_touched_spell: ["command"] } }] }));
+      expect(ft.map((x) => [x.spell, x.ability])).toEqual([["misty_step", "cha"], ["command", "cha"]]);
+    });
+    it("nessun needsReview rimasto sui talenti codificati", () => {
+      const left = [...R.feats.values()].filter((x) => x.needsReview).map((x) => x.id);
+      expect(left).toEqual(["dueling"]); // solo Duellare (dipende dalle armi, step 9)
     });
   });
 });

@@ -29,13 +29,18 @@ export function computeProfs(x: Ctx): Profs {
     // "artisan"/"gaming"/"musical" = strumento a scelta: arriva dalla scelta del background
     if (!GROUPS.has(bg.tool)) p.tools.add(bg.tool);
   }
+  const upgrades: string[][] = []; // Mente acuta, Osservatore: competenza, o Maestria se già competente
   for (const { effect: e } of x.active) {
-    if (e.op === "grantSkillProficiency") e.skills.forEach((s) => (e.expertise ? p.expertise : p.skills).add(s));
+    if (e.op === "grantSkillProficiency") {
+      if (e.upgradeToExpertise) upgrades.push(e.skills);
+      else e.skills.forEach((s) => (e.expertise ? p.expertise : p.skills).add(s));
+    }
     else if (e.op === "grantSaveProficiency") e.abilities.forEach((a) => p.saves.add(a));
     else if (e.op === "grantToolProficiency") e.tools.forEach((t) => p.tools.add(t));
     else if (e.op === "grantWeaponProficiency") e.weapons.forEach((w) => p.weapons.add(w));
     else if (e.op === "grantArmorTraining") e.training.forEach((t) => p.armor.add(t));
   }
+  for (const list of upgrades) for (const s of list) (p.skills.has(s) ? p.expertise : p.skills).add(s);
   // La maestria (expertise) implica la competenza
   p.expertise.forEach((s) => p.skills.add(s));
   return p;

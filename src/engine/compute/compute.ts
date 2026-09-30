@@ -7,6 +7,7 @@ import { evalValue } from "./formula-eval";
 import { computeHp } from "./hp";
 import { computeProfs } from "./proficiencies";
 import { computeResources } from "./resources";
+import { computeGrantedSpells } from "./spells";
 import { computeRolls, untrainedArmor } from "./rolls";
 import { sum, withOverride } from "./sourced";
 import { computeResistances, computeSenses, computeSpeed } from "./speed";
@@ -61,6 +62,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     resistances: computeResistances(x),
     resources: computeResources(x),
     spellcasting,
+    grantedSpells: computeGrantedSpells(x),
     carryCapacity: x.scores.str * 15,
     proficiencies: { weapons: [...profs.weapons], tools: [...profs.tools], armor: [...profs.armor] },
     features: [...x.collected.features].sort(),

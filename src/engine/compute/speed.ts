@@ -30,10 +30,18 @@ export function computeSpeed(x: Ctx): Derived["speed"] {
 
 export function computeSenses(x: Ctx): Derived["senses"] {
   const best: Derived["senses"] = {};
+  const extra: Partial<Record<"darkvision" | "blindsight" | "truesight", { label: string; value: number }[]>> = {};
   for (const { effect: e, label } of x.active) {
     if (e.op !== "sense") continue;
     const v = evalValue(e.range, x);
+    if (e.additive) { (extra[e.kind] ??= []).push({ label, value: v }); continue; }
     if (v > (best[e.kind]?.value ?? 0)) best[e.kind] = { value: v, sources: [{ label, value: v }] };
+  }
+  // senso "additivo": se lo hai già da un'altra fonte si somma, altrimenti vale il suo valore (Scurovisione 60 ft o +60)
+  for (const [kind, list] of Object.entries(extra) as [keyof typeof extra, { label: string; value: number }[]][]) {
+    const base = best[kind];
+    const add = list.reduce((n, l) => n + l.value, 0);
+    best[kind] = { value: (base?.value ?? 0) + add, sources: [...(base?.sources ?? []), ...list] };
   }
   return best;
 }

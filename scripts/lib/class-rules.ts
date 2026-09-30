@@ -35,6 +35,15 @@ const plain = (ids: [string, string][]) => ids.map(([id, it]) => ({ id, name: T(
 
 const expertise = (id: string, count: number): FeatureRule => ({ choices: [{ id, label: T("Maestria"), count, source: "expertise" }] });
 const style = (id: string): FeatureRule => ({ choices: [{ id, label: T("Stile di combattimento"), count: 1, source: "feats:fighting_style" }] });
+// Stile di combattimento (talento) OPPURE Guerriero benedetto/druidico (2 trucchetti): scelte alternative dello stesso gruppo
+const styleOrWarrior = (prefix: string, list: "cleric" | "druid", ability: "cha" | "wis", name: string): FeatureRule => ({
+  choices: [
+    { id: `${prefix}_fighting_style`, label: T("Stile di combattimento"), count: 1, source: "feats:fighting_style", group: `${prefix}_style` },
+    { id: `${prefix}_${name}_warrior`, label: T(list === "cleric" ? "Guerriero benedetto" : "Guerriero druidico"), count: 2, source: `cantrips:${list}`, ability, group: `${prefix}_style` },
+  ],
+});
+const spellFx = (spell: string, extra: Json = {}): Json => ({ op: "grantSpell", spell, mode: "alwaysPrepared", ...extra });
+const FREE_LR = { freeCast: { uses: 1, recharge: "long_rest" } };
 const res = (resourceId: string, uses: number | string, recharge: string): Json => ({ op: "resource", resourceId, uses, recharge });
 const resist = (...types: string[]): FeatureRule => ({ effects: [{ op: "resistance", types }] });
 // Un effetto per ogni aumento della colonna `col` (delta), attivo dal livello in cui compare
@@ -61,13 +70,21 @@ export const CLASS_RULES: Record<string, ClassRule> = {
   bard: {
     columns: ["Dado ispirazione", "Trucchetti", "Preparati", "Slot"],
     featureRules: {
+      words_of_creation: { effects: [spellFx("power_word_heal"), spellFx("power_word_kill")] },
       "expertise@2": { choices: [{ id: "bard_expertise_2", label: T("Maestria"), count: 2, source: "expertise" }] },
       "expertise_2@9": { choices: [{ id: "bard_expertise_9", label: T("Maestria"), count: 2, source: "expertise" }] },
     },
     subclassRules: {
       dance: { dazzling_footwork: { effects: [{ op: "acFormula", formula: "10 + mod:dex + mod:cha", shieldAllowed: false, when: "wearingArmor:none" }] } },
+      glamour: {
+        beguiling_magic: { effects: [spellFx("charm_person"), spellFx("mirror_image")] },
+        mantle_of_majesty: { effects: [spellFx("command", FREE_LR)] },
+      },
       valor: { martial_training: { effects: [{ op: "grantWeaponProficiency", weapons: ["martial"] }, { op: "grantArmorTraining", training: ["medium", "shield"] }] } },
-      lore: { bonus_proficiencies: { choices: [{ id: "lore_bonus_skills", label: T("Competenze bonus"), count: 3, source: "skills" }] } },
+      lore: {
+        bonus_proficiencies: { choices: [{ id: "lore_bonus_skills", label: T("Competenze bonus"), count: 3, source: "skills" }] },
+        magical_discoveries: { choices: [{ id: "lore_magical_discoveries", label: T("Scoperte magiche"), count: 2, source: "alwaysspells", filter: { classes: ["cleric", "druid", "wizard"] } }] },
+      },
     },
   },
   cleric: {
@@ -81,6 +98,9 @@ export const CLASS_RULES: Record<string, ClassRule> = {
   },
   druid: {
     columns: ["Forma selvatica", "Trucchetti", "Preparati", "Slot"],
+    subclassRules: {
+      stars: { star_map: { effects: [spellFx("guidance"), spellFx("guiding_bolt", { freeCast: { uses: "max(1, mod:wis)", recharge: "long_rest" } })] } },
+    },
     featureRules: {
       wild_shape: { resource: { partialShortRest: 1 } },
       primal_order: { choices: [{ id: "primal_order", label: T("Ordine primordiale"), count: 1, options: orderOptions("medium", [["arcana", "Arcano"], ["nature", "Natura"]]) }] },
@@ -102,9 +122,12 @@ export const CLASS_RULES: Record<string, ClassRule> = {
         combat_superiority: { effects: (t) => [{ op: "resource", resourceId: "superiority_dice", uses: { table: t.dadi_superiorita as number[] }, recharge: "short_rest" }] },
         student_of_war: { choices: [
           { id: "battle_master_tool", label: T("Strumento da artigiano"), count: 1, source: "tools:artisan" },
-          { id: "battle_master_skill", label: T("Abilità (lista del Guerriero)"), count: 1, source: "skills" }] },
+          { id: "battle_master_skill", label: T("Abilità (lista del Guerriero)"), count: 1, source: "classSkills" }] },
       },
-      psi_warrior: { psionic_power: { effects: (t) => [{ op: "resource", resourceId: "psionic_energy", uses: { table: t.dadi_energia as number[] }, recharge: "long_rest", partialShortRest: 1 }] } },
+      psi_warrior: {
+        telekinetic_master: { effects: [spellFx("telekinesis", { ability: "int", ...FREE_LR })] },
+        psionic_power: { effects: (t) => [{ op: "resource", resourceId: "psionic_energy", uses: { table: t.dadi_energia as number[] }, recharge: "long_rest", partialShortRest: 1 }] },
+      },
     },
   },
   monk: {
@@ -118,13 +141,14 @@ export const CLASS_RULES: Record<string, ClassRule> = {
     },
     subclassRules: {
       mercy: { implements_of_mercy: { effects: [{ op: "grantSkillProficiency", skills: ["insight", "medicine"], expertise: false }, { op: "grantToolProficiency", tools: ["herbalism_kit"] }] } },
+      shadow: { shadow_arts: { effects: [{ op: "sense", kind: "darkvision", range: 60, additive: true }] } },
       open_hand: { wholeness_of_body: { effects: [res("wholeness_of_body", "max(1, mod:wis)", "long_rest")] } },
     },
   },
   paladin: {
     columns: ["Incanalare divinita", "Maestria armi", "Preparati", "Slot"],
     featureRules: {
-      fighting_style: style("paladin_fighting_style"), // alternativa "Guerriero benedetto": vedi DATA_TODO
+      fighting_style: styleOrWarrior("paladin", "cleric", "cha", "blessed"),
       channel_divinity: { resource: { partialShortRest: 1 } },
       aura_of_protection: { effects: [{ op: "saveBonus", value: "max(1, mod:cha)" }] }, // su di sé; agli alleati entro 10 ft: testo
     },
@@ -137,7 +161,7 @@ export const CLASS_RULES: Record<string, ClassRule> = {
     columns: ["Nemico prescelto", "Maestria armi", "Preparati", "Slot"],
     featureRules: {
       deft_explorer: expertise("ranger_deft_explorer", 1),
-      fighting_style: style("ranger_fighting_style"),
+      fighting_style: styleOrWarrior("ranger", "druid", "wis", "druidic"),
       "expertise@9": expertise("ranger_expertise_9", 2),
       roving: { effects: [{ op: "speedBonus", value: 10, when: "!wearingArmor:heavy" }] },
       tireless: { effects: [res("tireless", "max(1, mod:wis)", "long_rest")] },
@@ -147,7 +171,7 @@ export const CLASS_RULES: Record<string, ClassRule> = {
     subclassRules: {
       gloom_stalker: {
         dread_ambusher: { effects: [{ op: "initiativeBonus", value: "mod:wis" }] },
-        umbral_sight: { effects: [{ op: "sense", kind: "darkvision", range: 60 }] }, // "(o +60)" se già l'hai: vedi DATA_TODO
+        umbral_sight: { effects: [{ op: "sense", kind: "darkvision", range: 60, additive: true }] }, // 60 ft, oppure +60 se già ce l'hai
         iron_mind: { effects: [{ op: "grantSaveProficiency", abilities: ["wis"] }] },
       },
       fey_wanderer: {
@@ -182,16 +206,20 @@ export const CLASS_RULES: Record<string, ClassRule> = {
     featureRules: { magical_cunning: { effects: [res("magical_cunning", 1, "long_rest")] } },
     subclassRules: {
       celestial: { radiant_soul: resist("radiant"), healing_light: { effects: [res("healing_light", "1 + classLevel:warlock", "long_rest")] } },
-      great_old_one: { thought_shield: resist("psychic") },
+      great_old_one: { thought_shield: resist("psychic"), eldritch_hex: { effects: [spellFx("hex")] } },
     },
     optionList: { heading: "Suppliche occulte (invocazioni)", choiceId: "warlock_invocations", label: "Invocazioni occulte", countFrom: "invocazioni", kind: "invocation" },
   },
   wizard: {
     columns: ["Trucchetti", "Preparati", "Slot"],
     featureRules: {
-      spellcasting: { choices: [{ id: "wizard_spellbook", label: T("Libro degli incantesimi"), count: 6, source: "spells:wizard" }] }, // +2 a ogni livello: DATA_TODO
+      spellcasting: { choices: [{ id: "wizard_spellbook", label: T("Libro degli incantesimi"), count: 6, countFormula: "4 + 2 * classLevel:wizard", source: "spells:wizard" }] }, // 6 al 1°, +2 a ogni livello
       arcane_recovery: { effects: [res("arcane_recovery", 1, "long_rest")] },
       scholar: expertise("wizard_scholar", 1),
+    },
+    subclassRules: {
+      abjurer: { spell_breaker: { effects: [spellFx("counterspell"), spellFx("dispel_magic")] } },
+      illusionist: { phantasmal_creatures: { effects: [spellFx("summon_beast", FREE_LR), spellFx("summon_fey", FREE_LR)] } },
     },
   },
 };

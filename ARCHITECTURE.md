@@ -116,3 +116,12 @@ Convenzioni:
 - Un'opzione scelta conta come posseduta per `hasFeature:` (es. `hasFeature:pact_of_the_blade`).
 - Le regole possono derivare gli effetti dalla tabella (`effects: (table) => ...`): scaglioni di velocità e dado di Arti marziali del Monaco.
 - Armi con filtro nelle competenze di classe: `martial[light]`, `martial[finesse|light]`.
+
+## Correzioni al modello (revisione DATA_TODO)
+- **Formato**: costi in monete di rame (1 mo = 100 mr); oggetti speciali nell'equipaggiamento `$tool`, `$gaming_set`, `$instrument`.
+- `grantSpell.abilityFrom` = id di una scelta a opzioni di caratteristiche; il motore lo risolve in `ability` (`compute/collect.ts`). `Derived.grantedSpells`.
+- `Choice`: `ability` / `abilityFrom` (per gli incantesimi generati dalla scelta), `countFormula`, `filter` ({livello, scuole, rituale, classi, `classFrom`}),
+  `group` = scelte alternative (una attiva esclude le altre). Nuove sorgenti: `alwaysspells`.
+- `sense.additive`: si somma al senso già posseduto. `grantSkillProficiency.upgradeToExpertise`: Maestria se già competente.
+- Talenti: `Character.feats[i].choices` ha la precedenza su `decisions` per quell'acquisizione; un talento non ripetibile conta una volta sola.
+- `validate:data` controlla `hasFeature:` / `hasFeat:` in prerequisiti, `requires` e `when`.

@@ -55,9 +55,10 @@ function spellEffects(list: string): Json[] {
   return list.split("; ").flatMap((part) => {
     const [lv, ids] = part.replace("liv.", "").split(": ") as [string, string];
     return ids.split(", ").map((spell) => CANTRIPS.has(spell)
-      ? { op: "grantSpell", spell, mode: "cantrip" }
+      ? { op: "grantSpell", spell, mode: "cantrip", abilityFrom: "spell_ability" }
       : {
-        op: "grantSpell", spell, mode: "alwaysPrepared", freeCast: { uses: FREE_CAST_USES[spell] ?? 1, recharge: "long_rest" },
+        op: "grantSpell", spell, mode: "alwaysPrepared", abilityFrom: "spell_ability", // caratteristica scelta (scelta spell_ability)
+        freeCast: { uses: FREE_CAST_USES[spell] ?? 1, recharge: "long_rest" },
         ...(Number(lv) > 1 ? { when: `level>=${lv}` } : {}),
       });
   });

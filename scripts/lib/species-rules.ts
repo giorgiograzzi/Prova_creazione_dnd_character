@@ -31,7 +31,7 @@ export const SPECIES_EFFECTS: Record<string, Json[]> = {
   orc: [{ op: "sense", kind: "darkvision", range: 120 }],
   tiefling: [
     { op: "sense", kind: "darkvision", range: 60 },
-    { op: "grantSpell", spell: "thaumaturgy", mode: "cantrip" },
+    { op: "grantSpell", spell: "thaumaturgy", mode: "cantrip", abilityFrom: "spell_ability" },
   ],
 };
 

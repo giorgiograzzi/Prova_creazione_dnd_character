@@ -340,6 +340,8 @@
     "funds": "Monete disponibili",
     "buy": "Compra",
     "free": "Gratis",
+    "discardTitle": "Eliminare l'oggetto?",
+    "discardAsk": "Vuoi eliminare «{n}» dallo zaino? Non puoi annullare.",
     "bought": "Comprato: {n}",
     "wield": "Impugna",
     "stow": "Riponi",

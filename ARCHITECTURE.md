@@ -253,3 +253,4 @@ Convenzioni:
 - **Negozio**: `shopCatalog` mette le creazioni homebrew nel gruppo "Homebrew" (anche con costo 0, mostrate come "Gratis"); le altre voci gratuite restano fuori.
 - **Finestre (`Dialog`)**: ora in un portale sul `body` (z-index 1000, con i margini di sicurezza dell'iPhone), quindi stanno sopra l'intestazione e la barra in basso; l'altezza massima è quella disponibile e il corpo scorre, così la barra del titolo con la × è sempre raggiungibile.
 - **Negozio (layout)**: la lista non ha più un'altezza propria; scorre tutto il corpo della finestra (altezza massima = schermo meno i margini sicuri), con il titolo fisso e "Chiudi" in fondo. Il filtro Homebrew divide le voci per tipo (Armi, Armature, Oggetti, Strumenti) con un'intestazione per sezione.
+- **Zaino**: eliminare un oggetto (✕, o − quando ne resta uno) chiede conferma in un popup; Annulla non cambia nulla.

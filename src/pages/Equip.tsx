@@ -30,6 +30,7 @@ export function Equip() {
   const [last, setLast] = useState("");
   const [shop, setShop] = useState(false);
   const [ac, setAc] = useState(false);
+  const [discard, setDiscard] = useState<{ id: string; name: string } | null>(null);
   const [attack, setAttack] = useState<AttackOption | null>(null);
   const d = useMemo(() => (ch ? computeCharacter(ch, rs) : null), [ch, rs]);
   if (!ch || !d) return <p className="xp-muted">{it.soon.needCharacter}</p>;
@@ -97,15 +98,24 @@ export function Equip() {
                 {f?.kind === "item" && f.def.attunement && (
                   <Button onClick={() => apply(setAttuned(ch, rs, e.itemId, !e.attuned))}>{e.attuned ? t.attuneOff : t.attuneOn}</Button>
                 )}
-                <Button aria-label={`${t.qtyMinus} ${def?.name.it ?? e.itemId}`} onClick={() => update((c) => setQty(c, e.itemId, e.qty - 1))}>−</Button>
+                <Button aria-label={`${t.qtyMinus} ${def?.name.it ?? e.itemId}`} onClick={() => (e.qty <= 1 ? setDiscard({ id: e.itemId, name: def?.name.it ?? e.itemId }) : update((c) => setQty(c, e.itemId, e.qty - 1)))}>−</Button>
                 <Button aria-label={`${t.qtyPlus} ${def?.name.it ?? e.itemId}`} onClick={() => update((c) => setQty(c, e.itemId, e.qty + 1))}>+</Button>
-                <Button variant="danger" aria-label={`${t.discard} ${def?.name.it ?? e.itemId}`} onClick={() => update((c) => setQty(c, e.itemId, 0))}>✕</Button>
+                <Button variant="danger" aria-label={`${t.discard} ${def?.name.it ?? e.itemId}`} onClick={() => setDiscard({ id: e.itemId, name: def?.name.it ?? e.itemId })}>✕</Button>
               </div>
             </li>
           );
         })}
       </ul>
 
+      {discard && (
+        <Dialog title={t.discardTitle} onClose={() => setDiscard(null)}>
+          <p>{fmt(t.discardAsk, { n: discard.name })}</p>
+          <div className="xp-actions">
+            <Button onClick={() => setDiscard(null)}>{it.homebrew.cancel}</Button>
+            <Button variant="danger" onClick={() => { update((c) => setQty(c, discard.id, 0)); setDiscard(null); }}>{t.discard}</Button>
+          </div>
+        </Dialog>
+      )}
       {ac && <SourcesDialog title={t.ac} value={d.ac} onClose={() => setAc(false)} />}
       {attack && <AttackRollDialog a={attack} rs={rs} onClose={() => setAttack(null)} />}
       {shop && <Shop ch={ch} onBuy={(id) => { const r = buyItem(ch, rs, id); if (r.ok) update(() => r.character); return r; }} onClose={() => setShop(false)} />}

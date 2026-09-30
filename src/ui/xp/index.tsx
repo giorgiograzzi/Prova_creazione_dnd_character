@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { icons, type IconName } from "./icons";
 import "./xp.css";
 
@@ -74,7 +75,8 @@ export function Dialog({ title, children, onClose }: { title: string; children: 
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
-  return (
+  // in un portale sul body: sopra intestazione e barra in basso, qualunque sia il contenitore da cui si apre
+  return createPortal(
     <div className="xp-overlay" onClick={onClose}>
       <div className="xp-dialog" role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <header className="dos-title">
@@ -88,7 +90,8 @@ export function Dialog({ title, children, onClose }: { title: string; children: 
         </header>
         <div className="xp-body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 export { icons };

@@ -135,7 +135,7 @@ function Shop({ ch, onBuy, onClose }: { ch: Character; onBuy: (id: string) => { 
       <ul className="xp-list" style={{ maxHeight: "45dvh", overflowY: "auto" }}>
         {rows.slice(0, LIMIT).map((c) => (
           <li key={`${c.kind}-${c.id}`}>
-            <div className="grow"><div className="name">{c.name}</div><div className="xp-muted">{c.group} · {formatCost(c.cost)} · {c.weight} {t.lb}</div></div>
+            <div className="grow"><div className="name">{c.name}</div><div className="xp-muted">{c.group} · {c.cost > 0 ? formatCost(c.cost) : t.free} · {c.weight} {t.lb}</div></div>
             <Button disabled={walletCp(ch.coins) < c.cost} onClick={() => { const r = onBuy(c.id); setMsg(r.ok ? fmt(t.bought, { n: c.name }) : r.errors.join(" ")); }}>{t.buy}</Button>
           </li>
         ))}

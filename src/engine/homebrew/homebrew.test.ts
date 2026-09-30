@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { computeCharacter } from "../compute";
 import { testCharacter, testRuleset } from "../compute/testkit";
-import { analyzeLoadout, addItem } from "../equipment";
+import { analyzeLoadout, addItem, buyItem, shopCatalog } from "../equipment";
 import { spellbook } from "../magic";
 import { buildRuleset, extendRuleset } from "../ruleset";
 import {
@@ -121,6 +121,14 @@ describe("homebrew: nel ruleset e nel personaggio", () => {
     const a = computeCharacter(w, rs).attacks.find((x) => x.id === "hb_lama");
     expect(a?.damage.dice).toBe("1d8");
     expect(a?.damage.type).toBe("radiant");
+  });
+  it("il negozio ha il gruppo Homebrew, anche per le voci a costo 0, e si comprano", () => {
+    const free = extendRuleset(rs, entryFiles([E("items", { id: "hb_zaino", name: t("Zaino"), category: "Oggetto magico", weight: 5, cost: 0 })]));
+    const shop = shopCatalog(free);
+    expect(shop.filter((c) => c.group === "Homebrew").map((c) => c.id).sort()).toEqual(["hb_lama", "hb_zaino"]);
+    expect(shop.some((c) => c.id === "rope")).toBe(false); // gli altri oggetti gratuiti restano fuori
+    const r = buyItem(testCharacter(), free, "hb_zaino");
+    expect(r.ok && r.character.inventory.map((i) => i.itemId)).toEqual(["hb_zaino"]);
   });
   it("l'incantesimo aggiunto a mano compare nel libro", () => {
     const ch = testCharacter({ extraSpells: ["hb_scintilla"] });

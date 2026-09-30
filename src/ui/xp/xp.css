@@ -227,7 +227,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pl-hpbar > div { height: 100%; background: var(--xp-ok); }
 .pl-hpbar.low > div { background: var(--xp-danger); }
 .pl-hp-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: flex-start; }
-.pl-hp-lbl { font-size: 14px; }
+.pl-hp-lbl { font-size: 16px; }
 .pl-hp-saves { font: inherit; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; }
 .pl-hp-saves .pl-row { margin-bottom: 2px; }
 .pl-hp-saves .pl-pip { width: 18px; height: 18px; }

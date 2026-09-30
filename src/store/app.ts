@@ -68,8 +68,13 @@ export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 8
     return {
       ready: false, list: [], current: null, saveStatus: "saved", error: null, settings: DEFAULT_APP_SETTINGS,
       async init() {
-        const settings = normalizeSettings(await repo.getSetting("app"));
-        set({ settings, list: await repo.list(), ready: true });
+        // se l'archivio del browser non risponde l'app si apre lo stesso, con l'errore in vista (mai pagina bianca)
+        try {
+          const settings = normalizeSettings(await repo.getSetting("app"));
+          set({ settings, list: await repo.list(), ready: true });
+        } catch (e) {
+          set({ ready: true, error: `Archivio del browser non disponibile: ${e instanceof Error ? e.message : String(e)}` });
+        }
       },
       async create() {
         await get().flush();

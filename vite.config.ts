@@ -19,5 +19,8 @@ export default defineConfig({
       },
     }),
   ],
+  // La pagina non va tenuta in cache: dopo ogni build i file hanno nomi nuovi e un index.html vecchio (PWA in Home su iOS) punterebbe a file spariti
+  preview: { headers: { "Cache-Control": "no-cache, must-revalidate" } },
+  server: { headers: { "Cache-Control": "no-cache, must-revalidate" } },
   test: { environment: "node", include: ["src/**/*.test.ts"] },
 });

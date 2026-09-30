@@ -1,6 +1,7 @@
 import { SKILLS, type Choice, type Effect } from "../schema";
 import type { Character } from "../types";
 import type { Ruleset } from "../ruleset";
+import { lookupItem, needsAttunement } from "../equipment/loadout";
 import type { FeatureInfo } from "./types";
 
 // Un effetto con la sua provenienza ("da dove viene")
@@ -169,6 +170,19 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
     }
   }
   for (const f of ch.feats) addFeat(f.featId, f.choices ?? {}, general);
+  // effetti dell'equipaggiamento (oggetti magici): arma impugnata, armatura indossata, oggetto nello zaino; con sintonia solo se sintonizzato
+  for (const e of ch.inventory) {
+    const f = lookupItem(rs, e.itemId);
+    if (!f || !f.def.effects.length) continue;
+    const on = f.kind === "weapon" ? e.state === "wielded" : f.kind === "armor" ? e.state === "worn" : e.state !== "dropped";
+    if (!on || (needsAttunement(f) && !e.attuned)) continue;
+    const go = { label: f.def.name.it, picks: general, prefix: "" };
+    for (const ef of f.def.effects) {
+      // i bonus di un'arma valgono solo per i suoi attacchi, non per tutti
+      const own = f.kind === "weapon" && (ef.op === "attackBonus" || ef.op === "damageBonus" || ef.op === "critRange");
+      add(own ? { ...ef, when: ef.when ? `usingWeapon:${f.def.id} && (${ef.when})` : `usingWeapon:${f.def.id}` } : ef, go);
+    }
+  }
   // linguaggi: Comune + scelta di creazione + Druidico e Gergo dei ladri dai privilegi
   (ch.decisions.languages ?? []).forEach((l) => out.languages.add(l));
   if (out.features.has("druidic")) out.languages.add("druidic");

@@ -130,4 +130,19 @@ describe("store: homebrew", () => {
     const l = await repo.load(ch.id);
     expect(l.ok && l.character.extraSpells).toEqual(["hb_s"]);
   });
+  it("il backup porta tutta la libreria homebrew (anche le voci non usate e quelle spente) e si ripristina su un altro dispositivo", async () => {
+    const a = setup();
+    await a.store.getState().init();
+    const on = { kind: "feats" as const, enabled: true, data: { id: "hb_a", name: { it: "A" }, category: "general" } };
+    const off = { kind: "items" as const, enabled: false, data: { id: "hb_b", name: { it: "B" }, category: "Oggetto magico", effects: [{ op: "acBonus", value: 1 }] } };
+    await a.store.getState().setHomebrew([on, off]);
+    await a.store.getState().create();
+    const text = await a.store.getState().exportAll();
+
+    const b = setup();
+    await b.store.getState().init();
+    const preview = await b.store.getState().previewImport(text);
+    await b.store.getState().commitImport(preview, {});
+    expect(b.store.getState().homebrew).toEqual([on, off]);
+  });
 });

@@ -31,6 +31,7 @@ export const FIELDS: Record<FlatKind, FieldSpec[]> = {
     f("versatileDamage", F.versatile, "text", { help: F.versatileHelp }),
     f("rangeNormal", F.rangeNormal, "number"), f("rangeLong", F.rangeLong, "number"),
     f("mastery", F.mastery, "select", { options: (rs) => terms(rs.masteries) }),
+    f("attunement", F.attunement, "bool"),
     f("weight", F.weight, "number"), f("costGp", F.cost, "number", { help: F.costHelp }),
   ],
   armors: [
@@ -39,7 +40,7 @@ export const FIELDS: Record<FlatKind, FieldSpec[]> = {
     f("baseAc", F.baseAc, "number", { help: F.baseAcHelp }),
     f("dexCap", F.dexCap, "number", { help: F.dexCapHelp }),
     f("strRequired", F.strRequired, "number"), f("donMinutes", F.donMinutes, "number"),
-    f("stealthDisadvantage", F.stealth, "bool"),
+    f("stealthDisadvantage", F.stealth, "bool"), f("attunement", F.attunement, "bool"),
     f("weight", F.weight, "number"), f("costGp", F.cost, "number", { help: F.costHelp }),
   ],
   items: [
@@ -58,7 +59,7 @@ export const FIELDS: Record<FlatKind, FieldSpec[]> = {
     f("name", F.name, "text"), f("description", F.description, "long"),
     f("level", F.level, "select", { options: () => Array.from({ length: 10 }, (_, i) => ({ id: String(i), label: i === 0 ? it.homebrew.presets.cantripShort : `${i}°` })) }),
     f("school", F.school, "select", { options: () => fromMap(O.school) }),
-    f("classes", F.classes, "multi", { options: (rs) => [...fromMap(O.classes), ...[...rs.classes.values()].filter((c) => c.origin === "homebrew" && c.caster !== "none").map((c) => ({ id: c.spellList ?? c.id, label: `${c.name.it} · Homebrew` }))] }),
+    f("classes", F.classes, "multi", { help: F.classesHelp, options: (rs) => [...fromMap(O.classes), ...[...rs.classes.values()].filter((c) => c.origin === "homebrew" && c.caster !== "none").map((c) => ({ id: c.spellList ?? c.id, label: `${c.name.it} · Homebrew` }))] }),
     f("castUnit", F.castUnit, "select", { options: () => fromMap(O.castUnit) }), f("castAmount", F.castAmount, "number"),
     f("range", F.range, "text", { help: F.rangeHelp }),
     f("comp", F.components, "multi", { options: () => fromMap(O.components) }),
@@ -82,8 +83,8 @@ export const FIELDS: Record<FlatKind, FieldSpec[]> = {
 
 export const emptyDraft = (kind: FlatKind): Draft => {
   switch (kind) {
-    case "weapons": return { name: "", description: "", category: "simple", wkind: "melee", damage: "1d6", damageType: "slashing", properties: [], versatileDamage: "", rangeNormal: "", rangeLong: "", mastery: "", weight: "0", costGp: "0" };
-    case "armors": return { name: "", description: "", category: "light", baseAc: "11", dexCap: "", strRequired: "0", donMinutes: "1", stealthDisadvantage: false, weight: "0", costGp: "0" };
+    case "weapons": return { name: "", description: "", category: "simple", wkind: "melee", damage: "1d6", damageType: "slashing", properties: [], versatileDamage: "", rangeNormal: "", rangeLong: "", mastery: "", attunement: false, weight: "0", costGp: "0" };
+    case "armors": return { name: "", description: "", category: "light", baseAc: "11", dexCap: "", strRequired: "0", donMinutes: "1", stealthDisadvantage: false, attunement: false, weight: "0", costGp: "0" };
     case "items": return { name: "", description: "", category: "Oggetto magico", attunement: false, weight: "0", costGp: "0" };
     case "feats": return { name: "", description: "", category: "general", minLevel: "", repeatable: false };
     case "languages": return { name: "", description: "", rarity: "standard" };
@@ -107,14 +108,14 @@ export function draftToData(kind: FlatKind, d: Draft, id: string, effects: unkno
       const n = optNum(d.rangeNormal), l = optNum(d.rangeLong);
       return { ...base, category: d.category, kind: d.wkind, damage: str(d.damage), damageType: d.damageType, properties: d.properties,
         ...opt("versatileDamage", str(d.versatileDamage)), ...(n !== undefined ? { range: { normal: n, long: l ?? n } } : {}),
-        mastery: d.mastery, weight: num(d.weight), cost: cp(d.costGp) } as HbData;
+        mastery: d.mastery, attunement: d.attunement, weight: num(d.weight), cost: cp(d.costGp), effects } as HbData;
     }
     case "armors": {
       const cap = optNum(d.dexCap);
       return { ...base, category: d.category, baseAc: num(d.baseAc), dexCap: cap ?? null, strRequired: num(d.strRequired), donMinutes: num(d.donMinutes),
-        stealthDisadvantage: d.stealthDisadvantage, weight: num(d.weight), cost: cp(d.costGp) } as HbData;
+        stealthDisadvantage: d.stealthDisadvantage, attunement: d.attunement, weight: num(d.weight), cost: cp(d.costGp), effects } as HbData;
     }
-    case "items": return { ...base, category: str(d.category), attunement: d.attunement, weight: num(d.weight), cost: cp(d.costGp) } as HbData;
+    case "items": return { ...base, category: str(d.category), attunement: d.attunement, weight: num(d.weight), cost: cp(d.costGp), effects } as HbData;
     case "feats": {
       const lv = optNum(d.minLevel);
       return { ...base, category: d.category, prerequisites: lv ? [`level>=${lv}`] : [], repeatable: d.repeatable, effects } as HbData;
@@ -142,9 +143,9 @@ export function dataToDraft(kind: FlatKind, x: HbData): Draft {
   const common = { name: x.name.it, description: s(d.description) };
   switch (kind) {
     case "weapons": return { ...common, category: d.category, wkind: d.kind, damage: d.damage, damageType: d.damageType, properties: d.properties ?? [], versatileDamage: s(d.versatileDamage),
-      rangeNormal: s(d.range?.normal), rangeLong: s(d.range?.long), mastery: d.mastery, weight: s(d.weight), costGp: gp(d.cost) };
+      rangeNormal: s(d.range?.normal), rangeLong: s(d.range?.long), mastery: d.mastery, attunement: !!d.attunement, weight: s(d.weight), costGp: gp(d.cost) };
     case "armors": return { ...common, category: d.category, baseAc: s(d.baseAc), dexCap: d.dexCap === null ? "" : s(d.dexCap), strRequired: s(d.strRequired), donMinutes: s(d.donMinutes),
-      stealthDisadvantage: !!d.stealthDisadvantage, weight: s(d.weight), costGp: gp(d.cost) };
+      stealthDisadvantage: !!d.stealthDisadvantage, attunement: !!d.attunement, weight: s(d.weight), costGp: gp(d.cost) };
     case "items": return { ...common, category: s(d.category), attunement: !!d.attunement, weight: s(d.weight), costGp: gp(d.cost) };
     case "feats": return { ...common, category: d.category, minLevel: s(((d.prerequisites ?? []) as string[]).map((p) => /^level>=(\d+)$/.exec(p)?.[1]).find(Boolean)), repeatable: !!d.repeatable };
     case "languages": return { ...common, rarity: s(d.extra?.rarity) || "standard" };

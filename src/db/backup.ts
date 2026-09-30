@@ -13,7 +13,7 @@ const containerSchema = z.object({
   exportedAt: z.number(),
   characters: z.array(z.unknown()),
   settings: z.unknown().optional(),
-  homebrew: z.unknown().optional(), // voci homebrew usate dai personaggi: così si importano anche su un altro dispositivo
+  homebrew: z.unknown().optional(), // libreria homebrew: così si importa anche su un altro dispositivo
 });
 export interface Backup { format: typeof BACKUP_FORMAT; version: number; exportedAt: number; characters: Character[]; settings?: unknown; homebrew?: HbEntry[] }
 

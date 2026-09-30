@@ -13,6 +13,9 @@ export function lookupItem(rs: Ruleset, id: string): Found | undefined {
   return undefined;
 }
 
+// Sintonia: solo armi, armature e oggetti che la richiedono
+export const needsAttunement = (f: Found): boolean => f.kind !== "tool" && f.def.attunement;
+
 type Entry = Character["inventory"][number];
 export interface WieldedWeapon { entry: Entry; weapon: Weapon; hands: 1 | 2 }
 
@@ -46,7 +49,7 @@ export function analyzeLoadout(ch: Character, rs: Ruleset): Loadout {
     const name = f.def.name.it;
     if (e.attuned) {
       attuned++;
-      if (f.kind === "item" && !f.def.attunement) problems.push(`${name} non richiede sintonia`);
+      if (!needsAttunement(f)) problems.push(`${name} non richiede sintonia`);
     }
     if (f.kind === "armor") {
       if (e.state === "wielded") problems.push(`${name}: un'armatura si indossa (stato "indossato"), non si impugna`);

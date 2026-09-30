@@ -20,7 +20,7 @@ File in `src/engine/schema/`:
 
 ### Condizioni
 Stringhe con `&&`, `||`, `!`. Atomi: `wearingArmor:none|light|medium|heavy|any`, `shield`,
-`equipped:<id>`, `weaponProperty:<prop>`, `attackType:melee|ranged`, `hasFeature:<id>`, `hasFeat:<id>`,
+`equipped:<id>`, `weaponProperty:<prop>`, `usingWeapon:<id>` (l'arma dell'attacco è proprio questa: bonus di un'arma magica), `attackType:melee|ranged`, `hasFeature:<id>`, `hasFeat:<id>`,
 `level>=N`, `classLevel:<classe>>=N`, `ability:<car>>=N` (operatori `>= <= == > <`).
 Esempio: `wearingArmor:none && !shield`.
 

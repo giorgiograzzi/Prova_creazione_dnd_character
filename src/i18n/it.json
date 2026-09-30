@@ -5,8 +5,6 @@
   "tabs": {
     "characters": "Eroi",
     "sheet": "Scheda",
-    "equip": "Equip",
-    "magic": "Magie",
     "homebrew": "Homebrew"
   },
   "menu": {
@@ -167,8 +165,10 @@
       "features": "Privilegi",
       "stats": "Statistiche",
       "attacks": "Attacchi",
-      "conditions": "Condizioni",
-      "misc": "Altro"
+      "equip": "Equip",
+      "magic": "Magie",
+      "misc": "Altro",
+      "conditions": "Condizioni"
     },
     "hp": "Punti Ferita",
     "temp": "PF temporanei",
@@ -290,7 +290,10 @@
       "expand": "Mostra la descrizione",
       "collapse": "Nascondi"
     },
-    "back": "Menu"
+    "back": "Menu",
+    "conditionsTile": "Condizioni",
+    "conditionsNone": "nessuna",
+    "toStatus": "Stato"
   },
   "equip": {
     "title": "Equipaggiamento",

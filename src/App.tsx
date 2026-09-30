@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import it from "./i18n/it.json";
 import { Characters } from "./pages/Characters";
-import { Equip } from "./pages/Equip";
 import { Placeholder } from "./pages/Placeholder";
 import { Sheet } from "./pages/Sheet";
 import { ImportDialog, Settings, exportNow } from "./pages/Settings";
 import type { ImportPreview } from "./db/backup";
 import { SectionBar, TabBar, icons, type IconName, type TabDef } from "./ui/xp";
-import { SHEET_SECTIONS, type SheetSection } from "./sheet/sections";
+import { SHEET_SECTIONS, type SheetView } from "./sheet/sections";
 import { isFinalized } from "./wizard/logic";
 import { useApp } from "./ui/useApp";
 
-const SECTION_ICONS: Record<SheetSection, IconName> = { status: "heart", features: "star", stats: "chart", attacks: "sword", conditions: "alert", misc: "notes" };
-type TabId = "characters" | "sheet" | "equip" | "magic" | "homebrew";
+const SECTION_ICONS: Record<(typeof SHEET_SECTIONS)[number], IconName> = { status: "heart", features: "star", stats: "chart", attacks: "sword", equip: "equip", magic: "magic", misc: "notes" };
+// Le tab principali non riguardano un personaggio; Scheda, Equip e Magie sono sezioni della scheda
+type TabId = "characters" | "sheet" | "homebrew";
 
 export function App() {
   const init = useApp((s) => s.init);
@@ -24,7 +24,7 @@ export function App() {
   const exportAll = useApp((s) => s.exportAll);
   const previewImport = useApp((s) => s.previewImport);
   const [tab, setTab] = useState<TabId>("characters");
-  const [section, setSection] = useState<SheetSection>("status");
+  const [section, setSection] = useState<SheetView>("status");
   const [menu, setMenu] = useState(false);
   const [settings, setSettings] = useState(false);
   const [importing, setImporting] = useState<ImportPreview | null>(null);
@@ -38,15 +38,11 @@ export function App() {
     return () => { document.removeEventListener("visibilitychange", onHide); window.removeEventListener("pagehide", onHide); };
   }, [flush]);
 
-  const need = !current;
   const tabs: TabDef[] = [
     { id: "characters", label: it.tabs.characters, icon: "characters" },
-    { id: "sheet", label: it.tabs.sheet, icon: "sheet", disabled: need },
-    { id: "equip", label: it.tabs.equip, icon: "equip", disabled: need },
-    { id: "magic", label: it.tabs.magic, icon: "magic", disabled: need },
     { id: "homebrew", label: it.tabs.homebrew, icon: "homebrew" },
   ];
-  const shown: TabId = need && (tab === "sheet" || tab === "equip" || tab === "magic") ? "characters" : tab;
+  const shown: TabId = !current && tab === "sheet" ? "characters" : tab;
   // scheda giocabile aperta: la barra in basso mostra le sue sezioni invece delle tab principali
   const inSheet = shown === "sheet" && !!current && isFinalized(current);
   const Menu = icons.menu;
@@ -74,17 +70,15 @@ export function App() {
       <main className="xp-body">
         {settings ? <Settings onBack={() => setSettings(false)} /> : (
           <>
-            {shown === "characters" && <Characters onOpened={() => setTab("sheet")} />}
-            {shown === "sheet" && <Sheet section={section} />}
-            {shown === "equip" && <Equip />}
-            {shown === "magic" && <Placeholder title={it.tabs.magic} text={it.soon.magic} />}
+            {shown === "characters" && <Characters onOpened={() => { setSection("status"); setTab("sheet"); }} />}
+            {shown === "sheet" && <Sheet section={section} onSection={setSection} />}
             {shown === "homebrew" && <Placeholder title={it.tabs.homebrew} text={it.soon.homebrew} />}
           </>
         )}
       </main>
       {inSheet
-        ? <SectionBar items={SHEET_SECTIONS.map((id) => ({ id, label: it.play.tabs[id], icon: SECTION_ICONS[id] }))} current={section} backLabel={it.play.back}
-            onSelect={(id) => { setSettings(false); setSection(id as SheetSection); }} onBack={() => { setSettings(false); setTab("characters"); }} />
+        ? <SectionBar items={SHEET_SECTIONS.map((id) => ({ id, label: it.play.tabs[id], icon: SECTION_ICONS[id] }))} current={section === "conditions" ? "status" : section} backLabel={it.play.back}
+            onSelect={(id) => { setSettings(false); setSection(id as SheetView); }} onBack={() => { setSettings(false); setTab("characters"); }} />
         : <TabBar tabs={tabs} current={shown} onSelect={(id) => { setSettings(false); setTab(id as TabId); }} />}
       {importing && <ImportDialog preview={importing} onClose={() => setImporting(null)} onDone={() => setImporting(null)} />}
     </div>

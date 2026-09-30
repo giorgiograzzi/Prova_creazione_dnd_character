@@ -7,13 +7,14 @@ import type { TabProps } from "./types";
 
 const t = it.play;
 
-export function ConditionsTab({ ch, rs, d, update }: TabProps) {
+export function ConditionsTab({ ch, rs, d, update, onBack }: TabProps & { onBack: () => void }) {
   const [sources, setSources] = useState<Record<string, string>>({});
   const cs = d.conditions;
   const list = [...rs.conditions.values()].filter((c) => !c.stackable);
   const ex = rs.conditions.get("exhaustion");
   return (
     <>
+      <div className="xp-actions" style={{ justifyContent: "flex-start" }}><Button onClick={onBack}>← {t.toStatus}</Button></div>
       <h2>{t.conditionsTitle}</h2>
       {cs.dead && <div className="xp-error" role="alert">{t.dead}</div>}
       {cs.active.length === 0 ? <p className="xp-muted">{t.none}</p> : (cs.cannot.length > 0 && <p><b>{t.cannot}:</b> {cs.cannot.join(", ")}</p>)}

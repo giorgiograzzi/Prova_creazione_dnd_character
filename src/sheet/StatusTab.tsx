@@ -17,7 +17,7 @@ const Pips = ({ n, of, kind }: { n: number; of: number; kind: "ok" | "ko" }) => 
   <span className="pl-pips" aria-label={`${n}/${of}`}>{Array.from({ length: of }, (_, i) => <span key={i} className={`pl-pip ${i < n ? `on ${kind}` : ""}`} />)}</span>
 );
 
-export function StatusTab({ ch, d, update }: TabProps) {
+export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSection: (s: "conditions") => void }) {
   const [amount, setAmount] = useState("");
   const [crit, setCrit] = useState(false);
   const [note, setNote] = useState("");
@@ -75,6 +75,12 @@ export function StatusTab({ ch, d, update }: TabProps) {
           <span className="pl-sub">{d.hp.hitDice.map((x) => `${x.total}d${x.die}`).join(" + ")}</span>
         </button>
       </div>
+
+      <button type="button" className="pl-tile" style={{ width: "100%", marginBottom: 12 }} onClick={() => onSection("conditions")}>
+        {t.conditionsTile}
+        <b>{d.conditions.active.length + (s.exhaustion > 0 && !d.conditions.active.includes("exhaustion") ? 1 : 0) || 0}</b>
+        <span className="pl-sub">{[...d.conditions.active.map((c) => rs.conditions.get(c)?.name.it ?? c), ...(s.exhaustion > 0 && !d.conditions.active.includes("exhaustion") ? [`Esaurimento ${s.exhaustion}`] : [])].join(", ") || t.conditionsNone}</span>
+      </button>
 
       <Check checked={s.inspiration} onChange={(v) => update((c) => setInspiration(c, v))}>{t.inspiration}</Check>
 

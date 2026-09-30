@@ -104,6 +104,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 ### 15. Tab Equip (UI)
 - Inventario, quantità/peso/valore, Estrai/Riponi/Indossa/Togli, selettore arma impugnata, negozio interno, sintonia.
+- **Navigazione**: Equip e Magie sono sezioni della scheda (non più tab principali); Condizioni si apre da Stato.
 - **Fatto**: 10 test su monete, negozio, quantità e sintonia; prova nel browser (Guerriero): impugnare lo Spadone aggiunge l'attacco (2d6 +2, +4), indossare/togliere l'armatura cambia la CA, mani/peso/sintonia in tempo reale, costo dell'azione mostrato (regola della casa o ufficiale), acquisto dal negozio con le monete detratte. Niente vendita: non c'è una regola nei dati.
 
 ### 16. Magie (motore + UI)

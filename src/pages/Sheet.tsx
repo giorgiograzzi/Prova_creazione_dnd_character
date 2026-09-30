@@ -3,7 +3,7 @@ import { useRuleset } from "../data/ruleset";
 import it from "../i18n/it.json";
 import { Button, Dialog } from "../ui/xp";
 import { useApp } from "../ui/useApp";
-import { Summary } from "../wizard/Summary";
+import { PlaySheet } from "../sheet/PlaySheet";
 import { Wizard } from "../wizard/Wizard";
 import { isFinalized, reopenCreation } from "../wizard/logic";
 
@@ -23,9 +23,7 @@ export function Sheet() {
   }
   return (
     <>
-      <Summary ch={ch} rs={rs} />
-      <p className="xp-muted">{it.soon.sheet}</p>
-      <div className="xp-actions footer"><Button onClick={() => setReopen(true)}>{it.wizard.sum.reopen}</Button></div>
+      <PlaySheet ch={ch} rs={rs} update={update} onReopen={() => setReopen(true)} />
       {reopen && (
         <Dialog title={it.wizard.sum.reopen} onClose={() => setReopen(false)}>
           <p>{it.wizard.sum.reopenConfirm}</p>

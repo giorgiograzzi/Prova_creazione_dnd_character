@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-13 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Prossimo: step 14 (scheda giocabile). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-14 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Prossimo: step 14b (privilegi giocabili). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -89,7 +89,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 ### 14. Scheda giocabile
 - PF (danno/cura rapidi, temporanei, salvezze contro morte, dadi vita), riposo breve/lungo, stat con lancio d20 (vant./svant.), attacchi, condizioni ed Esaurimento 2024, ispirazione, monete, note, "da dove viene" (sources) su ogni numero, override visibili e rimovibili.
-- **Fatto**: test motore riposi/PF + prova manuale UI.
+- **Fatto**: 19 test del motore di gioco (PF, PF temporanei, morte istantanea, salvezze contro morte, Dadi Vita, riposi, condizioni, valori forzati, dadi) + prova nel browser (Guerriero e Mago): danno/cura, a terra, salvezze, riposi, CA forzata, attacchi, condizioni. Restano fuori: slot e incantesimi (step 16), privilegi (14b).
 
 ### 14b. Privilegi giocabili (nuovo)
 - **Perché**: molti privilegi, tratti e talenti hanno effetti solo a parole (Attacco irruento, Colpo brutale, Bagliore protettivo...): devono essere descritti, contabili e attivabili dall'app, non da ricordare a mente.

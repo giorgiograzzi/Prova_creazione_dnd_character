@@ -10,3 +10,4 @@ export * from "./equipment";
 export * from "./settings";
 export * from "./creation";
 export * from "./character";
+export * from "./play";

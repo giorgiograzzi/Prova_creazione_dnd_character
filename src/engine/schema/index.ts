@@ -4,3 +4,4 @@ export * from "./condition";
 export * from "./effect";
 export * from "./choice";
 export * from "./content";
+export * from "./character";

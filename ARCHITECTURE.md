@@ -172,3 +172,12 @@ Convenzioni:
 - **Altro**: `creationProgress` (stato dei 7 passi), `classOptions` (multiclasse: 13 richiesto sia dalla nuova classe sia da quelle che hai), `fillHpRolls`, `startingEquipment` (opzioni A/B/C + strumento scelto + monete),
   `startingWealth` (partenza a livello più alto). Dati: `creation.json` da `scripts/extract-creation.ts` (array standard, acquisto a punti, array consigliati, fasce di livello, allineamenti).
 - Slot di talento a livello di classe: scelte `asi_<classe>_<livello>` (feats:general) ed `epic_boon_<classe>_<livello>` nei dati dei privilegi.
+
+## Store e salvataggio (step 11) — `src/db/`, `src/store/`
+- **Formato**: `characterSchema` (Zod) con `schemaVersion` (`CHARACTER_SCHEMA_VERSION`, oggi 1). `emptyCharacter(id)` crea il personaggio vuoto di partenza.
+- **Migrazioni** (`db/migrations.ts`): `MIGRATIONS[n]` porta da n a n+1 su dati grezzi; `migrateCharacter` applica la catena, poi valida con Zod. Errori chiari (versione futura → "aggiorna l'app", passaggio mancante, dati non validi). Per cambiare il formato: alzare la versione e aggiungere il passaggio.
+- **Persistenza** (`db/repo.ts`, Dexie/IndexedDB): tabelle `characters` (dati scritti così come sono, migrati in lettura) e `settings`. Un personaggio illeggibile dà errore solo su di lui, l'elenco resta intero.
+- **Backup** (`db/backup.ts`): contenitore `{format, version, exportedAt, characters, settings?}`. `previewImport` classifica ogni personaggio: `new`, `same`, `conflict`, `invalid` (con motivo); accetta anche un personaggio singolo. `applyImport` con risoluzione per conflitto: `copy` (default, nuovo id), `replace`, `skip`. Non sovrascrive mai senza scelta esplicita.
+- **Store** (`store/app.ts`, Zustand vanilla, iniettabili repo/scheduler/orologio): `update(fn)` → stato `pending` → salvataggio automatico dopo 800 ms di pausa (una sola scrittura per raffica); `flush()` salva subito (usato prima di cambiare/esportare); `saveStatus` = saved | pending | saving | error.
+- **Impostazioni** (`store/settings.ts`): `AppSettings` = regole (`weaponSwap`) + `backupReminderDays` (30, 0 = spento) + `lastBackupAt`; `normalizeSettings` tollerante, `backupDue` per il promemoria.
+- Test con `fake-indexeddb`: migrazioni, CRUD, round-trip export/import, conflitti, autosave, errore di scrittura.

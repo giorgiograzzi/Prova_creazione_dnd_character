@@ -10,10 +10,11 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "validate:data": "tsx scripts/validate-data.ts",
-    "extract:data": "tsx scripts/extract-data.ts && tsx scripts/extract-step5.ts && tsx scripts/extract-step6.ts && tsx scripts/extract-classes.ts"
+    "extract:data": "tsx scripts/extract-all.ts"
   },
   "dependencies": {
     "dexie": "^4.4.6",
+    "pdf-lib": "^1.17.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "zod": "^4.6.5",
@@ -24,6 +25,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "fake-indexeddb": "^6.2.5",
     "pdfjs-dist": "^6.3.289",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",

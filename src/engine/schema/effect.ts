@@ -48,7 +48,7 @@ export const effectSchema = z.discriminatedUnion("op", [
     freeCast: z.object({ uses: value, recharge }).optional(),
   }),
   e("grantFeature", { feature: id }),
-  e("grantFeat", { feat: id }),
+  e("grantFeat", { feat: id, via: z.string().optional() }), // via: id della scelta che lo concede (le sue scelte interne hanno chiave "<via>/<scelta>")
   e("grantEquipment", { item: id, qty: z.number().int().min(1).default(1) }),
   // Vincoli: prerequisiti (dell'opzione) e restrizioni (esclusioni mentre la condizione vale)
   e("prerequisite", { requires: condition, reason: z.string().optional() }),

@@ -79,7 +79,8 @@ export const FEAT_RULES: Record<string, FeatRule> = {
   archery: { effects: [{ op: "attackBonus", value: 2, attackType: "ranged" }] },
   blind_fighting: { effects: [{ op: "sense", kind: "blindsight", range: 10 }] },
   defense: { effects: [{ op: "acBonus", value: 1, when: "wearingArmor:any" }] },
-  dueling: { effects: [{ op: "damageBonus", value: 2, attackType: "melee", when: "attackType:melee && !weaponProperty:two_handed" }], needsReview: true }, // "senza altre armi": step 9
+  // arma da mischia impugnata in una mano, senza altre armi (lo scudo è ammesso)
+  dueling: { effects: [{ op: "damageBonus", value: 2, attackType: "melee", when: "attackType:melee && !twoHanded && !otherWeapon" }] },
   thrown_weapon_fighting: { effects: [{ op: "damageBonus", value: 2, attackType: "ranged", when: "attackType:ranged && weaponProperty:thrown" }] },
   // Doni epici
   boon_of_fortitude: { effects: [{ op: "hpMaxBonus", value: 40 }] },

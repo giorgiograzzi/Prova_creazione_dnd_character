@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "name": "Esempio: armi e armature",
+  "weapons": [
+    {
+      "id": "hb_lama_del_crepuscolo",
+      "name": { "it": "Lama del crepuscolo" },
+      "description": "Una spada lunga dalla lama scura che brilla debolmente al calare del sole.",
+      "category": "martial", "kind": "melee",
+      "damage": "1d8", "damageType": "radiant",
+      "properties": ["versatile"], "versatileDamage": "1d10",
+      "mastery": "sap", "weight": 3, "cost": 50000
+    },
+    {
+      "id": "hb_arco_del_vento",
+      "name": { "it": "Arco del vento" },
+      "description": "Arco corto leggerissimo, intagliato in legno di salice.",
+      "category": "martial", "kind": "ranged",
+      "damage": "1d6", "damageType": "piercing",
+      "properties": ["ammunition", "two_handed"],
+      "range": { "normal": 80, "long": 320 },
+      "mastery": "vex", "weight": 1.5, "cost": 15000
+    }
+  ],
+  "armors": [
+    {
+      "id": "hb_cuoio_rinforzato",
+      "name": { "it": "Cuoio rinforzato" },
+      "description": "Armatura leggera con placche sottili cucite nel cuoio.",
+      "category": "light", "baseAc": 12, "dexCap": null,
+      "weight": 12, "cost": 3000
+    }
+  ]
+}

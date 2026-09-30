@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "name": "Esempio: incantesimi",
+  "spells": [
+    {
+      "id": "hb_scintilla_di_luna",
+      "name": { "it": "Scintilla di luna" },
+      "description": "Un dardo d'argento colpisce una creatura entro gittata e infligge 1d8 danni radiosi.",
+      "level": 0, "school": "evocation", "classes": ["wizard", "sorcerer", "druid"],
+      "castingTime": { "unit": "action", "amount": 1 },
+      "range": "36 metri",
+      "components": { "v": true, "s": true, "m": false },
+      "duration": "Istantanea", "resolution": "attack_ranged",
+      "summary": "Attacco a distanza: 1d8 danni radiosi."
+    },
+    {
+      "id": "hb_scudo_d_ombra",
+      "name": { "it": "Scudo d'ombra" },
+      "description": "Ombre ti avvolgono: fino alla fine del tuo prossimo turno hai +2 alla CA.",
+      "level": 1, "school": "abjuration", "classes": ["wizard", "warlock"],
+      "castingTime": { "unit": "reaction", "amount": 1, "trigger": "quando vieni colpito da un attacco" },
+      "range": "Personale",
+      "components": { "v": true, "s": true, "m": false },
+      "duration": "1 round", "resolution": "none",
+      "summary": "+2 alla CA fino alla fine del tuo prossimo turno."
+    }
+  ]
+}

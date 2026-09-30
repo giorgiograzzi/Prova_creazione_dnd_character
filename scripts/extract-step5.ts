@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { FEAT_RULES } from "./lib/feat-rules";
 import { bodyLines, pdfPages, section } from "./lib/pdf-text";
 import { equipment, itemNames } from "./lib/equipment";
+import { fixSpellModes } from "./lib/spells";
 import { splitNames } from "./lib/util";
 
 const SRC = process.env.RULES_DIR ?? "docs/rules";
@@ -117,6 +118,7 @@ for (let m; (m = bre.exec(body)); end = m.index + m[0].length) {
 if (backgrounds.length !== 16) throw new Error(`Background trovati: ${backgrounds.length} (attesi 16)`);
 if (body.slice(end).trim()) throw new Error(`Background: testo non riconosciuto: ${body.slice(end, end + 80)}`);
 
+fixSpellModes(feats, "feats");
 for (const [kind, entries] of [["feats", feats], ["backgrounds", backgrounds]] as const) {
   writeFileSync(`${OUT}/${kind}.json`, JSON.stringify({ kind, entries }, null, 1) + "\n");
   console.log(`${kind.padEnd(17)} ${entries.length}`);

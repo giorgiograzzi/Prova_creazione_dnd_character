@@ -49,8 +49,6 @@ export const DRAGON_DAMAGE: Record<string, string> = {
   Acido: "acid", Fulmine: "lightning", Fuoco: "fire", Veleno: "poison", Freddo: "cold",
 };
 
-// Trucchetti tra gli incantesimi elencati nei lignaggi (gli altri sono di 1° livello o più)
-export const CANTRIPS = new Set(["dancing_lights", "prestidigitation", "druidcraft", "minor_illusion", "mending", "poison_spray", "chill_touch", "fire_bolt"]);
 // Lanci gratuiti con usi diversi da 1 (Gnomo delle foreste: bonus competenza)
 export const FREE_CAST_USES: Record<string, number | string> = { speak_with_animals: "pb" };
 

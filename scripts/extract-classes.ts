@@ -4,6 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { CLASS_RULES, type FeatureRule, type OptionList, type Table } from "./lib/class-rules";
 import { equipment, itemNames, readKind } from "./lib/equipment";
 import { bodyLines, pdfPages } from "./lib/pdf-text";
+import { fixSpellModes } from "./lib/spells";
 
 const SRC = process.env.RULES_DIR ?? "docs/rules";
 const OUT = "data/private";
@@ -189,6 +190,8 @@ heads.forEach((h, hi) => {
   const unknownTool = tools.find((t) => !toolId.has(t) && !/^(\d+) (Strumento musicale|Strumenti da artigiano o Strumento musicale)$/.test(t));
   if (unknownTool) throw new Error(`${id}: strumento sconosciuto "${unknownTool}"`);
   const mc = /^Requisito: (.+?)\. Ottieni: (.+)$/.exec(F["Multiclasse"]!)!;
+  // Competenze che si ottengono prendendo un livello in questa classe come NON prima (riga "Ottieni:" del file 01)
+  const multiclass = parseMulticlass(mc[2]!, id, new Set(toolId.values()));
   const req = mc[1]!.replace(/ oppure /g, " || ").replace(/ e /g, " && ").replace(/(\w+) 13/g, (_, a) => `ability:${ABIL[a]}>=13`);
   const spell = F["Incantesimi"] ? /^Tipo: (.+?); caratteristica (\w+); lista (\w+); (.*)$/.exec(F["Incantesimi"]!) : null;
   if (F["Incantesimi"] && !spell) throw new Error(`${id}: riga Incantesimi non riconosciuta: ${F["Incantesimi"]}`);
@@ -236,6 +239,11 @@ heads.forEach((h, hi) => {
   const featText = block.slice(iFeat + 1, featEnd).filter((l) => !isHeader(l)).join(" ");
   const fs = features(featText, id);
   applyRules(fs, rule.featureRules, table);
+  // Aumento dei punteggi di caratteristica / Dono epico: il talento si sceglie in una scelta per livello (chiave <tipo>_<classe>_<livello>)
+  for (const f of fs) {
+    if (f.id === "ability_score_improvement") f.choices.push({ id: `asi_${id}_${f.level}`, label: { it: "Talento (Aumento dei punteggi o talento generale)" }, count: 1, source: "feats:general" });
+    if (f.id === "epic_boon") f.choices.push({ id: `epic_boon_${id}_${f.level}`, label: { it: "Dono epico" }, count: 1, source: "feats:epic_boon" });
+  }
   for (const r of rows) {
     const have = fs.filter((f) => f.level === r.lv).map((f) => f.name.it as string).sort().join("|");
     const want = r.names.filter((n) => n !== "Privilegio di sottoclasse").sort().join("|");
@@ -248,7 +256,7 @@ heads.forEach((h, hi) => {
     ? { id: `${id}_skills`, label: { it: "Abilità" }, count: Number(sk[1]), source: "skills" }
     : { id: `${id}_skills`, label: { it: "Abilità" }, count: Number(sk[1]), options: skillList.map((s) => ({ id: s, name: { it: s }, effects: [{ op: "grantSkillProficiency", skills: [s] }] })) });
   picks.forEach((p, i) => choices.push({ id: `${id}_tools${i ? i + 1 : ""}`, label: { it: "Strumenti" }, count: p.count, source: p.source }));
-  if (table["maestria_armi"]) choices.push({ id: `${id}_weapon_mastery`, label: { it: "Maestria nelle armi" }, count: 1, countFrom: "maestria_armi", source: "weaponMastery" });
+  if (table["maestria_armi"]) choices.push({ id: `${id}_weapon_mastery`, label: { it: "Maestria nelle armi" }, count: 1, countFrom: "maestria_armi", source: "weaponMastery", ...(id === "barbarian" ? { weaponFilter: { kind: "melee" } } : {}) }); // Barbaro: solo armi da mischia (file 03 §3c)
   if (spell) {
     if (table["trucchetti"]) choices.push({ id: `${id}_cantrips`, label: { it: "Trucchetti" }, count: 1, countFrom: "trucchetti", source: `cantrips:${spell[3]}` });
     choices.push({ id: `${id}_prepared`, label: { it: "Incantesimi preparati" }, count: 1, countFrom: "preparati", source: `spells:${spell[3]}` });
@@ -345,7 +353,7 @@ heads.forEach((h, hi) => {
     weaponProficiency: F["Armi"]!.split(/, (?=semplici|marziali)/).map((w) => WEAPON[w] ?? (() => { throw new Error(`Armi sconosciute: "${w}"`); })()), toolProficiency: fixedTools,
     ...(spell ? { caster: CASTER[spell[1]!], spellAbility: ABIL[spell[2]!], spellList: spell[3] } : {}),
     description: [notes, optionsNote].filter(Boolean).join(" "),
-    ...(slots ? { spellSlots: slots } : {}), ...(pact ? { pactSlots: pact } : {}), multiclassRequirement: req, equipment: eq,
+    ...(slots ? { spellSlots: slots } : {}), ...(pact ? { pactSlots: pact } : {}), multiclassRequirement: req, multiclass, equipment: eq,
     features: fs, table, subclassLevel: 3, choices,
   });
 });
@@ -368,5 +376,28 @@ function merge(kind: string, fresh: Json[]) {
   writeFileSync(path, JSON.stringify({ kind, entries: all }, null, 1) + "\n");
   console.log(`${kind.padEnd(17)} ${all.length} (${fresh.length} aggiornate)`);
 }
+fixSpellModes(classes, "classes");
+fixSpellModes(subclasses, "subclasses");
 merge("classes", classes);
 merge("subclasses", subclasses);
+
+// "Dado Vita, armi marziali, armature leggere, medie, scudi, 1 abilità, 1 strumento, Arnesi da scasso" → competenze strutturate
+function parseMulticlass(text: string, classId: string, toolIds: Set<string>) {
+  const out = { weapons: [] as string[], armor: [] as string[], skills: 0, toolChoices: 0, tools: [] as string[] };
+  const parts = text.split(", ").map((x) => x.trim());
+  let mode: "armor" | "weapons" | "" = "";
+  const ARMOR: Record<string, string> = { leggere: "light", medie: "medium", pesanti: "heavy", scudi: "shield" };
+  for (const p of parts) {
+    let m: RegExpExecArray | null;
+    if (p === "Dado Vita") { mode = ""; continue; }
+    if ((m = /^armature (\w+)$/.exec(p)) && ARMOR[m[1]!]) { mode = "armor"; out.armor.push(ARMOR[m[1]!]!); continue; }
+    if (mode === "armor" && ARMOR[p]) { out.armor.push(ARMOR[p]!); continue; }
+    if ((m = /^armi (semplici|marziali)$/.exec(p))) { mode = "weapons"; out.weapons.push(m[1] === "semplici" ? "simple" : "martial"); continue; }
+    if (mode === "weapons" && (m = /^marziali con proprietà Leggera$/.exec(p))) { out.weapons.push("martial[light]"); continue; }
+    if ((m = /^(\d+) abilità$/.exec(p))) { out.skills = Number(m[1]); mode = ""; continue; }
+    if ((m = /^(\d+) strumento$/.exec(p))) { out.toolChoices = Number(m[1]); mode = ""; continue; }
+    if (p === "Arnesi da scasso" && toolIds.has("thieves_tools")) { out.tools.push("thieves_tools"); mode = ""; continue; }
+    throw new Error(`${classId}: competenza multiclasse non riconosciuta "${p}" in "${text}"`);
+  }
+  return out;
+}

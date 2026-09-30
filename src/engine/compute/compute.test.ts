@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { computeCharacter } from "./index";
 import { combineMode } from "./rolls";
+import { casterLevelOf } from "./slots";
+import { spellChoiceCandidates, spellsMatching } from "../spells";
 import { evalValue } from "./formula-eval";
 import { testCharacter, testRuleset } from "./testkit";
 import type { Character } from "../types";
@@ -267,6 +269,102 @@ describe("meccanismi nuovi (senza dati privati)", () => {
     expect(d.saves.str.proficient && d.saves.dex.proficient).toBe(true);
     const one = computeCharacter(testCharacter({ asi: asiStd, feats: [{ featId: "alert" }, { featId: "alert" }] }), rs2).initiative.value;
     expect(one).toBe(2 + 2); // Des +2, Allerta una sola volta
+  });
+});
+
+describe("condizioni", () => {
+  const withState = (over: object) => testCharacter({ asi: asiStd, state: { ...testCharacter().state, ...over } });
+  const run = (over: object) => computeCharacter(withState(over), rs);
+
+  it("Paralizzato include Incapacitato (ricorsivo, senza duplicati) e azzera velocità, TS For/Des, azioni", () => {
+    const d = run({ conditions: ["paralyzed", "incapacitated", "paralyzed"] });
+    expect(d.conditions.active.sort()).toEqual(["incapacitated", "paralyzed"]);
+    expect(d.speed.walk.value).toBe(0);
+    expect(d.saves.str.autoFail).toEqual(["Paralizzato"]);
+    expect(d.saves.dex.autoFail).toHaveLength(1);
+    expect(d.saves.wis.autoFail).toEqual([]);
+    expect(d.conditions.cannot).toEqual(expect.arrayContaining(["compiere azione", "compiere reazione", "parlare", "concentrarsi"]));
+    expect(d.conditions.attacksAgainstYou.advantage).toEqual(["Paralizzato"]);
+    expect(d.conditions.attacksAgainstYou.autoCritical[0]).toMatch(/entro 5 ft/);
+    expect(d.spellcastingBlocked).toBe(true);
+    expect(d.conditions.initiativeMode.mode).toBe("disadvantage");
+  });
+  it("Pietrificato: immune ad Avvelenato (la condizione cade), resistenza a tutti i danni", () => {
+    const d = run({ conditions: ["petrified", "poisoned"] });
+    expect(d.conditions.active).toEqual(expect.arrayContaining(["petrified", "incapacitated"]));
+    expect(d.conditions.active).not.toContain("poisoned");
+    expect(d.conditions.immune).toEqual(["poisoned"]);
+    expect(d.resistances).toContain("all");
+    expect(d.skills.athletics.mode).toBe("normal"); // niente Svantaggio da Avvelenato
+  });
+  it("Avvelenato: Svantaggio a tiri per colpire e prove; si annulla con un Vantaggio", () => {
+    const d = run({ conditions: ["poisoned"] });
+    expect(d.conditions.attackRolls).toEqual({ mode: "disadvantage", modeSources: ["Avvelenato"] });
+    expect(d.skills.stealth.mode).toBe("disadvantage");
+    expect(d.saves.dex.mode).toBe("normal"); // i TS non sono prove di caratteristica
+    // Trattenuto: TS Des con Svantaggio, ma un Vantaggio dello stesso TS li annulla
+    const rs2 = testRuleset();
+    rs2.feats.set("adv", { id: "adv", name: { it: "V" }, description: "", origin: "private", needsReview: false, category: "general", prerequisites: [], repeatable: false, choices: [], effects: [{ op: "saveAdvantage", abilities: ["dex"] }] } as never);
+    const both = computeCharacter(testCharacter({ asi: asiStd, feats: [{ featId: "adv" }], state: { ...testCharacter().state, conditions: ["restrained"] } }), rs2);
+    expect(both.saves.dex.mode).toBe("normal");
+    expect(computeCharacter(withState({ conditions: ["restrained"] }), rs).saves.dex.mode).toBe("disadvantage");
+  });
+  it("Esaurimento a livelli: -2 × livello ai Tiri D20, -5 ft × livello, 6 = morte", () => {
+    const base = run({});
+    const d = run({ exhaustion: 3 });
+    expect(d.conditions.active).toEqual(["exhaustion"]);
+    expect(d.skills.athletics.bonus.value).toBe(base.skills.athletics.bonus.value - 6);
+    expect(d.saves.con.bonus.value).toBe(base.saves.con.bonus.value - 6);
+    expect(d.initiative.value).toBe(base.initiative.value - 6);
+    expect(d.speed.walk.value).toBe(30 - 15);
+    expect(d.passivePerception.value).toBe(base.passivePerception.value); // non è un Tiro D20
+    expect(d.conditions.dead).toBe(false);
+    const dead = run({ exhaustion: 6 });
+    expect(dead.conditions.dead).toBe(true);
+    expect(dead.speed.walk.value).toBe(0);
+    expect(run({ exhaustion: 9 }).conditions.exhaustion).toBe(6); // tetto al livello massimo
+  });
+  it("effetti che dipendono dalla fonte/situazione restano testo (Spaventato), con la fonte tracciata", () => {
+    const d = run({ conditions: ["frightened"], conditionSources: { frightened: "Drago rosso" } });
+    expect(d.conditions.attackRolls.mode).toBe("normal");
+    expect(d.conditions.situational).toEqual(["Spaventato (da Drago rosso): Spaventato: riassunto"]);
+    expect(d.skills.stealth.mode).toBe("normal");
+  });
+  it("Invisibile: Vantaggio all'Iniziativa; il resto (dipende da chi ti vede) è testo", () => {
+    const d = run({ conditions: ["invisible"] });
+    expect(d.conditions.initiativeMode.mode).toBe("advantage");
+    expect(d.conditions.attackRolls.mode).toBe("normal");
+    expect(d.conditions.situational).toHaveLength(1);
+  });
+  it("condizioni sconosciute si ignorano; senza dati non cambia nulla", () => {
+    const d = run({ conditions: ["boh"] });
+    expect(d.conditions.active).toEqual([]);
+    expect(d.speed.walk.value).toBe(30);
+  });
+});
+
+describe("incantesimi: filtri delle scelte e livello da incantatore", () => {
+  const ids = (l: { id: string }[]) => l.map((x) => x.id).sort();
+  it("filtro per livello, scuola, rituale e lista di classe", () => {
+    expect(ids(spellsMatching(rs, { level: 1, schools: ["enchantment", "divination"] }))).toEqual(["charm", "omen"]);
+    expect(ids(spellsMatching(rs, { level: 1, ritual: true }))).toEqual(["omen"]);
+    expect(ids(spellsMatching(rs, { level: 0 }, {}, "wizard"))).toEqual(["spark"]);
+    expect(ids(spellsMatching(rs, { classes: ["cleric", "bard"], level: 1 }))).toEqual(["charm", "omen", "ward"]);
+  });
+  it("classFrom: la lista arriva da un'altra scelta; senza scelta nessun risultato", () => {
+    const f = { level: 1, classFrom: "list" };
+    expect(spellsMatching(rs, f, {})).toEqual([]);
+    expect(ids(spellsMatching(rs, f, { list: ["cleric"] }))).toEqual(["omen", "ward"]);
+  });
+  it("candidati di una scelta per sorgente", () => {
+    const c = (source: string, filter?: object) => ({ id: "x", label: { it: "x" }, count: 1, distinct: true, source, ...(filter ? { filter } : {}) }) as never;
+    expect(ids(spellChoiceCandidates(rs, c("cantrips:cleric")))).toEqual(["comfort"]);
+    expect(ids(spellChoiceCandidates(rs, c("spells:wizard")))).toEqual(["bolt", "charm", "ward"]); // niente trucchetti
+    expect(ids(spellChoiceCandidates(rs, c("freespells", { level: 1, schools: ["abjuration"] })))).toEqual(["ward"]);
+    expect(spellChoiceCandidates(rs, c("skills"))).toEqual([]);
+  });
+  it("livello da incantatore combinato: pieno, metà per eccesso, un terzo per difetto", () => {
+    expect([casterLevelOf("full", 5), casterLevelOf("half", 3), casterLevelOf("half", 4), casterLevelOf("third", 8), casterLevelOf("third", 9)]).toEqual([5, 2, 2, 2, 3]);
   });
 });
 

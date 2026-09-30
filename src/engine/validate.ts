@@ -41,6 +41,12 @@ export function checkReferences(rs: Ruleset): string[] {
   for (const f of rs.feats.values())
     for (const e of f.effects)
       if (e.op === "grantFeat") need(`feats/${f.id}`, "talento concesso", e.feat, rs.feats, "feats");
+  for (const c of rs.conditions.values()) {
+    for (const g of c.grantsConditions) need(`conditions/${c.id}`, "condizione inclusa", g, rs.conditions, "conditions");
+    for (const e of c.effects) for (const i of e.conditions ?? []) need(`conditions/${c.id}`, "immunità a", i, rs.conditions, "conditions");
+    if (c.stackable && !c.levels) errs.push(`conditions/${c.id}: cumulativa senza livelli`);
+    if (c.requiresSource && !c.effects.length) errs.push(`conditions/${c.id}: richiede la fonte ma non ha effetti`);
+  }
   // hasFeature / hasFeat nelle condizioni (prerequisiti, requires, when) devono riferirsi a privilegi e talenti che esistono
   const featureIds = new Set<string>();
   const choicesOf = (h: { choices: Choice[] }) => h.choices.flatMap((c) => c.options ?? []);
@@ -71,6 +77,30 @@ export function checkReferences(rs: Ruleset): string[] {
     }
   }
   for (const f of rs.feats.values()) for (const p of f.prerequisites) checkCond(`feats/${f.id}`, p);
+  // incantesimi concessi: devono esistere e il modo deve coincidere col livello (trucchetto ⇔ livello 0); filtri delle scelte coerenti
+  if (rs.spells.size) {
+    const SCHOOLS = new Set([...rs.spells.values()].map((sp) => sp.school));
+    const CLASSES = new Set(["bard", "cleric", "druid", "paladin", "ranger", "sorcerer", "warlock", "wizard"]);
+    for (const h of holders) {
+      for (const c of [h, ...(h.features ?? [])]) {
+        const effects = [...c.effects, ...choicesOf(c).flatMap((o) => o.effects)];
+        for (const e of effects) {
+          if (e.op !== "grantSpell") continue;
+          const sp = rs.spells.get(e.spell);
+          if (!sp) { errs.push(`${h.where}: incantesimo "${e.spell}" non esiste in spells`); continue; }
+          if ((sp.level === 0) !== (e.mode === "cantrip")) errs.push(`${h.where}: ${e.spell} (livello ${sp.level}) con modo "${e.mode}"`);
+        }
+        for (const ch of c.choices) {
+          for (const sc of ch.filter?.schools ?? []) if (!SCHOOLS.has(sc as never)) errs.push(`${h.where}/${ch.id}: scuola "${sc}" non valida`);
+          for (const cl of ch.filter?.classes ?? []) if (!CLASSES.has(cl)) errs.push(`${h.where}/${ch.id}: lista "${cl}" non valida`);
+          const from = ch.filter?.classFrom;
+          if (from && !c.choices.some((x) => x.id === from)) errs.push(`${h.where}/${ch.id}: classFrom "${from}" non è una scelta dello stesso privilegio`);
+          const list = ch.source && /^(cantrips|spells):(\w+)$/.exec(ch.source)?.[2];
+          if (list && !CLASSES.has(list)) errs.push(`${h.where}/${ch.id}: lista "${list}" non valida`);
+        }
+      }
+    }
+  }
   for (const s of rs.skills.values()) {
     const ab = String(s.extra.ability ?? "");
     if (!["str", "dex", "con", "int", "wis", "cha"].includes(ab)) errs.push(`skills/${s.id}: caratteristica "${ab}" non valida`);

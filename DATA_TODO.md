@@ -5,38 +5,47 @@ Fonte dei dati: i riepiloghi in `docs/rules/` (non il Manuale del giocatore): ne
 Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 
 ## 1. Serve una fonte che non abbiamo
-- **Condizioni** (15, `needsReview`): i PDF danno solo i nomi. Effetti e regole (incluso Indebolimento/Esaurimento 2024) vanno forniti
-  (testo del manuale o decisione tua) prima dello step 14; non li scrivo a memoria.
+- Niente per ora. (Le condizioni sono arrivate con la spec `05_conditions.json`, vedi in fondo.)
 
 ## 2. Da fare in uno step già in piano
-- **Step 8 (incantesimi)**
-  - `CANTRIPS` in `scripts/lib/species-rules.ts` (trucchetto o 1° livello nei lignaggi) → sostituire con i livelli veri.
-  - Gli elenchi degli incantesimi sempre preparati delle sottoclassi includono trucchetti (es. `fire_bolt`, `ray_of_frost`, `acid_splash`):
-    ora sono tutti `alwaysPrepared`, da separare per livello.
-  - I filtri delle scelte (`Choice.filter`: livello, scuola, rituale, lista) sono già nei dati: servono i dati degli incantesimi per applicarli.
-  - Arcani firma del Mago (20°), Arcanum mistico, Maestria degli incantesimi: scelte di incantesimi con ricarica particolare, non codificate.
-- **Step 9 (armi e attacchi)**
-  - Lancia da cavaliere: "A due mani solo se non in sella" (ora solo testo in `description`).
-  - Competenze con filtro: `martial[light]` (Monaco), `martial[finesse|light]` (Ladro).
-  - Duellare (`needsReview`): "senza altre armi impugnate".
-  - Bonus/dadi di Arti marziali, Furtivo e simili applicati ai singoli attacchi.
-- **Step 10 (creazione)**
-  - Aumenti "+1 a una tra..." dei talenti e ASI: si registrano in `Character.asi` (con `cap` 20/30).
-  - Scelte alternative (`Choice.group`): Stile di combattimento / Guerriero benedetto / Guerriero druidico; conteggi da `countFrom`
-    (colonna della classe o della sottoclasse) e `countFormula` (es. libro del Mago `4 + 2 * classLevel:wizard`, Incantatore rituale `pb`).
-  - Competenze duplicate (es. Sensi acuti dell'Elfo "se già competente, escludila").
-  - Mente di ferro (Cacciatore delle tenebre): "se hai già la competenza Sag, Int o Car" (ora sempre Sag).
-- **Step 14b (privilegi giocabili)** — sono le regole scritte solo a parole:
+- **Step 16 (Magie)** — fatto: slot spesi/rimasti, slot del Patto (`state.pactUsed`), lancio con livello superiore, rituali, lanci gratuiti (un contatore per incantesimo), Concentrazione (una alla volta, CD dei danni), Recupero arcano/naturale, Astuzia magica, preparazione con le stesse regole della creazione. Restano:
+  - Arcani firma del Mago (20°), Arcanum mistico (Warlock 11°+), Maestria degli incantesimi (Mago 18°: un 1° e un 2° a volontà), Memorizzare (Mago 5°): scelte con ricarica particolare, non codificate.
+  - Punti stregoneria: conversione slot ↔ punti e Ripristino stregonesco; Rinascita selvatica (Druido 5°); Incantesimi potenti e Metamagia sui lanci.
+  - La regola "un solo slot per turno" è solo un promemoria (non c'è il tracciamento dei turni); i componenti con costo (materiali) sono un promemoria, non si controlla l'inventario.
+  - Restrizioni di componenti (V/S: Silenzio, mani occupate; Incantatore da guerra) e Svantaggio degli attacchi a distanza con incantesimo con un nemico entro 5 ft: solo testo.
+- **Step 14b (attacchi in gioco)**
+  - Bonus che dipendono da uno stato attivo: Danno ira (serve "Ira attiva"), Punizione divina, Colpo brutale, Furia, Sacro Simbolo ecc. Nelle schede degli attacchi ci sono solo gli extra sempre validi (Attacco furtivo, come promemoria).
+  - Proprietà di maestria: il motore dice quale è attiva e la CD di Rovesciare; l'effetto (Spingere, Fiaccare...) è solo testo della regola.
+  - Attacco a distanza con nemico entro 5 ft / a gittata lunga: promemoria di Svantaggio (dipende dalla situazione).
+- **Privilegi ancora solo descritti** (step 14b ha messo l'elenco, i contatori e 7 stati attivabili; il resto si legge ma non modifica i numeri):
+  - Contatori: 49 ricavati dal testo dei riepiloghi (`scripts/lib/feature-play.ts`, `deriveUsage`): solo formule esplicite ("Usi = mod Sag (min 1) per Riposo Lungo", "1 volta per Riposo Breve o Lungo"); il minimo 1 c'è solo dove il testo lo scrive.
+    I costi alternativi ("o spendendo un dado / uno slot / 5 punti") restano nel testo: il contatore conta solo gli usi a riposo.
+  - Stati attivabili curati (`ACTIVATIONS`): Ira, Forma selvatica, Rivelazione celestiale, Volo draconico, Forma grande, Ali del drago, Angelo vendicatore. Da aggiungere gli altri (Forma divina dello Zelota, Presenza intimidatoria...), il danno extra di Rivelazione celestiale (1 volta per turno), il Vantaggio alle prove di Forza dell'Ira e di Forma grande (non c'è un effetto per le prove).
+  - Bonus che dipendono da uno stato attivo: fatto per l'Ira; restano Punizione divina, Colpo brutale, Furia, Sacro Simbolo ecc.
   - Talenti: quasi tutti i talenti generali (es. Maestro delle armi possenti, Sentinella, Attore), effetti di oggetti (acido, pozioni ecc.).
-  - Specie: Trance, Retaggio fatato, Esperto della pietra, Agilità halfling, Fortunato, Furtivo per natura, Corporatura possente,
-    benefici dell'Ascendenza gigante, forme di Rivelazione celestiale, Volo draconico, Forma grande; Alto elfo: cambio del trucchetto a ogni Riposo Lungo.
-  - Classi: quasi tutti i privilegi di combattimento (Attacco irruento, Colpo brutale, Furia, Forma selvatica...), Colpo divino / Incantesimi
-    potenti, "usi = mod Sag" delle sottoclassi (Bagliore protettivo, Sacerdote di guerra), Presagio del Divinatore, Protezione arcana,
-    compagni del Signore delle bestie (nella descrizione della sottoclasse), effetti delle invocazioni (es. Deflagrazione agonizzante),
-    Aura di protezione sugli alleati.
-  - **Immunità alle condizioni** (es. Protezione della natura, Aura di coraggio): non c'è ancora un effetto `immunity`.
+  - Specie: Trance, Retaggio fatato, Esperto della pietra, Agilità halfling, Fortunato, Furtivo per natura, Corporatura possente, benefici dell'Ascendenza gigante; Alto elfo: cambio del trucchetto a ogni Riposo Lungo.
+  - Classi: quasi tutti i privilegi di combattimento (Attacco irruento, Colpo brutale...), Colpo divino / Incantesimi potenti, Presagio del Divinatore, Protezione arcana,
+    compagni del Signore delle bestie (nella descrizione della sottoclasse), effetti delle invocazioni (es. Deflagrazione agonizzante), Aura di protezione sugli alleati.
+  - **Immunità alle condizioni** dei privilegi (es. Protezione della natura, Aura di coraggio): il motore sa applicare l'immunità (Pietrificato → Avvelenato), ma i privilegi non hanno ancora un effetto `immunity`.
+  - Condizioni con fonte e situazionali (linea di vista, distanza): il motore le mostra come testo, con la fonte se indicata (fatto nella scheda, step 14).
+
+## 3. Homebrew (step 18): cosa non c'è ancora
+- Gli **effetti sul motore** valgono solo per i talenti (17 effetti predefiniti). Armi, armature e oggetti homebrew hanno i campi standard ma un oggetto magico non può ancora dare bonus (anello +1 CA, sintonia con effetti).
+- **Incantesimi homebrew**: si aggiungono a mano al personaggio (`extraSpells`, lanciati con la prima classe incantatrice); non compaiono nelle liste di classe per la preparazione e la creazione.
+- **Backup**: l'homebrew non è nel backup dei personaggi (si scambia con l'export `.json` del pacchetto).
+- Nessun effetto "a scelta" o con condizioni (`when`) nel catalogo: per quelli serve scrivere il `.json` a mano (vedi `data/homebrew/template.jsonc`).
+- Bug segnalato: dadi del danno delle armi (vedi PLAN.md, "Aperti").
+
+## Nota sugli incantesimi (step 8)
+390 incantesimi dal riepilogo `04_Incantesimi`: i testi sono riassunti in parole nostre (non il testo del manuale). Per 10 incantesimi la risoluzione non entra nell'enum e resta in
+`resolutionRaw` (Indagare, "TS Des / Cos", "TS vario/vari"). L'estrazione verifica ogni incantesimo contro le liste per classe del PDF (nome, livello, classe, ◆ Concentrazione, ® Rituale).
 
 ## Chiuso in questa revisione
+- **Step 10**: aumenti di caratteristica di talenti e livelli (`Character.asi` con `key` e `cap`), scelte alternative (`Choice.group`), conteggi da `countFrom` / `countFormula`,
+  competenze duplicate (abilità, strumenti, tiri salvezza; Maestria solo su abilità già competenti), linguaggi (Comune + 2, Druidico, Gergo dei ladri, scelte di Ladro e Ranger),
+  Guerriero benedetto/druidico, Barbaro con maestrie solo da mischia, Incantatore rituale / Toccato dai folletti con i filtri applicati, talenti ripetibili con scelte separate per acquisizione.
+- **Step 9**: Lancia da cavaliere (`twoHandedUnlessMounted` + `state.mounted`), competenze con filtro (`martial[light]`, `martial[finesse|light]`),
+  Duellare (condizioni `twoHanded` / `otherWeapon`, non più `needsReview`), Arti marziali e Attacco furtivo negli attacchi, munizioni delle armi (`ammunition`).
 - Id dei privilegi nei prerequisiti dei talenti (`spellcasting`, `pact_magic`, `fighting_style`): ora `validate:data` controlla ogni `hasFeature:`/`hasFeat:` in tutte le condizioni.
 - Caratteristica da incantatore delle specie: la scelta `spell_ability` arriva ai `grantSpell` (`abilityFrom`); `Derived.grantedSpells` dà caratteristica, CD e attacco
   (per gli incantesimi di classe e sottoclasse usa la caratteristica della classe).
@@ -50,4 +59,10 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
   Circolo delle Stelle, Guerriero psionico; scelta di Scoperte magiche (Sapienza).
 - Terreno del Circolo della Terra: resistenza di Protezione della natura dal 10°.
 - Scurovisione "60 ft o +60" (Cacciatore delle tenebre, Ombra): effetto `sense` additivo.
+- **Step 8**: incantesimi (390) e tabelle degli slot del multiclasse; trucchetto / 1° livello dei lignaggi ora dai livelli veri (niente più elenco fisso); i trucchetti negli elenchi
+  delle sottoclassi sono `cantrip`; filtri delle scelte (`spellsMatching`, `spellChoiceCandidates`); slot per livello, multiclasse e slot del patto (`Derived.spellSlots`);
+  ogni incantesimo concesso dai dati viene verificato (esistenza e modo coerente col livello).
 - Recuperi parziali (Ira, Incanalare divinità, Forma selvatica, Recupero energie).
+- **Condizioni** (15): dati veri dalla spec `docs/rules/05_conditions.json` (PHB 2024 App. C) con effetti tipizzati, condizioni incluse, immunità,
+  Esaurimento a livelli (-2 × livello ai Tiri D20, -5 ft × livello, morte al 6°) e vincoli di fuga. Il motore le applica a velocità, TS, prove, iniziativa,
+  tiri per colpire, resistenze e azioni (`Derived.conditions`). Le voci non sono più `needsReview`; il testo ufficiale fa fede il manuale (pagina in `bookPage`).

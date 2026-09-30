@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { buildRuleset } from "./ruleset";
 import { checkReferences } from "./validate";
 import { buildCtx, computeCharacter, evalValue } from "./compute";
+import { spellChoiceCandidates } from "./spells";
+import { equipItem } from "./equipment";
 import { testCharacter } from "./compute/testkit";
 
 // Questi test girano solo dove esiste data/private (non tracciata): altrove vengono saltati.
@@ -446,7 +448,262 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
     });
     it("nessun needsReview rimasto sui talenti codificati", () => {
       const left = [...R.feats.values()].filter((x) => x.needsReview).map((x) => x.id);
-      expect(left).toEqual(["dueling"]); // solo Duellare (dipende dalle armi, step 9)
+      expect(left).toEqual([]); // Duellare incluso: ora sa se hai altre armi in mano (step 9)
+    });
+  });
+
+  describe("condizioni (spec PHB 2024, App. C)", () => {
+    const R = fullRuleset();
+    const base = testCharacter({ classes: [{ classId: "fighter", level: 1, hpRolls: [] }] });
+    const run = (state: object) => computeCharacter({ ...base, state: { ...base.state, ...state } }, R);
+
+    it("15 condizioni con id, pagina del manuale e riferimenti coerenti", () => {
+      expect(R.conditions.size).toBe(15);
+      expect(checkReferences(R)).toEqual([]);
+      expect([...R.conditions.values()].filter((c) => c.stackable).map((c) => c.id)).toEqual(["exhaustion"]);
+      expect([...R.conditions.values()].filter((c) => c.requiresSource).map((c) => c.id).sort()).toEqual(["charmed", "frightened", "grappled"]);
+      for (const c of R.conditions.values()) { expect(c.bookPage, c.id).toBeGreaterThan(300); expect(c.description, c.id).not.toBe(""); }
+      const g = R.conditions.get("grappled")!;
+      expect(g.escape).toMatchObject({ action: true, check: [{ ability: "str", skill: "athletics" }, { ability: "dex", skill: "acrobatics" }] });
+      expect(R.conditions.get("exhaustion")!.levels).toEqual({ min: 1, max: 6, deathAt: 6 });
+    });
+    it("Privo di sensi: include Incapacitato e Prono; Velocità 0; TS For/Des falliti; colpi critici entro 5 ft", () => {
+      const d = run({ conditions: ["unconscious"] });
+      expect(d.conditions.active.sort()).toEqual(["incapacitated", "prone", "unconscious"]);
+      expect(d.speed.walk.value).toBe(0);
+      expect(d.saves.str.autoFail.length + d.saves.dex.autoFail.length).toBe(2);
+      expect(d.conditions.attacksAgainstYou.advantage).toContain("Privo di sensi");
+      expect(d.conditions.attacksAgainstYou.autoCritical).toHaveLength(1);
+      expect(d.conditions.attackRolls.mode).toBe("disadvantage"); // Prono: Svantaggio ai tuoi tiri per colpire
+      expect(d.conditions.cannot).toEqual(expect.arrayContaining(["compiere azione", "parlare"]));
+    });
+    it("Pietrificato: include Incapacitato, immune ad Avvelenato, resistenza a tutti i danni", () => {
+      const d = run({ conditions: ["petrified", "poisoned"] });
+      expect(d.conditions.active).not.toContain("poisoned");
+      expect(d.resistances).toContain("all");
+      expect(d.conditions.active).toContain("incapacitated");
+    });
+    it("Trattenuto: Velocità 0, Svantaggio ai tuoi attacchi e ai TS Des", () => {
+      const d = run({ conditions: ["restrained"] });
+      expect(d.speed.walk.value).toBe(0);
+      expect(d.conditions.attackRolls.mode).toBe("disadvantage");
+      expect(d.saves.dex.mode).toBe("disadvantage");
+      expect(d.saves.str.mode).toBe("normal");
+    });
+    it("Accecato: Vantaggio a chi ti attacca e Svantaggio ai tuoi; prove di vista fallite", () => {
+      const d = run({ conditions: ["blinded"] });
+      expect(d.conditions.attacksAgainstYou.advantage).toEqual(["Accecato"]);
+      expect(d.conditions.attackRolls.mode).toBe("disadvantage");
+      expect(d.conditions.autoFailChecks[0]).toMatch(/vista/);
+      expect(d.conditions.cannot).toContain("vedere");
+    });
+    it("Afferrato e Spaventato: fonte tracciata, effetti situazionali in testo", () => {
+      const d = run({ conditions: ["grappled", "frightened"], conditionSources: { grappled: "Ogre", frightened: "Lich" } });
+      expect(d.speed.walk.value).toBe(0);
+      expect(d.conditions.situational.join(" ")).toMatch(/Ogre/);
+      expect(d.conditions.situational.join(" ")).toMatch(/Lich/);
+      expect(d.conditions.attackRolls.mode).toBe("normal"); // Svantaggio solo se non attacchi chi ti afferra / fonte in vista
+    });
+    it("Prono e Invisibile: gli effetti che dipendono dalla distanza o da chi ti vede restano testo", () => {
+      const p = run({ conditions: ["prone"] });
+      expect(p.conditions.attackRolls.mode).toBe("disadvantage");
+      expect(p.conditions.attacksAgainstYou.advantage).toEqual([]); // dipende dalla distanza
+      expect(p.conditions.situational.length).toBeGreaterThan(0);
+      const i = run({ conditions: ["invisible"] });
+      expect(i.conditions.initiativeMode.mode).toBe("advantage");
+    });
+    it("Esaurimento 1-6 con i dati veri", () => {
+      const at = (l: number) => run({ exhaustion: l });
+      expect(at(0).speed.walk.value).toBe(30);
+      expect([1, 2, 5].map((l) => at(l).speed.walk.value)).toEqual([25, 20, 5]);
+      expect(at(2).skills.acrobatics.bonus.value - at(0).skills.acrobatics.bonus.value).toBe(-4);
+      expect(at(5).conditions.dead).toBe(false);
+      expect(at(6).conditions.dead).toBe(true);
+    });
+    it("Avvelenato e Assordato: Svantaggio alle prove, prove di udito fallite", () => {
+      const d = run({ conditions: ["poisoned", "deafened"] });
+      expect(d.skills.perception.mode).toBe("disadvantage");
+      expect(d.conditions.autoFailChecks.join()).toMatch(/udito/);
+    });
+  });
+
+  describe("incantesimi (step 8)", () => {
+    const R = fullRuleset();
+    const cls = (classId: string, level: number, extra: object = {}) => ({ classId, level, hpRolls: [], ...extra });
+    const mk = (classes: ReturnType<typeof cls>[], over: object = {}) => testCharacter({ classes, ...over });
+    const slots = (ch: ReturnType<typeof mk>) => computeCharacter(ch, R).spellSlots;
+
+    it("390 incantesimi: 34 trucchetti, 64 di 1°... 16 di 9°; 159 a Concentrazione, 31 rituali", () => {
+      const by = (l: number) => [...R.spells.values()].filter((x) => x.level === l).length;
+      expect([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(by)).toEqual([34, 64, 62, 52, 41, 48, 34, 21, 18, 16]);
+      expect([...R.spells.values()].filter((x) => x.concentration)).toHaveLength(159);
+      expect([...R.spells.values()].filter((x) => x.ritual)).toHaveLength(31);
+    });
+    it("liste per classe (Paladino e Ranger senza trucchetti)", () => {
+      const n = (c: string, lv?: number) => [...R.spells.values()].filter((x) => x.classes.includes(c as never) && (lv === undefined || x.level === lv)).length;
+      expect(["bard", "cleric", "druid", "paladin", "ranger", "sorcerer", "warlock", "wizard"].map((c) => n(c))).toEqual([139, 117, 135, 51, 61, 149, 88, 241]);
+      expect([n("paladin", 0), n("ranger", 0), n("wizard", 0)]).toEqual([0, 0, 20]);
+    });
+    it("schede: Palla di fuoco, Identificare (costo), Scudo (reazione), Controincantesimo", () => {
+      const f = R.spells.get("fireball")!;
+      expect([f.level, f.school, f.resolution, f.castingTime.unit, f.range]).toEqual([3, "evocation", "save_dex", "action", "150 ft"]);
+      expect(f.name).toEqual({ it: "Palla di fuoco", en: "Fireball" });
+      expect(R.spells.get("identify")!).toMatchObject({ ritual: true, castingTime: { unit: "minute", amount: 1 }, components: { materialCost: 100, materialConsumed: false } });
+      expect(R.spells.get("shield")!.castingTime).toMatchObject({ unit: "reaction", trigger: expect.stringContaining("colpito") });
+      expect(R.spells.get("revivify")!.components).toMatchObject({ materialCost: 300, materialConsumed: true });
+      expect(R.spells.get("chill_touch")!).toMatchObject({ level: 0, resolution: "attack_melee" });
+      expect(R.spells.get("acid_splash")!.higherLevels).toMatch(/2d6/);
+    });
+    it("ogni incantesimo concesso dai dati esiste, con il modo giusto (trucchetto solo al livello 0)", () => {
+      expect(checkReferences(R)).toEqual([]);
+      const sub = R.subclasses.get("land")!.choices[0]!.options![0]!.effects.filter((e) => e.op === "grantSpell");
+      expect(sub.find((e) => e.op === "grantSpell" && e.spell === "fire_bolt")).toMatchObject({ mode: "cantrip" });
+      expect(sub.find((e) => e.op === "grantSpell" && e.spell === "blur")).toMatchObject({ mode: "alwaysPrepared" });
+    });
+    it("lignaggi della specie: trucchetti a volontà, incantesimi di 1°+ con lancio gratuito", () => {
+      const sp = (species: string, dec: object) => computeCharacter(mk([cls("fighter", 5)], { speciesId: species, decisions: dec }), R).grantedSpells;
+      const gnome = sp("gnome", { gnomish_lineage: ["forest_gnome"], spell_ability: ["int"] });
+      expect(gnome.find((x) => x.spell === "minor_illusion")).toMatchObject({ mode: "cantrip" });
+      expect(gnome.find((x) => x.spell === "speak_with_animals")).toMatchObject({ mode: "alwaysPrepared" });
+      const inf = sp("tiefling", { fiendish_legacy: ["infernal"], spell_ability: ["cha"] });
+      expect(inf.find((x) => x.spell === "fire_bolt")).toMatchObject({ mode: "cantrip" });
+      expect(inf.find((x) => x.spell === "fire_bolt")!.freeCast).toBeUndefined();
+      expect(inf.find((x) => x.spell === "hellish_rebuke")).toMatchObject({ mode: "alwaysPrepared", freeCast: { recharge: "long_rest" } });
+    });
+    it("candidati delle scelte: liste di classe, Iniziato alla magia, Toccato dai folletti, Incantatore rituale", () => {
+      const choice = (featId: string, id: string) => R.feats.get(featId)!.choices.find((c) => c.id === id)!;
+      const ids = (l: { id: string }[]) => l.map((x) => x.id);
+      const cant = spellChoiceCandidates(R, R.classes.get("bard")!.choices.find((c) => c.id === "bard_cantrips")!);
+      expect(cant).toHaveLength(13);
+      expect(cant.every((x) => x.level === 0 && x.classes.includes("bard"))).toBe(true);
+      expect(spellChoiceCandidates(R, choice("magic_initiate", "magic_initiate_cantrips"), {})).toEqual([]); // lista non ancora scelta
+      const cl = spellChoiceCandidates(R, choice("magic_initiate", "magic_initiate_cantrips"), { magic_initiate_list: ["cleric"] });
+      expect(ids(cl)).toContain("guidance");
+      expect(ids(cl)).not.toContain("fire_bolt");
+      const fey = spellChoiceCandidates(R, choice("fey_touched", "fey_touched_spell"));
+      expect(fey.every((x) => x.level === 1 && ["enchantment", "divination"].includes(x.school))).toBe(true);
+      expect(ids(fey)).toEqual(expect.arrayContaining(["charm_person", "command", "detect_magic"]));
+      expect(ids(fey)).not.toContain("shield");
+      const rit = spellChoiceCandidates(R, choice("ritual_caster", "ritual_caster_spells"));
+      expect(ids(rit).sort()).toEqual(["alarm", "comprehend_languages", "detect_magic", "detect_poison_and_disease", "find_familiar", "identify", "illusory_script", "purify_food_and_drink", "speak_with_animals", "tensers_floating_disk", "unseen_servant"]);
+      const lore = spellChoiceCandidates(R, R.subclasses.get("lore")!.features.find((f) => f.id === "magical_discoveries")!.choices[0]!);
+      expect(ids(lore)).toContain("cure_wounds");
+      expect(ids(lore)).toContain("fireball");
+      expect(ids(lore)).not.toContain("eldritch_blast"); // solo Warlock: fuori dalle liste ammesse (Chierico, Druido, Mago)
+    });
+    it("slot con una sola classe: tabella della classe (o della sottoclasse per i terzi incantatori)", () => {
+      expect(slots(mk([cls("cleric", 5)]))).toMatchObject({ slots: [4, 3, 2], casterLevel: 5 });
+      expect(slots(mk([cls("paladin", 5)])).slots).toEqual([4, 2]);
+      expect(slots(mk([cls("fighter", 3, { subclassId: "eldritch_knight" })])).slots).toEqual([2]);
+      expect(slots(mk([cls("fighter", 3)])).slots).toEqual([]);
+      expect(slots(mk([cls("barbarian", 20)]))).toMatchObject({ slots: [], casterLevel: 0 });
+    });
+    it("slot in multiclasse: livello combinato e tabella dell'incantatore completo", () => {
+      expect(slots(mk([cls("wizard", 3), cls("cleric", 2)]))).toMatchObject({ casterLevel: 5, slots: [4, 3, 2] });
+      expect(slots(mk([cls("paladin", 4), cls("ranger", 3)]))).toMatchObject({ casterLevel: 4, slots: [4, 3] }); // 2 + 2
+      expect(slots(mk([cls("fighter", 9, { subclassId: "eldritch_knight" }), cls("wizard", 1)]))).toMatchObject({ casterLevel: 4, slots: [4, 3] }); // 3 + 1
+      expect(slots(mk([cls("wizard", 20), cls("bard", 1)])).slots).toEqual([4, 3, 3, 3, 3, 2, 2, 1, 1]); // 21 → tetto 20
+    });
+    it("slot del patto separati dal resto; slot spesi", () => {
+      expect(slots(mk([cls("warlock", 11)]))).toMatchObject({ slots: [], pact: { count: 3, level: 5 } });
+      const both = slots(mk([cls("wizard", 5), cls("warlock", 3)]));
+      expect(both).toMatchObject({ slots: [4, 3, 2], pact: { count: 2, level: 2 } });
+      const spent = computeCharacter(mk([cls("wizard", 5)], { state: { ...testCharacter().state, slotsUsed: { 1: 2, 3: 5 } } }), R).spellSlots;
+      expect(spent.used).toEqual([2, 0, 2]); // non si spendono più slot di quanti ce ne sono
+      expect(spent.remaining).toEqual([2, 3, 0]);
+    });
+    it("tabelle degli slot del multiclasse presenti e coerenti con le classi", () => {
+      const full = R.slotTables.get("full_caster")!.slots;
+      for (const id of ["wizard", "bard", "cleric", "druid", "sorcerer"]) expect(R.classes.get(id)!.spellSlots, id).toEqual(full);
+      const half = R.slotTables.get("half_caster")!.slots;
+      for (const id of ["paladin", "ranger"]) expect(R.classes.get(id)!.spellSlots, id).toEqual(half);
+      expect(R.slotTables.get("third_caster")!.slots.slice(2)).toEqual(R.subclasses.get("eldritch_knight")!.spellSlots!.slice(2));
+    });
+  });
+
+  describe("equipaggiamento e attacchi (step 9) con i dati veri", () => {
+    const R = fullRuleset();
+    const cls = (classId: string, level: number, extra: object = {}) => ({ classId, level, hpRolls: [], ...extra });
+    const inv = (...e: [string, "wielded" | "worn" | "stowed", object?][]) => e.map(([itemId, state, x]) => ({ itemId, qty: 1, state, ...(x ?? {}) }));
+    const sc = (o: object) => ({ baseScores: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, ...o } });
+    const run = (classes: ReturnType<typeof cls>[], over: object = {}) => computeCharacter(testCharacter({ classes, ...over }), R);
+    const atk = (d: ReturnType<typeof run>, label: string) => d.attacks.find((a) => a.label === label)!;
+
+    it("Guerriero con Spadone: Pesante, 2d6 + For, maestria Sfiorare solo se scelta", () => {
+      const inventory = inv(["greatsword", "wielded"]);
+      const base = sc({ str: 16 });
+      const a = atk(run([cls("fighter", 1)], { ...base, inventory }), "Spadone");
+      expect([a.hands, a.damage.dice, a.damage.bonus.value, a.toHit.value, a.mastery]).toEqual([2, "2d6", 3, 5, { id: "graze", name: "Sfiorare", active: false }]);
+      const m = atk(run([cls("fighter", 1)], { ...base, inventory, decisions: { fighter_weapon_mastery: ["greatsword"] } }), "Spadone");
+      expect(m.mastery?.active).toBe(true);
+      expect(atk(run([cls("fighter", 1)], { ...sc({ str: 12 }), inventory }), "Spadone").mode).toBe("disadvantage");
+    });
+    it("Rovesciare: CD = 8 + modificatore + competenza", () => {
+      const a = atk(run([cls("fighter", 1)], { ...sc({ str: 16 }), inventory: inv(["battleaxe", "wielded"]), decisions: { fighter_weapon_mastery: ["battleaxe"] } }), "Ascia da battaglia");
+      expect(a.mastery).toMatchObject({ id: "topple", active: true, dc: 8 + 3 + 2 });
+    });
+    it("Stili di combattimento con i dati veri: Duellare, Tiro con l'arco, Armi da lancio, Armi possenti", () => {
+      const style = (id: string) => ({ decisions: { fighter_fighting_style: [id] }, feats: [{ featId: id }] });
+      const b = sc({ str: 16, dex: 14 });
+      const sword = inv(["longsword", "wielded"], ["shield", "worn"]);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("dueling"), inventory: sword }), "Spada lunga").damage.bonus.value).toBe(3 + 2);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("dueling"), inventory: inv(["greatsword", "wielded"]) }), "Spadone").damage.bonus.value).toBe(3);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("archery"), inventory: inv(["longbow", "wielded"]) }), "Arco lungo").toHit.value).toBe(2 + 2 + 2);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("thrown_weapon_fighting"), inventory: inv(["handaxe", "wielded"]) }), "Ascia (lanciata)").damage.bonus.value).toBe(3 + 2);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("thrown_weapon_fighting"), inventory: inv(["handaxe", "wielded"]) }), "Ascia").damage.bonus.value).toBe(3);
+      expect(atk(run([cls("fighter", 1)], { ...b, ...style("great_weapon_fighting"), inventory: inv(["greatsword", "wielded"]) }), "Spadone").notes.join()).toMatch(/contano 3/);
+    });
+    it("Arco lungo: Des, gittata 150/600, Frecce dall'inventario; Lancia da cavaliere: 10 ft e a una mano in sella", () => {
+      const a = atk(run([cls("fighter", 1)], { ...sc({ dex: 16 }), inventory: [...inv(["longbow", "wielded"]), { itemId: "arrow", qty: 3, state: "stowed" }] }), "Arco lungo");
+      expect([a.ability, a.range, a.ammo]).toEqual(["dex", { normal: 150, long: 600 }, { itemId: "arrow", available: 60 }]);
+      const l = (mounted: boolean) => atk(run([cls("fighter", 1)], { inventory: inv(["lance", "wielded"]), state: { ...testCharacter().state, mounted } }), "Lancia da cavaliere");
+      expect([l(false).hands, l(true).hands, l(false).reach]).toEqual([2, 1, 10]);
+    });
+    it("Attacco extra: Guerriero 2/3/4 attacchi, Barbaro al 5°", () => {
+      const n = (c: string, l: number) => run([cls(c, l)]).attacksPerAction;
+      expect([n("fighter", 1), n("fighter", 5), n("fighter", 11), n("fighter", 20), n("barbarian", 4), n("barbarian", 5)]).toEqual([1, 2, 3, 4, 1, 2]);
+    });
+    it("Campione: critico 19-20 dal 3° e 18-20 dal 15°", () => {
+      const c = (l: number) => atk(run([cls("fighter", l, { subclassId: "champion" })], { inventory: inv(["longsword", "wielded"]) }), "Spada lunga").critRange;
+      expect([c(2), c(3), c(15)]).toEqual([20, 19, 18]);
+    });
+    it("Monaco: Arti marziali (Des, dado per livello) solo senza armatura né scudo", () => {
+      const b = sc({ str: 10, dex: 16 });
+      const u = (l: number, inv2: object[] = []) => atk(run([cls("monk", l)], { ...b, inventory: inv2 }), "Colpo senz'armi");
+      expect([u(1).damage.dice, u(5).damage.dice, u(11).damage.dice, u(17).damage.dice]).toEqual(["1d6", "1d8", "1d10", "1d12"]);
+      expect([u(1).ability, u(1).abilityWhy, u(1).damage.bonus.value]).toEqual(["dex", "Arti marziali", 3]);
+      const armored = u(5, inv(["studded_leather", "worn"]));
+      expect([armored.ability, armored.damage.dice]).toEqual(["str", "1"]); // armatura: niente Arti marziali
+      const w = atk(run([cls("monk", 1)], { ...b, inventory: inv(["shortsword", "wielded"]) }), "Spada corta");
+      expect([w.ability, w.abilityWhy]).toEqual(["dex", "Accurata"]);
+      const club = atk(run([cls("monk", 1)], { ...sc({ str: 10, dex: 16 }), inventory: inv(["mace", "wielded"]) }), "Mazza"); // arma da Monaco
+      expect([club.ability, club.abilityWhy, club.proficient]).toEqual(["dex", "Arti marziali", true]);
+      const greatsword = atk(run([cls("monk", 1)], { ...b, inventory: inv(["greatsword", "wielded"]) }), "Spadone"); // né semplice né Leggera
+      expect([greatsword.ability, greatsword.proficient]).toEqual(["str", false]);
+    });
+    it("Ladro: Attacco furtivo con arma Accurata o a distanza; competenza nelle armi marziali Accurate o Leggere", () => {
+      const r = (w: string) => atk(run([cls("rogue", 5)], { ...sc({ dex: 16 }), inventory: inv([w, "wielded"]) }), R.weapons.get(w)!.name.it);
+      expect(r("rapier").riders[0]).toMatch(/Attacco furtivo 3d6/);
+      expect(r("rapier").proficient).toBe(true);
+      expect(r("shortbow").riders[0]).toMatch(/3d6/);
+      expect(r("longsword").riders).toEqual([]);
+      expect(r("longsword").proficient).toBe(false); // marziale non Accurata né Leggera
+    });
+    it("Warlock del Patto della Lama: l'arma del patto usa Carisma", () => {
+      const ch = { ...sc({ str: 8, cha: 16 }), inventory: inv(["longsword", "wielded"]), pactWeapon: "longsword", decisions: { warlock_invocations: ["pact_of_the_blade"] } };
+      const a = atk(run([cls("warlock", 3)], ch), "Spada lunga");
+      expect([a.ability, a.abilityWhy]).toEqual(["cha", "arma del patto"]);
+      expect(atk(run([cls("warlock", 3)], { ...ch, pactWeapon: undefined }), "Spada lunga").ability).toBe("str");
+    });
+    it("tempi con i dati veri: Cotta di maglia 10 minuti, Scudo 1 azione, sintonia e peso", () => {
+      const ch = testCharacter({ classes: [cls("fighter", 1)], inventory: inv(["chain_mail", "stowed"], ["shield", "stowed"]) });
+      const r = equipItem(ch, R, "chain_mail", "worn");
+      expect(r.time.minutes).toBe(10);
+      expect(equipItem(r.character, R, "shield", "worn").time.action).toBe(true);
+      const d = computeCharacter(equipItem(equipItem(ch, R, "chain_mail", "worn").character, R, "shield", "worn").character, R);
+      expect(d.ac.value).toBe(18);
+      expect(d.loadout.weight).toBe(55 + 6);
     });
   });
 });
+

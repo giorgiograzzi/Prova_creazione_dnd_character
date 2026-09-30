@@ -160,7 +160,7 @@ export const CLASS_RULES: Record<string, ClassRule> = {
   ranger: {
     columns: ["Nemico prescelto", "Maestria armi", "Preparati", "Slot"],
     featureRules: {
-      deft_explorer: expertise("ranger_deft_explorer", 1),
+      deft_explorer: { choices: [...expertise("ranger_deft_explorer", 1).choices!, { id: "ranger_languages", label: T("Linguaggi"), count: 2, source: "languages:standard" }] },
       fighting_style: styleOrWarrior("ranger", "druid", "wis", "druidic"),
       "expertise@9": expertise("ranger_expertise_9", 2),
       roving: { effects: [{ op: "speedBonus", value: 10, when: "!wearingArmor:heavy" }] },
@@ -172,7 +172,12 @@ export const CLASS_RULES: Record<string, ClassRule> = {
       gloom_stalker: {
         dread_ambusher: { effects: [{ op: "initiativeBonus", value: "mod:wis" }] },
         umbral_sight: { effects: [{ op: "sense", kind: "darkvision", range: 60, additive: true }] }, // 60 ft, oppure +60 se già ce l'hai
-        iron_mind: { effects: [{ op: "grantSaveProficiency", abilities: ["wis"] }] },
+        // Competenza nei TS di Saggezza; se già ce l'hai (dalla classe di partenza) scegli Intelligenza o Carisma
+        iron_mind: { choices: [{ id: "iron_mind", label: T("Competenza nei tiri salvezza"), count: 1, options: [
+          { id: "wis", name: T("Saggezza"), requires: "!saveProficient:wis", effects: [{ op: "grantSaveProficiency", abilities: ["wis"] }] },
+          { id: "int", name: T("Intelligenza"), requires: "saveProficient:wis", effects: [{ op: "grantSaveProficiency", abilities: ["int"] }] },
+          { id: "cha", name: T("Carisma"), requires: "saveProficient:wis", effects: [{ op: "grantSaveProficiency", abilities: ["cha"] }] },
+        ] }] },
       },
       fey_wanderer: {
         otherworldly_glamour: {
@@ -187,6 +192,7 @@ export const CLASS_RULES: Record<string, ClassRule> = {
     featureRules: {
       "expertise@1": expertise("rogue_expertise_1", 2),
       "expertise_2@6": expertise("rogue_expertise_6", 2),
+      thieves_cant: { choices: [{ id: "rogue_extra_language", label: T("Linguaggio aggiuntivo"), count: 1, source: "languages:standard" }] },
       slippery_mind: { effects: [{ op: "grantSaveProficiency", abilities: ["wis", "cha"] }] },
     },
     subclassRules: { assassin: { assassins_tools: { effects: [{ op: "grantToolProficiency", tools: ["disguise_kit", "poisoners_kit"] }] } } },

@@ -2,19 +2,26 @@
 // Grammatica: or := and ('||' and)* ; and := not ('&&' not)* ; not := '!'? atom
 //   wearingArmor:none|light|medium|heavy|any   shield   equipped:<id|categoria>
 //   trained:light|medium|heavy|shield (addestramento nelle armature)
+//   twoHanded (l'arma è impugnata a due mani)   otherWeapon (nell'altra mano c'è un'altra arma)
 //   weaponProperty:<prop>   attackType:melee|ranged   hasFeature:<id>   hasFeat:<id>
+//   active:<id> (privilegio attivato: Ira...)   attackAbility:<car> (caratteristica usata dall'attacco)
+//   saveProficient:<car> (TS già di classe: la prima classe dà i TS)
 //   level>=N   classLevel:<classe>>=N   ability:<car>>=N   (operatori: >= <= == > <)
+import type { Ability } from "./primitives";
 export type Cmp = ">=" | "<=" | "==" | ">" | "<";
 export type Condition =
   | { t: "and" | "or"; items: Condition[] }
   | { t: "not"; item: Condition }
   | { t: "wearingArmor"; value: "none" | "light" | "medium" | "heavy" | "any" }
   | { t: "shield" }
+  | { t: "twoHanded" }
+  | { t: "otherWeapon" }
   | { t: "trained"; value: "light" | "medium" | "heavy" | "shield" }
   | { t: "equipped"; value: string }
   | { t: "weaponProperty"; value: string }
   | { t: "attackType"; value: "melee" | "ranged" }
-  | { t: "hasFeature" | "hasFeat"; value: string }
+  | { t: "hasFeature" | "hasFeat" | "active"; value: string } // active:<id> = privilegio attivato (Ira...)
+  | { t: "attackAbility" | "saveProficient"; value: Ability } // saveProficient: competenza nel TS già data dalla classe di partenza (Mente di ferro) // caratteristica usata dall'attacco (Ira: solo attacchi con la Forza)
   | { t: "level" | "classLevel" | "ability"; key?: string; cmp: Cmp; n: number };
 
 const ARMOR = ["none", "light", "medium", "heavy", "any"];
@@ -24,6 +31,8 @@ const ID = /^[a-z][a-z0-9_]*$/;
 function atom(s: string): Condition {
   const bad = () => new Error(`Condizione non valida: "${s}"`);
   if (s === "shield") return { t: "shield" };
+  if (s === "twoHanded") return { t: "twoHanded" };
+  if (s === "otherWeapon") return { t: "otherWeapon" };
   let m = /^level(>=|<=|==|>|<)(\d+)$/.exec(s);
   if (m) return { t: "level", cmp: m[1] as Cmp, n: Number(m[2]) };
   m = /^(classLevel|ability):([a-z_]+)(>=|<=|==|>|<)(\d+)$/.exec(s);
@@ -37,7 +46,8 @@ function atom(s: string): Condition {
   if (k === "wearingArmor" && ARMOR.includes(v)) return { t: k, value: v as never };
   if (k === "attackType" && (v === "melee" || v === "ranged")) return { t: k, value: v };
   if (k === "trained" && ["light", "medium", "heavy", "shield"].includes(v)) return { t: k, value: v as never };
-  if ((k === "equipped" || k === "weaponProperty" || k === "hasFeature" || k === "hasFeat") && ID.test(v))
+  if ((k === "attackAbility" || k === "saveProficient") && ABIL.includes(v)) return { t: k, value: v as Ability };
+  if ((k === "equipped" || k === "weaponProperty" || k === "hasFeature" || k === "hasFeat" || k === "active") && ID.test(v))
     return { t: k, value: v };
   throw bad();
 }

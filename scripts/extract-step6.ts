@@ -1,7 +1,8 @@
 // Step 6: specie dal PDF "01_Dati_Gioco" → data/private/species.json
 import { writeFileSync } from "node:fs";
 import { bodyLines, pdfPages } from "./lib/pdf-text";
-import { CANTRIPS, DRAGON_DAMAGE, FREE_CAST_USES, OPTION_EFFECTS, SIMPLE_CHOICES, SPECIES_EFFECTS } from "./lib/species-rules";
+import { fixSpellModes, spellLevels } from "./lib/spells";
+import { DRAGON_DAMAGE, FREE_CAST_USES, OPTION_EFFECTS, SIMPLE_CHOICES, SPECIES_EFFECTS } from "./lib/species-rules";
 
 const SRC = process.env.RULES_DIR ?? "docs/rules";
 const OUT = "data/private";
@@ -25,7 +26,9 @@ function traits(text: string) {
   const marks = [...text.matchAll(/\[(\w+)\] (\d) /g)];
   if (!marks.length) throw new Error("Nessun tratto trovato");
   const out: Json[] = [];
-  let name = norm(text.slice(0, marks[0]!.index));
+  // l'intestazione della tabella dei tratti ("Tratto Livello Effetto") non fa parte del nome
+  const stripHeader = (n: string) => n.replace(/^(?:Tratto Livello Effetto )+/, "").trim();
+  let name = stripHeader(norm(text.slice(0, marks[0]!.index)));
   marks.forEach((m, i) => {
     const from = m.index! + m[0].length;
     const to = i + 1 < marks.length ? marks[i + 1]!.index! : text.length;
@@ -36,7 +39,7 @@ function traits(text: string) {
     if (i + 1 < marks.length) {
       const k = clean.lastIndexOf(". ");
       if (k < 0) throw new Error(`Tratto ${m[1]}: confine col tratto successivo non trovato`);
-      desc = clean.slice(0, k + 1); next = clean.slice(k + 2);
+      desc = clean.slice(0, k + 1); next = stripHeader(clean.slice(k + 2));
     }
     out.push({
       id: m[1], name: { it: name }, level: Number(m[2]), description: desc,
@@ -51,10 +54,11 @@ function traits(text: string) {
 }
 
 const SPELLS = /Incantesimi: (liv\.\d+: [a-z_, ]+?(?:; liv\.\d+: [a-z_, ]+?)*)(?= [A-Z]|$)/;
+const LEVELS = spellLevels(); // trucchetto o 1° livello secondo i dati veri degli incantesimi
 function spellEffects(list: string): Json[] {
   return list.split("; ").flatMap((part) => {
     const [lv, ids] = part.replace("liv.", "").split(": ") as [string, string];
-    return ids.split(", ").map((spell) => CANTRIPS.has(spell)
+    return ids.split(", ").map((spell) => LEVELS.get(spell) === 0
       ? { op: "grantSpell", spell, mode: "cantrip", abilityFrom: "spell_ability" }
       : {
         op: "grantSpell", spell, mode: "alwaysPrepared", abilityFrom: "spell_ability", // caratteristica scelta (scelta spell_ability)
@@ -120,5 +124,6 @@ const species = heads.map((h, hi) => {
   };
 });
 
+fixSpellModes(species, "species", LEVELS);
 writeFileSync(`${OUT}/species.json`, JSON.stringify({ kind: "species", entries: species }, null, 1) + "\n");
 console.log(`species           ${species.length}`);

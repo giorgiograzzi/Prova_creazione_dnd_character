@@ -24,6 +24,7 @@ export const choiceSchema = z.object({
   // Caratteristica da incantatore degli incantesimi scelti/concessi: fissa oppure da un'altra scelta
   ability: ability.optional(),
   abilityFrom: id.optional(),
+  weaponFilter: z.object({ kind: z.enum(["melee", "ranged"]) }).optional(), // scelte di armi (maestria): es. Barbaro solo armi da mischia
   // Restringe gli incantesimi proponibili (usato quando ci sono i dati degli incantesimi)
   filter: z.object({
     level: z.number().int().min(0).max(9).optional(),

@@ -79,6 +79,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     })(),
     carryCapacity: x.scores.str * 15,
     proficiencies: { weapons: [...profs.weapons], tools: [...profs.tools], armor: [...profs.armor] },
+    languages: [...x.collected.languages],
     features: [...x.collected.features].sort(),
     feats: [...x.collected.feats].sort(),
     notes, warnings,

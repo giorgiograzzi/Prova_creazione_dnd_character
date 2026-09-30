@@ -1,13 +1,13 @@
 import type { z } from "zod";
 import {
-  armorSchema, backgroundSchema, classSchema, conditionDefSchema, featSchema, itemSchema, speciesSchema,
+  armorSchema, backgroundSchema, classSchema, conditionDefSchema, creationRulesSchema, featSchema, itemSchema, speciesSchema,
   slotTableSchema, spellSchema, subclassSchema, termSchema, toolSchema, weaponSchema,
 } from "./schema";
 
 const KINDS = {
   species: speciesSchema, backgrounds: backgroundSchema, classes: classSchema,
   subclasses: subclassSchema, feats: featSchema, weapons: weaponSchema,
-  armors: armorSchema, items: itemSchema, spells: spellSchema, tools: toolSchema, slotTables: slotTableSchema,
+  armors: armorSchema, items: itemSchema, spells: spellSchema, tools: toolSchema, slotTables: slotTableSchema, creation: creationRulesSchema,
   // glossario (tutti con termSchema)
   skills: termSchema, languages: termSchema, sizes: termSchema, damageTypes: termSchema,
   conditions: conditionDefSchema, weaponProperties: termSchema, masteries: termSchema, coins: termSchema,

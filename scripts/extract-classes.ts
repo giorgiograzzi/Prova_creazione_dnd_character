@@ -237,6 +237,11 @@ heads.forEach((h, hi) => {
   const featText = block.slice(iFeat + 1, featEnd).filter((l) => !isHeader(l)).join(" ");
   const fs = features(featText, id);
   applyRules(fs, rule.featureRules, table);
+  // Aumento dei punteggi di caratteristica / Dono epico: il talento si sceglie in una scelta per livello (chiave <tipo>_<classe>_<livello>)
+  for (const f of fs) {
+    if (f.id === "ability_score_improvement") f.choices.push({ id: `asi_${id}_${f.level}`, label: { it: "Talento (Aumento dei punteggi o talento generale)" }, count: 1, source: "feats:general" });
+    if (f.id === "epic_boon") f.choices.push({ id: `epic_boon_${id}_${f.level}`, label: { it: "Dono epico" }, count: 1, source: "feats:epic_boon" });
+  }
   for (const r of rows) {
     const have = fs.filter((f) => f.level === r.lv).map((f) => f.name.it as string).sort().join("|");
     const want = r.names.filter((n) => n !== "Privilegio di sottoclasse").sort().join("|");
@@ -249,7 +254,7 @@ heads.forEach((h, hi) => {
     ? { id: `${id}_skills`, label: { it: "Abilità" }, count: Number(sk[1]), source: "skills" }
     : { id: `${id}_skills`, label: { it: "Abilità" }, count: Number(sk[1]), options: skillList.map((s) => ({ id: s, name: { it: s }, effects: [{ op: "grantSkillProficiency", skills: [s] }] })) });
   picks.forEach((p, i) => choices.push({ id: `${id}_tools${i ? i + 1 : ""}`, label: { it: "Strumenti" }, count: p.count, source: p.source }));
-  if (table["maestria_armi"]) choices.push({ id: `${id}_weapon_mastery`, label: { it: "Maestria nelle armi" }, count: 1, countFrom: "maestria_armi", source: "weaponMastery" });
+  if (table["maestria_armi"]) choices.push({ id: `${id}_weapon_mastery`, label: { it: "Maestria nelle armi" }, count: 1, countFrom: "maestria_armi", source: "weaponMastery", ...(id === "barbarian" ? { weaponFilter: { kind: "melee" } } : {}) }); // Barbaro: solo armi da mischia (file 03 §3c)
   if (spell) {
     if (table["trucchetti"]) choices.push({ id: `${id}_cantrips`, label: { it: "Trucchetti" }, count: 1, countFrom: "trucchetti", source: `cantrips:${spell[3]}` });
     choices.push({ id: `${id}_prepared`, label: { it: "Incantesimi preparati" }, count: 1, countFrom: "preparati", source: `spells:${spell[3]}` });

@@ -160,7 +160,7 @@ export const CLASS_RULES: Record<string, ClassRule> = {
   ranger: {
     columns: ["Nemico prescelto", "Maestria armi", "Preparati", "Slot"],
     featureRules: {
-      deft_explorer: expertise("ranger_deft_explorer", 1),
+      deft_explorer: { choices: [...expertise("ranger_deft_explorer", 1).choices!, { id: "ranger_languages", label: T("Linguaggi"), count: 2, source: "languages:standard" }] },
       fighting_style: styleOrWarrior("ranger", "druid", "wis", "druidic"),
       "expertise@9": expertise("ranger_expertise_9", 2),
       roving: { effects: [{ op: "speedBonus", value: 10, when: "!wearingArmor:heavy" }] },
@@ -187,6 +187,7 @@ export const CLASS_RULES: Record<string, ClassRule> = {
     featureRules: {
       "expertise@1": expertise("rogue_expertise_1", 2),
       "expertise_2@6": expertise("rogue_expertise_6", 2),
+      thieves_cant: { choices: [{ id: "rogue_extra_language", label: T("Linguaggio aggiuntivo"), count: 1, source: "languages:standard" }] },
       slippery_mind: { effects: [{ op: "grantSaveProficiency", abilities: ["wis", "cha"] }] },
     },
     subclassRules: { assassin: { assassins_tools: { effects: [{ op: "grantToolProficiency", tools: ["disguise_kit", "poisoners_kit"] }] } } },

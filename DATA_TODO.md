@@ -16,11 +16,8 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
   - Bonus che dipendono da uno stato attivo: Danno ira (serve "Ira attiva"), Punizione divina, Colpo brutale, Furia, Sacro Simbolo ecc. Nelle schede degli attacchi ci sono solo gli extra sempre validi (Attacco furtivo, come promemoria).
   - Proprietà di maestria: il motore dice quale è attiva e la CD di Rovesciare; l'effetto (Spingere, Fiaccare...) è solo testo della regola.
   - Attacco a distanza con nemico entro 5 ft / a gittata lunga: promemoria di Svantaggio (dipende dalla situazione).
-- **Step 10 (creazione)**
-  - Aumenti "+1 a una tra..." dei talenti e ASI: si registrano in `Character.asi` (con `cap` 20/30).
-  - Scelte alternative (`Choice.group`): Stile di combattimento / Guerriero benedetto / Guerriero druidico; conteggi da `countFrom`
-    (colonna della classe o della sottoclasse) e `countFormula` (es. libro del Mago `4 + 2 * classLevel:wizard`, Incantatore rituale `pb`).
-  - Competenze duplicate (es. Sensi acuti dell'Elfo "se già competente, escludila").
+- **Step 17 (avanzamento di livello)**
+  - Multiclasse: `classOptions` già controlla il 13 richiesto; restano le competenze parziali della nuova classe (solo quelle "multiclasse") e il Dado Vita/PF al nuovo livello.
   - Mente di ferro (Cacciatore delle tenebre): "se hai già la competenza Sag, Int o Car" (ora sempre Sag).
 - **Step 14b (privilegi giocabili)** — sono le regole scritte solo a parole:
   - Talenti: quasi tutti i talenti generali (es. Maestro delle armi possenti, Sentinella, Attore), effetti di oggetti (acido, pozioni ecc.).
@@ -39,6 +36,9 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 `resolutionRaw` (Indagare, "TS Des / Cos", "TS vario/vari"). L'estrazione verifica ogni incantesimo contro le liste per classe del PDF (nome, livello, classe, ◆ Concentrazione, ® Rituale).
 
 ## Chiuso in questa revisione
+- **Step 10**: aumenti di caratteristica di talenti e livelli (`Character.asi` con `key` e `cap`), scelte alternative (`Choice.group`), conteggi da `countFrom` / `countFormula`,
+  competenze duplicate (abilità, strumenti, tiri salvezza; Maestria solo su abilità già competenti), linguaggi (Comune + 2, Druidico, Gergo dei ladri, scelte di Ladro e Ranger),
+  Guerriero benedetto/druidico, Barbaro con maestrie solo da mischia, Incantatore rituale / Toccato dai folletti con i filtri applicati, talenti ripetibili con scelte separate per acquisizione.
 - **Step 9**: Lancia da cavaliere (`twoHandedUnlessMounted` + `state.mounted`), competenze con filtro (`martial[light]`, `martial[finesse|light]`),
   Duellare (condizioni `twoHanded` / `otherWeapon`, non più `needsReview`), Arti marziali e Attacco furtivo negli attacchi, munizioni delle armi (`ammunition`).
 - Id dei privilegi nei prerequisiti dei talenti (`spellcasting`, `pact_magic`, `fighting_style`): ora `validate:data` controlla ogni `hasFeature:`/`hasFeat:` in tutte le condizioni.

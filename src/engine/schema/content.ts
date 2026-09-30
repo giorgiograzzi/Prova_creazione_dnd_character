@@ -231,3 +231,19 @@ export const homebrewPackSchema = z.object({
   feats: z.array(featSchema).default([]),
   spells: z.array(spellSchema).default([]),
 });
+
+// Regole di creazione del personaggio (file "Regole_Creazione_Personaggio"): un solo record con id "creation"
+export const creationRulesSchema = z.object({
+  id,
+  standardArray: z.array(z.number().int()).length(6),
+  pointBuy: z.object({ budget: z.number().int(), min: z.number().int(), max: z.number().int(), costs: z.record(z.string(), z.number().int()) }),
+  recommendedArrays: z.record(z.string(), z.record(ability, z.number().int())), // per classe
+  // Partire a un livello più alto: monete e oggetti magici
+  startingLevels: z.array(z.object({
+    minLevel: z.number().int(), maxLevel: z.number().int(),
+    gold: z.number().int(), // mo fisse
+    goldDice: z.object({ sides: z.number().int(), count: z.number().int(), multiplier: z.number().int() }).optional(), // es. 1d10 × 25 mo
+    magicItems: z.object({ common: z.number().int(), uncommon: z.number().int(), rare: z.number().int(), veryRare: z.number().int() }),
+  })),
+  alignments: z.array(z.object({ id, name: text })),
+});

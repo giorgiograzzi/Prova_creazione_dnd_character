@@ -157,3 +157,18 @@ Convenzioni:
   Maestria attiva se l'arma è tra le scelte `weaponMastery` (CD di Rovesciare = 8 + mod + competenza), munizioni disponibili dall'inventario, promemoria, extra di Attacco furtivo.
 - `Derived.attacksPerAction` (Attacco extra 2/3/4, colonna del Guerriero) e `Derived.loadout` (mani, armatura, scudo, sintonia, peso, capacità, problemi).
 - Condizioni delle regole: `twoHanded`, `otherWeapon` (contesto dell'attacco: `buildCtx(ch, rs, weapon, {twoHanded, otherWeapon})`).
+
+## Motore di creazione (step 10) — `src/engine/creation/`
+- **Passi** (`STEPS`): `class`, `background`, `species`, `languages`, `scores`, `alignment`, `details` (l'ordine ufficiale del file 02).
+- **Domande**: `allQuestions(ch, rs)` / `availableOptions(step, ch, rs)` → `Question` con chiave (`Character.decisions`), quante opzioni scegliere (`count`, `countFrom`, `countFormula`, extra trucchetti),
+  opzioni con `enabled` / `disabledReason` e `selected`, scelte alternative (`group` → `disabled`). Chiavi speciali: `pick:class|species|background`, `subclass:<classe>`, `languages`, `alignment`,
+  `equipment:class|background`; i talenti concessi da una scelta hanno le scelte interne sotto `<scelta>/<sotto-scelta>` (due Resiliente non si mescolano).
+  Le opzioni di una domanda tengono conto solo di dati fissi e domande PRECEDENTI (due scelte in conflitto: vince la prima). Sorgenti: `skills`, `expertise`, `skillsTools`, `tools:*`, `weaponMastery`,
+  `feats:*`, `cantrips:*`, `spells:*`, `freespells`, `alwaysspells`, `languages:standard`, `resistance`. Spiegazioni a parole dei prerequisiti in `describeCondition`.
+- **Modifiche**: `previewDecision(ch, rs, chiave, scelte)` → `{ ok, errors, character, removed }`. Non valida = errore e personaggio invariato; valida = personaggio nuovo ripulito + `removed` (scelte annullate a cascata con il motivo).
+  L'interfaccia mostra l'avviso e, se l'utente annulla, tiene il personaggio di partenza. `validateDecisions` ripulisce in ordine di passo (classe cambiata, punteggi scesi sotto un prerequisito, ecc.).
+- **Punteggi**: `rollAbilityScores(rng)` (4d6 scarta il più basso), `pointBuyCost`, `scoreProblems`, `setBaseScores(ch, rs, metodo, punteggi, rolls?)`, `recommendedArray`. Aumenti: `setAsi(ch, rs, chiave, [{ability, amount}])` con le regole
+  in `asiProblems` (background +2/+1 o +1/+1/+1 sulle 3 caratteristiche; Aumento dei punteggi +2 o +1/+1; altri talenti +1 tra quelle elencate; tetto 20, 30 per i Doni epici).
+- **Altro**: `creationProgress` (stato dei 7 passi), `classOptions` (multiclasse: 13 richiesto sia dalla nuova classe sia da quelle che hai), `fillHpRolls`, `startingEquipment` (opzioni A/B/C + strumento scelto + monete),
+  `startingWealth` (partenza a livello più alto). Dati: `creation.json` da `scripts/extract-creation.ts` (array standard, acquisto a punti, array consigliati, fasce di livello, allineamenti).
+- Slot di talento a livello di classe: scelte `asi_<classe>_<livello>` (feats:general) ed `epic_boon_<classe>_<livello>` nei dati dei privilegi.

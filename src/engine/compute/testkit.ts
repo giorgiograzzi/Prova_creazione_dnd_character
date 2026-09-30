@@ -97,6 +97,13 @@ export function testRuleset(): Ruleset {
       feat("fleet", [{ op: "speedBonus", value: 10 }]),
     ] },
     { kind: "conditions", entries: TEST_CONDITIONS },
+    { kind: "creation", entries: [{
+      id: "creation", standardArray: [15, 14, 13, 12, 10, 8],
+      pointBuy: { budget: 27, min: 8, max: 15, costs: { "8": 0, "9": 1, "10": 2, "11": 3, "12": 4, "13": 5, "14": 7, "15": 9 } },
+      recommendedArrays: { fighter: { str: 15, dex: 14, con: 13, int: 8, wis: 10, cha: 12 } },
+      startingLevels: [{ minLevel: 5, maxLevel: 10, gold: 500, goldDice: { sides: 10, count: 1, multiplier: 25 }, magicItems: { common: 1, uncommon: 1, rare: 0, veryRare: 0 } }],
+      alignments: [{ id: "true_neutral", name: t("Neutrale") }],
+    }] },
     { kind: "weapons", entries: TEST_WEAPONS },
     { kind: "items", entries: [{ id: "arrow", name: t("Frecce (20)"), category: "ammunition", weight: 1 }, { id: "ring", name: t("Anello"), category: "gear", attunement: true }, { id: "rope", name: t("Corda"), category: "gear", weight: 5 }] },
     { kind: "spells", entries: TEST_SPELLS },

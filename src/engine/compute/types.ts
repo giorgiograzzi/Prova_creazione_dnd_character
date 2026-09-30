@@ -79,6 +79,7 @@ export interface Derived {
   spellcasting: { classId: string; ability: Ability; dc: Sourced; attack: Sourced }[];
   carryCapacity: number;
   proficiencies: { weapons: string[]; tools: string[]; armor: string[] };
+  languages: string[];
   features: string[];
   feats: string[];
   notes: string[];  // vantaggi condizionati e simili, da mostrare come testo

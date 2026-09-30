@@ -31,10 +31,12 @@ export interface Character {
   backgroundId: string;
   baseScores: Record<Ability, number>; // prima degli aumenti
   decisions: Record<string, string[]>; // choiceId → opzioni scelte (id univoci per scelta)
-  asi: { source: string; ability: Ability; amount: number; cap?: number }[]; // cap: 20 (default), 30 Doni epici // aumenti scelti (background, ASI di livello)
+  asi: { source: string; ability: Ability; amount: number; cap?: number; key?: string }[]; // key: "background" oppure la scelta del talento che li dà (per sostituirli) // cap: 20 (default), 30 Doni epici // aumenti scelti (background, ASI di livello)
   feats: { featId: string; choices?: Record<string, string[]> }[];
   // grip: impugnatura a una o due mani (armi Versatili); attuned: sintonizzato (max 3)
   inventory: { itemId: string; qty: number; state: EquipState; attuned?: boolean; grip?: "one" | "two" }[];
+  // Come sono stati generati i punteggi (creazione): array standard, tiro 4d6 (rolls = i 6 valori grezzi), acquisto a punti o manuale
+  creation?: { method: "array" | "roll" | "pointbuy" | "manual"; rolls?: number[] };
   pactWeapon?: string; // Warlock con Patto della Lama: id dell'arma del patto (usa Carisma)
   coins: { cp: number; sp: number; ep: number; gp: number; pp: number };
   state: {

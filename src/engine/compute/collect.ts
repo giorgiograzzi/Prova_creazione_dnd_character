@@ -13,13 +13,15 @@ export interface Collected {
   entries: Entry[];
   features: Set<string>;
   feats: Set<string>;
+  languages: Set<string>; // linguaggi (Comune + scelte + Druidico, Gergo dei ladri)
   masteries: Set<string>; // armi di cui si usa la proprietà di maestria (scelte `weaponMastery`)
 }
 
 const SKILL_IDS = new Set<string>(SKILLS);
 
 type Picks = (choiceId: string) => string[] | undefined;
-type Owner = { label: string; classId?: string; picks: Picks };
+// prefix: chiave delle scelte interne di un talento concesso da una scelta ("asi_fighter_4/"): due acquisizioni non si mescolano
+type Owner = { label: string; classId?: string; picks: Picks; prefix: string };
 type Holder = { name: { it: string }; effects: Effect[]; choices: Choice[] };
 
 const withAbility = (c: Choice, spell: Effect & { op: "grantSpell" }): Effect =>
@@ -28,7 +30,7 @@ const withAbility = (c: Choice, spell: Effect & { op: "grantSpell" }): Effect =>
 // Convenzione per le scelte "source": gli id scelti diventano effetti standard.
 //   skills / expertise / skillsTools / tools:* / weapons:* / cantrips:* / spells:* / freespells / alwaysspells / resistance / feats:*
 // Le altre (languages, weaponMastery...) non hanno effetti sul calcolo.
-function sourceEffects(c: Choice, picked: string[]): Effect[] {
+function sourceEffects(c: Choice, picked: string[], key: string): Effect[] {
   const kind = c.source!.split(":")[0];
   const spell = (s: string, mode: "cantrip" | "known" | "alwaysPrepared", free?: boolean) =>
     withAbility(c, { op: "grantSpell", spell: s, mode, ...(free ? { freeCast: { uses: 1, recharge: "long_rest" as const } } : {}) });
@@ -39,7 +41,7 @@ function sourceEffects(c: Choice, picked: string[]): Effect[] {
     case "weapons": return [{ op: "grantWeaponProficiency", weapons: picked }];
     case "cantrips": return picked.map((s) => spell(s, "cantrip"));
     case "spells": return picked.map((s) => spell(s, "known"));
-    case "feats": return picked.map((f) => ({ op: "grantFeat", feat: f }));
+    case "feats": return picked.map((f) => ({ op: "grantFeat", feat: f, via: key }));
     // abilità e strumenti in qualsiasi combinazione (talento Esperto)
     case "skillsTools": {
       const skills = picked.filter((p) => SKILL_IDS.has(p)), tools = picked.filter((p) => !SKILL_IDS.has(p));
@@ -63,26 +65,27 @@ function sourceEffects(c: Choice, picked: string[]): Effect[] {
 // Le scelte di un talento acquisito (Character.feats[i].choices) hanno la precedenza sulle
 // decisioni generali: così un talento ripetibile (Resiliente, Iniziato alla magia) ha scelte per ogni acquisizione.
 export function collectEffects(ch: Character, rs: Ruleset): Collected {
-  const out: Collected = { entries: [], features: new Set(), feats: new Set(), masteries: new Set() };
+  const out: Collected = { entries: [], features: new Set(), feats: new Set(), masteries: new Set(), languages: new Set(["common"]) };
   const seenFeats = new Set<string>();
   const general: Picks = (id) => ch.decisions[id];
 
   const add = (effect: Effect, o: Owner) => {
     // caratteristica da incantatore fissata da una scelta (es. spell_ability, magic_initiate_ability)
     if (effect.op === "grantSpell" && effect.abilityFrom && !effect.ability) {
-      const a = o.picks(effect.abilityFrom)?.[0] ?? general(effect.abilityFrom)?.[0];
+      const a = o.picks(o.prefix + effect.abilityFrom)?.[0];
       if (a) effect = { ...effect, ability: a as never };
     }
     out.entries.push(o.classId ? { effect, label: o.label, classId: o.classId } : { effect, label: o.label });
     if (effect.op === "grantFeature") out.features.add(effect.feature);
-    if (effect.op === "grantFeat") addFeat(effect.feat, undefined, general);
+    if (effect.op === "grantFeat") addFeat(effect.feat, undefined, general, effect.via ? `${effect.via}/` : "");
   };
   const addHolder = (h: Holder, o: Owner) => {
     for (const e of h.effects) add(e, o);
     for (const c of h.choices) addChoice(c, o);
   };
   const addChoice = (c: Choice, o: Owner) => {
-    const picked = o.picks(c.id) ?? general(c.id) ?? [];
+    const key = o.prefix + c.id;
+    const picked = o.picks(key) ?? [];
     if (c.options) {
       for (const opt of c.options) {
         if (!picked.includes(opt.id)) continue;
@@ -91,15 +94,16 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
       }
     } else if (c.source) {
       if (c.source === "weaponMastery") picked.forEach((w) => out.masteries.add(w));
-      sourceEffects(c, picked).forEach((e) => add(e, o));
+      if (c.source.startsWith("languages")) picked.forEach((l) => out.languages.add(l));
+      sourceEffects(c, picked, key).forEach((e) => add(e, o));
     }
   };
-  const addFeat = (id: string, instance: Record<string, string[]> | undefined, base: Picks) => {
+  const addFeat = (id: string, instance: Record<string, string[]> | undefined, base: Picks, prefix = "") => {
     const f = rs.feats.get(id);
     // un talento non ripetibile non si somma a se stesso (background + talento scelto)
     if (!f?.repeatable) { if (seenFeats.has(id)) return; seenFeats.add(id); }
     out.feats.add(id);
-    if (f) addHolder(f, { label: f.name.it, picks: instance ? (cid) => instance[cid] ?? base(cid) : base });
+    if (f) addHolder(f, { label: f.name.it, prefix, picks: instance ? (cid) => instance[cid] ?? base(cid) : base });
   };
   const addLeveled = (list: { id: string; level: number; name: { it: string }; effects: Effect[]; choices: Choice[] }[],
     lvl: number, o: Owner) => {
@@ -113,28 +117,32 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
   const totalLevel = ch.classes.reduce((n, c) => n + c.level, 0);
   const sp = rs.species.get(ch.speciesId);
   if (sp) {
-    const o = { label: sp.name.it, picks: general };
+    const o = { label: sp.name.it, picks: general, prefix: "" };
     addHolder(sp, o);
     addLeveled(sp.traits, totalLevel, o);
   }
   const bg = rs.backgrounds.get(ch.backgroundId);
   if (bg) {
-    addHolder(bg, { label: bg.name.it, picks: general });
+    addHolder(bg, { label: bg.name.it, picks: general, prefix: "" });
     addFeat(bg.feat, undefined, general);
   }
   for (const cl of ch.classes) {
     const def = rs.classes.get(cl.classId);
     if (!def) continue;
-    const o = { label: def.name.it, classId: cl.classId, picks: general };
+    const o = { label: def.name.it, classId: cl.classId, picks: general, prefix: "" };
     addHolder(def, o);
     addLeveled(def.features, cl.level, o);
     const sub = cl.subclassId ? rs.subclasses.get(cl.subclassId) : undefined;
     if (sub && cl.level >= def.subclassLevel) {
-      const so = { label: sub.name.it, classId: cl.classId, picks: general };
+      const so = { label: sub.name.it, classId: cl.classId, picks: general, prefix: "" };
       addHolder(sub, so);
       addLeveled(sub.features, cl.level, so);
     }
   }
   for (const f of ch.feats) addFeat(f.featId, f.choices ?? {}, general);
+  // linguaggi: Comune + scelta di creazione + Druidico e Gergo dei ladri dai privilegi
+  (ch.decisions.languages ?? []).forEach((l) => out.languages.add(l));
+  if (out.features.has("druidic")) out.languages.add("druidic");
+  if (out.features.has("thieves_cant")) out.languages.add("thieves_cant");
   return out;
 }

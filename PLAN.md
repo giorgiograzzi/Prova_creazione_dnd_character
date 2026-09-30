@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-9 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 9 completato (equipaggiamento e attacchi). Prossimo: step 10 (motore di creazione). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-10 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Prossimo: step 11 (store e salvataggio). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -71,7 +71,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - Stati `stowed|wielded|worn|dropped`, slot mani, due mani/versatile/scudo, armatura + scudo unici, Forza minima, svantaggio Furtività, addestramento, munizioni, attacco e danno per arma (Accurata, Pesante, Leggera, Da lancio, gittata, stili di combattimento, maestrie attive), sintonia (max 3), regole cambio equipaggiamento configurabili (ufficiale / casa: 1 azione).
 - **Fatto**: test su CA (es. "18 = Cotta di maglia 16 + Scudo 2"), attacchi per arma, tempi indossa/togli.
 
-### 10. Motore creazione (`creation/`)
+### 10. Motore creazione (`creation/`) ✅
 - `availableOptions(stepId, character)` con `enabled` e `disabledReason`; `validateDecisions()` con reset + avviso + annulla; punteggi (tiro 4d6, array, point buy 27) con +2/+1 o +1/+1/+1 solo sui 3 ammessi, tetto 20; competenze duplicate; incantatori (trucchetti/preparati).
 - **Fatto**: test dei percorsi di esclusione/invalidazione.
 

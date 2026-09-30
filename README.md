@@ -2,6 +2,9 @@
 
 App per creare e gestire personaggi di D&D 5.5 (2024), in italiano, offline.
 
+## Requisiti
+Node 22 o più recente consigliato (i test con Vitest 5 lo richiedono). `extract:data` e `validate:data` funzionano anche su Node 20.
+
 ## Comandi
 - `npm run dev` — sviluppo
 - `npm run build` — build di produzione (typecheck + Vite + PWA)

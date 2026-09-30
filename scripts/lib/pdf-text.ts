@@ -1,5 +1,14 @@
 import { readFileSync } from "node:fs";
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+
+// pdfjs 6 usa Promise.withResolvers (Node 22+): lo aggiungiamo per Node 20
+if (!("withResolvers" in Promise)) {
+  (Promise as unknown as { withResolvers: () => unknown }).withResolvers = function () {
+    let resolve!: (v: unknown) => void, reject!: (e: unknown) => void;
+    const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
+    return { promise, resolve, reject };
+  };
+}
+const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
 
 // Testo di un PDF, pagina per pagina (le righe restano come nel PDF)
 export async function pdfPages(path: string): Promise<string[]> {

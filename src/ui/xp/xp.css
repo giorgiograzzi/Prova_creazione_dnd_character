@@ -241,3 +241,22 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pl-sub { color: var(--xp-text-dim); }
 .pl-cond { display: flex; gap: 12px; align-items: flex-start; width: 100%; min-height: var(--tap); padding: 8px 12px; text-align: left; background: transparent; border: 0; border-bottom: 1px solid var(--xp-face-dark); cursor: pointer; }
 .pl-cond[aria-checked="true"] { background: #ffe3e3; }
+
+.pl-tabs button[aria-pressed="true"] { background: var(--xp-select); color: var(--xp-select-text); font-weight: 700; }
+.pl-feat.active { background: #dff0d8; }
+.pl-badge { color: var(--xp-ok); font-weight: 700; }
+.pl-desc { margin: 0; padding: 4px 12px 8px; white-space: pre-line; }
+.pl-list li > button[aria-expanded] { border-bottom: 0; }
+.pl-feat { border-bottom: 1px solid var(--xp-face-dark); }
+.pl-feat:last-child { border-bottom: 0; }
+
+/* liste di opzioni dentro i popup (scelte all'attivazione ecc.) */
+.xp-dialog .wz-opts { background: var(--dos-bg); border: 2px solid var(--dos-text); }
+.xp-dialog .wz-opt { color: var(--dos-text); border-bottom: 1px dotted var(--dos-shadow); font-family: inherit; }
+.xp-dialog .wz-opt .nm { color: var(--dos-bright); }
+.xp-dialog .wz-opt .desc, .xp-dialog .wz-opt .why { color: var(--dos-dim); }
+.xp-dialog .wz-opt .mark { background: var(--dos-bg); border-color: var(--dos-text); color: var(--dos-accent); }
+.xp-dialog .wz-opt[aria-checked="true"] { background: var(--dos-text); color: var(--dos-dark); }
+.xp-dialog .wz-opt[aria-checked="true"] .nm, .xp-dialog .wz-opt[aria-checked="true"] .desc, .xp-dialog .wz-opt[aria-checked="true"] .why { color: var(--dos-dark); }
+.xp-dialog .wz-opt[aria-disabled="true"] { background: var(--dos-bg); }
+.xp-dialog .wz-opt[aria-disabled="true"] .nm { color: var(--dos-shadow); }

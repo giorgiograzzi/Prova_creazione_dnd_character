@@ -34,6 +34,7 @@ export const characterSchema = z.object({
     conditions: z.array(z.string()), exhaustion: int, inspiration: z.boolean(),
     conditionSources: z.record(z.string(), z.string()).optional(),
     mounted: z.boolean().optional(),
+    active: z.record(z.string(), z.array(z.string())).optional(), // privilegi attivati (Ira...): id → scelte fatte all'attivazione
   }),
   overrides: z.record(z.string(), z.number()),
   notes: z.string(),

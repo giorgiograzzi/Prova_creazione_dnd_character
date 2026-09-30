@@ -16,6 +16,8 @@ export function spendHitDie(ch: Character, d: Pick<Derived, "hp" | "mods">, roll
   return { character: applyHealing(spent, d.hp.max.value, healed), healed };
 }
 
+// Un riposo termina gli stati attivi (Ira, Forma selvatica...)
+const noActive = (s: Character["state"]): Character["state"] => { const { active: _drop, ...rest } = s; void _drop; return rest; };
 const without = <T,>(o: Record<string, T>, keys: string[]) => Object.fromEntries(Object.entries(o).filter(([k]) => !keys.includes(k)));
 const rechargeOn = (d: Pick<Derived, "resources">, when: string[]) => Object.entries(d.resources).filter(([, r]) => when.includes(r.recharge)).map(([id]) => id);
 
@@ -23,7 +25,7 @@ const rechargeOn = (d: Pick<Derived, "resources">, when: string[]) => Object.ent
 export function shortRest(ch: Character, d: Pick<Derived, "resources" | "spellSlots">): Character {
   const slots = { ...ch.state.slotsUsed };
   if (d.spellSlots.pact) delete slots[d.spellSlots.pact.level];
-  return { ...ch, state: { ...ch.state, resourcesUsed: without(ch.state.resourcesUsed, rechargeOn(d, ["short_rest"])), slotsUsed: slots } };
+  return { ...ch, state: { ...noActive(ch.state), resourcesUsed: without(ch.state.resourcesUsed, rechargeOn(d, ["short_rest"])), slotsUsed: slots } };
 }
 
 // Riposo lungo: PF al massimo, PF temporanei a zero, metà dei Dadi Vita (minimo 1), tutte le risorse e gli slot,
@@ -37,7 +39,7 @@ export function longRest(ch: Character, d: Pick<Derived, "hp" | "resources">): C
   return {
     ...ch,
     state: {
-      ...ch.state, hp: d.hp.max.value, tempHp: 0, hitDiceUsed: Math.max(0, ch.state.hitDiceUsed - restored),
+      ...noActive(ch.state), hp: d.hp.max.value, tempHp: 0, hitDiceUsed: Math.max(0, ch.state.hitDiceUsed - restored),
       resourcesUsed: without(ch.state.resourcesUsed, rechargeOn(d, ["short_rest", "long_rest", "dawn"])), slotsUsed: {},
       exhaustion: Math.max(0, ch.state.exhaustion - 1), deathSaves: { successes: 0, failures: 0 },
       conditions: wasDown ? ch.state.conditions.filter((c) => c !== "unconscious") : ch.state.conditions, conditionSources: src,

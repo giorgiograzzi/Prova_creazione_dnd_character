@@ -9,7 +9,8 @@ export function computeResources(x: Ctx): Derived["resources"] {
   for (const { effect: e, label, classId } of x.active) {
     if (e.op !== "resource") continue;
     const lv = classId ? x.classLevels[classId] ?? 0 : x.level;
-    const max = typeof e.uses === "object" && "table" in e.uses ? e.uses.table[Math.max(1, lv) - 1] ?? 0 : evalValue(e.uses as number | string, x);
+    const raw = typeof e.uses === "object" && "table" in e.uses ? e.uses.table[Math.max(1, lv) - 1] ?? 0 : evalValue(e.uses as number | string, x);
+    const max = Math.max(0, raw); // un modificatore negativo non dà usi negativi
     const prev = out[e.resourceId];
     if (prev && prev.max.value >= max) continue;
     const used = Math.min(x.ch.state.resourcesUsed[e.resourceId] ?? 0, max);

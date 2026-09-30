@@ -42,7 +42,6 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
     const hands = wf?.hands ?? 0;
     const asWeapon = w ? ({ ...w, kind } as Weapon) : undefined; // lanciata = attacco a distanza per le condizioni
     const others = load.wielded.filter((o) => o !== wf).length > 0;
-    const c2 = buildCtx(ch, rs, asWeapon, { twoHanded: hands === 2, otherWeapon: others });
 
     // caratteristica: mischia For (Accurata: For o Des); distanza Des; Monaco con arma da Monaco Des; arma del patto Car
     const cand: [Ability, string][] = [];
@@ -55,6 +54,7 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
     }
     if (w && ch.pactWeapon === wf!.entry.itemId && feat.has("pact_of_the_blade")) cand.push(["cha", "arma del patto"]);
     const [ability, why] = cand.reduce((b, c) => (x.mods[c[0]] > x.mods[b[0]] ? c : b));
+    const c2 = buildCtx(ch, rs, asWeapon, { twoHanded: hands === 2, otherWeapon: others, ability });
 
     const proficient = !w || isProficient(w, profs.weapons);
     const parts: Part[] = [{ label: `Mod ${AB_IT[ability]}`, value: x.mods[ability] }];

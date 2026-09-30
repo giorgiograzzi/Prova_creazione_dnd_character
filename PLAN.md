@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-14 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Prossimo: step 14b (privilegi giocabili). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-14b completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Prossimo: step 15 (tab Equip). Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -100,7 +100,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
   4. **Scelte per attivazione** (Orso/Aquila/Lupo dell'Ira, elemento, forma) salvate nello stato di gioco e mostrate sulla scheda.
   5. Dati: marcare nei dati quali privilegi sono attivabili / a usi, con `needsReview` dove il testo è ambiguo.
 - **File**: schema (`activatable`, `active:`), `compute/` (stati attivi), `store` (stato di gioco), UI Scheda.
-- **Fatto**: Ira attivabile con bonus danno e resistenze corretti; contatore su un privilegio solo testo; scelta per attivazione salvata; test del motore per ogni tipo.
+- **Fatto**: Ira attivabile con bonus danno (+2/+3/+4 dalla colonna Danno ira, solo attacchi con la Forza), resistenze, Vantaggio ai TS di Forza e niente incantesimi; 49 contatori su privilegi solo testo (Usi = mod Sag…); scelta per attivazione salvata (Rivelazione celestiale); Forma selvatica, Volo draconico, Forma grande, Ali del drago, Angelo vendicatore attivabili; 20 test del motore (mini ruleset + dati veri) e prova nel browser. Attivabili curati: 7; altri privilegi restano solo descritti (DATA_TODO).
 
 ### 15. Tab Equip (UI)
 - Inventario, quantità/peso/valore, Estrai/Riponi/Indossa/Togli, selettore arma impugnata, negozio interno, sintonia.

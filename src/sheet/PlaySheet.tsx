@@ -5,12 +5,13 @@ import type { Character } from "../engine/types";
 import it from "../i18n/it.json";
 import { AttacksTab } from "./AttacksTab";
 import { ConditionsTab } from "./ConditionsTab";
+import { FeaturesTab } from "./FeaturesTab";
 import { MiscTab } from "./MiscTab";
 import { StatsTab } from "./StatsTab";
 import { StatusTab } from "./StatusTab";
 
 const t = it.play;
-const TABS = ["status", "stats", "attacks", "conditions", "misc"] as const;
+const TABS = ["status", "features", "stats", "attacks", "conditions", "misc"] as const;
 type Tab = (typeof TABS)[number];
 
 // Scheda giocabile: ogni numero viene dal motore (computeCharacter); qui si cambia solo lo stato di gioco
@@ -26,6 +27,7 @@ export function PlaySheet({ ch, rs, update, onReopen }: { ch: Character; rs: Rul
         {TABS.map((k) => <button key={k} type="button" role="tab" aria-selected={k === tab} onClick={() => setTab(k)}>{t.tabs[k]}</button>)}
       </div>
       {tab === "status" && <StatusTab {...props} />}
+      {tab === "features" && <FeaturesTab {...props} />}
       {tab === "stats" && <StatsTab {...props} />}
       {tab === "attacks" && <AttacksTab {...props} />}
       {tab === "conditions" && <ConditionsTab {...props} />}

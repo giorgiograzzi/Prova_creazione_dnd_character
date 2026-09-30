@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { choiceSchema } from "./choice";
-import { condition, effectSchema } from "./effect";
+import { choiceSchema, optionSchema } from "./choice";
+import { condition, effectSchema, value } from "./effect";
 import {
   ability, armorTraining, damageType, id, SCHEMA_VERSION, skill, text,
 } from "./primitives";
@@ -16,8 +16,26 @@ const base = {
   choices: z.array(choiceSchema).default([]),
 };
 
+// Usi limitati di un privilegio o talento (anche solo a parole): diventa una risorsa con lo stesso id del privilegio.
+// uses: numero, formula ("pb", "max(1, mod:wis)") o tabella per livello; recharge: riposo che ricarica gli usi.
+export const usageSchema = z.object({
+  uses: z.union([value, z.object({ table: z.array(z.number()).length(20) })]),
+  recharge: z.enum(["short_rest", "long_rest", "dawn", "none"]),
+  partialShortRest: z.number().int().optional(),
+});
+// Privilegio che si attiva (Ira, Forma selvatica...): finché è attivo valgono gli effetti con `when: "active:<id>"` e quelli
+// dell'opzione scelta all'attivazione (salvata in Character.state.active). Attivare consuma un uso di `resource`.
+export const activationSchema = z.object({
+  resource: id.optional(), // risorsa di cui si consuma 1 uso
+  requires: condition.optional(), // per poterlo attivare (Ira: non con armatura pesante)
+  label: text.optional(), // nome della scelta all'attivazione ("Aspetto")
+  options: z.array(optionSchema).optional(), // scelta all'attivazione: se ci sono, se ne sceglie una
+  duration: z.string().optional(), // solo testo ("1 minuto")
+});
+const play = { usage: usageSchema.optional(), activation: activationSchema.optional() };
+
 export const featureSchema = z.object({
-  ...base, level: z.number().int().min(1).max(20).default(1),
+  ...base, ...play, level: z.number().int().min(1).max(20).default(1),
 });
 
 export const speciesSchema = z.object({
@@ -44,7 +62,7 @@ export const backgroundSchema = z.object({
 });
 
 export const featSchema = z.object({
-  ...base,
+  ...base, ...play,
   category: z.enum(["origin", "general", "fighting_style", "epic_boon"]),
   prerequisites: z.array(condition).default([]), // condizioni, tutte da soddisfare
   repeatable: z.boolean().default(false),

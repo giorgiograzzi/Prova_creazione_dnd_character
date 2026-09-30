@@ -10,6 +10,7 @@ const STEPS: { script: string; needs: string[]; produces: string }[] = [
   { script: "extract-step6", needs: ["docs/rules/01_Dati_Gioco_DnD2024.pdf"], produces: "specie" },
   { script: "extract-classes", needs: ["docs/rules/01_Dati_Gioco_DnD2024.pdf"], produces: "classi e sottoclassi" },
   { script: "extract-conditions", needs: ["docs/rules/05_conditions.json"], produces: "condizioni" },
+  { script: "extract-features", needs: ["data/private/classes.json", "data/private/species.json"], produces: "contatori e stati attivabili dei privilegi" },
   { script: "extract-creation", needs: ["docs/rules/02_Regole_Creazione_Personaggio.pdf"], produces: "regole di creazione (allineamenti, array, acquisto a punti)" },
 ];
 

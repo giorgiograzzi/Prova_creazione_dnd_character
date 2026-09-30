@@ -47,6 +47,7 @@ export interface Character {
     conditions: string[]; exhaustion: number; inspiration: boolean; // conditions: id (Esaurimento: livello in `exhaustion`)
     conditionSources?: Record<string, string>; // chi causa Affascinato / Spaventato / Afferrato
     mounted?: boolean; // in sella (Lancia da cavaliere)
+    active?: Record<string, string[]>; // privilegi attivati (Ira, Forma selvatica...): id → scelte fatte all'attivazione
   };
   overrides: Record<string, number>; // valori forzati a mano, visibili e rimovibili
   notes: string;

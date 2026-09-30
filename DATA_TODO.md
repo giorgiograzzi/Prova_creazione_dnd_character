@@ -19,17 +19,17 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 - **Step 17 (avanzamento di livello)**
   - Multiclasse: `classOptions` già controlla il 13 richiesto; restano le competenze parziali della nuova classe (solo quelle "multiclasse") e il Dado Vita/PF al nuovo livello.
   - Mente di ferro (Cacciatore delle tenebre): "se hai già la competenza Sag, Int o Car" (ora sempre Sag).
-- **Step 14b (privilegi giocabili)** — sono le regole scritte solo a parole:
+- **Privilegi ancora solo descritti** (step 14b ha messo l'elenco, i contatori e 7 stati attivabili; il resto si legge ma non modifica i numeri):
+  - Contatori: 49 ricavati dal testo dei riepiloghi (`scripts/lib/feature-play.ts`, `deriveUsage`): solo formule esplicite ("Usi = mod Sag (min 1) per Riposo Lungo", "1 volta per Riposo Breve o Lungo"); il minimo 1 c'è solo dove il testo lo scrive.
+    I costi alternativi ("o spendendo un dado / uno slot / 5 punti") restano nel testo: il contatore conta solo gli usi a riposo.
+  - Stati attivabili curati (`ACTIVATIONS`): Ira, Forma selvatica, Rivelazione celestiale, Volo draconico, Forma grande, Ali del drago, Angelo vendicatore. Da aggiungere gli altri (Forma divina dello Zelota, Presenza intimidatoria...), il danno extra di Rivelazione celestiale (1 volta per turno), il Vantaggio alle prove di Forza dell'Ira e di Forma grande (non c'è un effetto per le prove).
+  - Bonus che dipendono da uno stato attivo: fatto per l'Ira; restano Punizione divina, Colpo brutale, Furia, Sacro Simbolo ecc.
   - Talenti: quasi tutti i talenti generali (es. Maestro delle armi possenti, Sentinella, Attore), effetti di oggetti (acido, pozioni ecc.).
-  - Specie: Trance, Retaggio fatato, Esperto della pietra, Agilità halfling, Fortunato, Furtivo per natura, Corporatura possente,
-    benefici dell'Ascendenza gigante, forme di Rivelazione celestiale, Volo draconico, Forma grande; Alto elfo: cambio del trucchetto a ogni Riposo Lungo.
-  - Classi: quasi tutti i privilegi di combattimento (Attacco irruento, Colpo brutale, Furia, Forma selvatica...), Colpo divino / Incantesimi
-    potenti, "usi = mod Sag" delle sottoclassi (Bagliore protettivo, Sacerdote di guerra), Presagio del Divinatore, Protezione arcana,
-    compagni del Signore delle bestie (nella descrizione della sottoclasse), effetti delle invocazioni (es. Deflagrazione agonizzante),
-    Aura di protezione sugli alleati.
+  - Specie: Trance, Retaggio fatato, Esperto della pietra, Agilità halfling, Fortunato, Furtivo per natura, Corporatura possente, benefici dell'Ascendenza gigante; Alto elfo: cambio del trucchetto a ogni Riposo Lungo.
+  - Classi: quasi tutti i privilegi di combattimento (Attacco irruento, Colpo brutale...), Colpo divino / Incantesimi potenti, Presagio del Divinatore, Protezione arcana,
+    compagni del Signore delle bestie (nella descrizione della sottoclasse), effetti delle invocazioni (es. Deflagrazione agonizzante), Aura di protezione sugli alleati.
   - **Immunità alle condizioni** dei privilegi (es. Protezione della natura, Aura di coraggio): il motore sa applicare l'immunità (Pietrificato → Avvelenato), ma i privilegi non hanno ancora un effetto `immunity`.
-  - **Condizioni con fonte** (Affascinato, Spaventato, Afferrato) e situazionali (linea di vista, distanza): il motore le mostra come testo, con la fonte se indicata in `state.conditionSources`; il tracciamento delle fonti è della scheda (step 14).
-  - Un Riposo Lungo toglie 1 livello di Esaurimento (`removal` nei dati): da applicare nella scheda (step 14).
+  - Condizioni con fonte e situazionali (linea di vista, distanza): il motore le mostra come testo, con la fonte se indicata (fatto nella scheda, step 14).
 
 ## Nota sugli incantesimi (step 8)
 390 incantesimi dal riepilogo `04_Incantesimi`: i testi sono riassunti in parole nostre (non il testo del manuale). Per 10 incantesimi la risoluzione non entra nell'enum e resta in

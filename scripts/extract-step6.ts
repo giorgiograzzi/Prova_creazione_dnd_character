@@ -26,7 +26,9 @@ function traits(text: string) {
   const marks = [...text.matchAll(/\[(\w+)\] (\d) /g)];
   if (!marks.length) throw new Error("Nessun tratto trovato");
   const out: Json[] = [];
-  let name = norm(text.slice(0, marks[0]!.index));
+  // l'intestazione della tabella dei tratti ("Tratto Livello Effetto") non fa parte del nome
+  const stripHeader = (n: string) => n.replace(/^(?:Tratto Livello Effetto )+/, "").trim();
+  let name = stripHeader(norm(text.slice(0, marks[0]!.index)));
   marks.forEach((m, i) => {
     const from = m.index! + m[0].length;
     const to = i + 1 < marks.length ? marks[i + 1]!.index! : text.length;
@@ -37,7 +39,7 @@ function traits(text: string) {
     if (i + 1 < marks.length) {
       const k = clean.lastIndexOf(". ");
       if (k < 0) throw new Error(`Tratto ${m[1]}: confine col tratto successivo non trovato`);
-      desc = clean.slice(0, k + 1); next = clean.slice(k + 2);
+      desc = clean.slice(0, k + 1); next = stripHeader(clean.slice(k + 2));
     }
     out.push({
       id: m[1], name: { it: name }, level: Number(m[2]), description: desc,

@@ -34,6 +34,19 @@ export interface AttackOption {
 
 export interface LoadoutSummary { handsUsed: number; handsMax: number; body?: string; shield?: string; attuned: number; weight: number; capacity: number; problems: string[] }
 
+// Un privilegio, tratto o talento del personaggio, per l'elenco della scheda (descrizione, usi, attivazione)
+export interface FeatureInfo {
+  id: string; name: string; description: string;
+  kind: "species" | "background" | "class" | "subclass" | "feat";
+  source: string; // chi lo dà: "Barbaro", "Aasimar", "Iniziato alla magia"
+  level: number; // livello di sblocco (0 = talento)
+  resourceId?: string; // contatore degli usi (in Derived.resources)
+  activation?: { resource?: string; requires?: string; label?: string; duration?: string; options: { id: string; name: string; description?: string }[] };
+  active: boolean;
+  picked: string[]; // scelta fatta all'attivazione
+  needsReview: boolean;
+}
+
 export interface Lists { adv: string[]; dis: string[] }
 
 // Effetto delle condizioni attive sul personaggio (vedi compute/conditions.ts)
@@ -82,6 +95,7 @@ export interface Derived {
   languages: string[];
   features: string[];
   feats: string[];
+  featureList: FeatureInfo[]; // privilegi, tratti e talenti con descrizione, usi e attivazione
   notes: string[];  // vantaggi condizionati e simili, da mostrare come testo
   warnings: string[]; // es. armatura senza addestramento
   spellcastingBlocked: boolean;

@@ -34,5 +34,7 @@ export function describeCondition(src: string | Condition, rs: Ruleset): string 
     case "equipped": return `equipaggiato: ${c.value}`;
     case "weaponProperty": return `arma con proprietà ${c.value}`;
     case "attackType": return c.value === "melee" ? "attacco in mischia" : "attacco a distanza";
+    case "active": return `${name(rs, c.value)} attivo`;
+    case "attackAbility": return `attacco con ${AB[c.value]}`;
   }
 }

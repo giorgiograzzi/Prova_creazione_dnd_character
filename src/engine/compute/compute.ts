@@ -82,8 +82,11 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     languages: [...x.collected.languages],
     features: [...x.collected.features].sort(),
     feats: [...x.collected.feats].sort(),
+    featureList: x.collected.info.map((f) => ({ ...f, active: !!ch.state.active?.[f.id], picked: ch.state.active?.[f.id] ?? [] })),
     notes, warnings,
-    spellcastingBlocked: untrainedArmor(x, profs) || cs.cannot.includes("compiere azione"),
+    // niente incantesimi: armatura senza addestramento, azioni bloccate, o uno stato attivo che li vieta (Ira)
+    spellcastingBlocked: untrainedArmor(x, profs) || cs.cannot.includes("compiere azione")
+      || x.active.some(({ effect: e }) => e.op === "restriction" && e.forbids === "spellcasting"),
     conditions: cs,
   };
 }

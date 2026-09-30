@@ -164,6 +164,7 @@
   "play": {
     "tabs": {
       "status": "Stato",
+      "features": "Privilegi",
       "stats": "Statistiche",
       "attacks": "Attacchi",
       "conditions": "Condizioni",
@@ -255,6 +256,39 @@
     "forced": "Forzato a mano",
     "reopen": "Modifica la creazione",
     "warnings": "Avvisi",
-    "name": "Nome"
+    "name": "Nome",
+    "features": {
+      "title": "Privilegi e tratti",
+      "search": "Cerca…",
+      "all": "Tutti",
+      "allLevels": "Tutti i livelli",
+      "level": "Livello {n}",
+      "kinds": {
+        "species": "Specie",
+        "background": "Background",
+        "class": "Classe",
+        "subclass": "Sottoclasse",
+        "feat": "Talento"
+      },
+      "uses": "Usi",
+      "use": "Usa",
+      "restore": "Ripristina",
+      "activate": "Attiva",
+      "end": "Termina",
+      "active": "Attivo",
+      "chooseTitle": "Attiva: {n}",
+      "confirm": "Attiva",
+      "review": "Da verificare",
+      "empty": "Nessun privilegio con questi filtri.",
+      "recharge": {
+        "short_rest": "Riposo breve",
+        "long_rest": "Riposo lungo",
+        "dawn": "All'alba",
+        "none": ""
+      },
+      "duration": "Durata: {d}",
+      "expand": "Mostra la descrizione",
+      "collapse": "Nascondi"
+    }
   }
 }

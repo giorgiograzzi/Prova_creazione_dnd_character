@@ -1,3 +1,6 @@
+import { buildCtx, holds } from "../compute";
+import type { Derived } from "../compute";
+import { describeCondition } from "../creation/describe";
 import type { Ruleset } from "../ruleset";
 import type { Character } from "../types";
 
@@ -43,4 +46,27 @@ export function setOverride(ch: Character, key: OverrideKey, value: number | und
   const o = { ...ch.overrides };
   if (value === undefined || !Number.isFinite(value)) delete o[key]; else o[key] = Math.round(value);
   return { ...ch, overrides: o };
+}
+
+// Attivare e disattivare un privilegio (Ira, Forma selvatica...). Attivare consuma un uso della risorsa indicata dal privilegio
+// e, se c'è una scelta (aspetto, elemento...), ne richiede una e la salva. Disattivare non restituisce l'uso.
+export function setActive(ch: Character, rs: Ruleset, d: Pick<Derived, "featureList" | "resources">, id: string, on: boolean, picks: string[] = []): { ok: boolean; errors: string[]; character: Character } {
+  const fail = (e: string) => ({ ok: false, errors: [e], character: ch });
+  const f = d.featureList.find((x) => x.id === id);
+  if (!f?.activation) return fail("Questo privilegio non si attiva");
+  const state = { ...(ch.state.active ?? {}) };
+  if (!on) { delete state[id]; return { ok: true, errors: [], character: set(ch, { active: state }) }; }
+  if (state[id]) return fail("È già attivo");
+  const a = f.activation;
+  if (a.requires && !holds(a.requires, buildCtx(ch, rs))) return fail(`Non puoi attivarlo ora: serve ${describeCondition(a.requires, rs)}`);
+  if (a.options.length) {
+    if (picks.length !== 1 || !a.options.some((o) => o.id === picks[0])) return fail(`Scegli ${a.label ? a.label.toLowerCase() : "un\u2019opzione"}`);
+  }
+  let next = ch;
+  if (a.resource) {
+    const r = d.resources[a.resource];
+    if (!r || r.remaining <= 0) return fail("Nessun uso rimasto");
+    next = useResource(ch, a.resource, r.max.value, 1);
+  }
+  return { ok: true, errors: [], character: set(next, { active: { ...(next.state.active ?? {}), [id]: a.options.length ? picks : [] } }) };
 }

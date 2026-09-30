@@ -1,27 +1,162 @@
 {
-  "app": { "title": "Personaggi D&D" },
-  "tabs": { "characters": "Eroi", "sheet": "Scheda", "equip": "Equip", "magic": "Magie", "homebrew": "Homebrew" },
-  "menu": { "open": "Menu", "settings": "Impostazioni", "export": "Esporta backup", "import": "Importa backup" },
+  "app": {
+    "title": "Personaggi D&D"
+  },
+  "tabs": {
+    "characters": "Eroi",
+    "sheet": "Scheda",
+    "equip": "Equip",
+    "magic": "Magie",
+    "homebrew": "Homebrew"
+  },
+  "menu": {
+    "open": "Menu",
+    "settings": "Impostazioni",
+    "export": "Esporta backup",
+    "import": "Importa backup"
+  },
   "characters": {
-    "title": "I tuoi personaggi", "empty": "Nessun personaggio ancora. Creane uno!", "new": "Nuovo personaggio",
-    "unnamed": "Senza nome", "open": "Apri", "delete": "Elimina", "confirmDelete": "Eliminare definitivamente questo personaggio?",
+    "title": "I tuoi personaggi",
+    "empty": "Nessun personaggio ancora. Creane uno!",
+    "new": "Nuovo personaggio",
+    "unnamed": "Senza nome",
+    "open": "Apri",
+    "delete": "Elimina",
+    "confirmDelete": "Eliminare definitivamente questo personaggio?",
     "creationSoon": "La creazione guidata arriva con il prossimo passo: per ora il personaggio è vuoto."
   },
-  "soon": { "sheet": "La scheda giocabile arriva allo step 14.", "equip": "L'equipaggiamento arriva allo step 15.", "magic": "Le magie arrivano allo step 16.", "homebrew": "L'homebrew arriva allo step 18.", "needCharacter": "Apri o crea un personaggio dalla scheda Personaggi." },
+  "soon": {
+    "sheet": "La scheda giocabile arriva allo step 14.",
+    "equip": "L'equipaggiamento arriva allo step 15.",
+    "magic": "Le magie arrivano allo step 16.",
+    "homebrew": "L'homebrew arriva allo step 18.",
+    "needCharacter": "Apri o crea un personaggio dalla scheda Personaggi."
+  },
   "settings": {
-    "title": "Impostazioni", "back": "Indietro",
-    "hand": "Mano di gioco", "handHelp": "Sposta i pulsanti principali dove il pollice arriva meglio.",
-    "right": "Destra", "left": "Sinistra", "center": "Centro",
-    "weaponSwap": "Cambio arma", "house": "Regola della casa (costa 1 azione)", "official": "Ufficiale (fa parte dell'Attacco)",
+    "title": "Impostazioni",
+    "back": "Indietro",
+    "hand": "Mano di gioco",
+    "handHelp": "Sposta i pulsanti principali dove il pollice arriva meglio.",
+    "right": "Destra",
+    "left": "Sinistra",
+    "center": "Centro",
+    "weaponSwap": "Cambio arma",
+    "house": "Regola della casa (costa 1 azione)",
+    "official": "Ufficiale (fa parte dell'Attacco)",
     "allowReroll": "Permetti di rifare i tiri dei punteggi",
-    "backup": "Backup", "reminder": "Promemoria backup", "reminderOff": "Spento", "reminderDays": "ogni {n} giorni",
-    "lastBackup": "Ultimo backup", "never": "mai", "exportNow": "Esporta ora", "importFile": "Importa da file", "backupDue": "È ora di fare un backup!",
-    "saveStatus": { "saved": "Salvato", "pending": "Modifiche in attesa…", "saving": "Salvataggio…", "error": "Errore di salvataggio" }
+    "backup": "Backup",
+    "reminder": "Promemoria backup",
+    "reminderOff": "Spento",
+    "reminderDays": "ogni {n} giorni",
+    "lastBackup": "Ultimo backup",
+    "never": "mai",
+    "exportNow": "Esporta ora",
+    "importFile": "Importa da file",
+    "backupDue": "È ora di fare un backup!",
+    "saveStatus": {
+      "saved": "Salvato",
+      "pending": "Modifiche in attesa…",
+      "saving": "Salvataggio…",
+      "error": "Errore di salvataggio"
+    }
   },
   "import": {
-    "title": "Anteprima importazione", "error": "File non valido", "apply": "Importa", "cancel": "Annulla", "nothing": "Niente da importare.",
-    "status": { "new": "Nuovo", "same": "Già presente (identico)", "conflict": "Conflitto: esiste già con lo stesso id", "invalid": "Non valido" },
-    "resolve": { "copy": "Tieni entrambi", "replace": "Sostituisci", "skip": "Salta" },
+    "title": "Anteprima importazione",
+    "error": "File non valido",
+    "apply": "Importa",
+    "cancel": "Annulla",
+    "nothing": "Niente da importare.",
+    "status": {
+      "new": "Nuovo",
+      "same": "Già presente (identico)",
+      "conflict": "Conflitto: esiste già con lo stesso id",
+      "invalid": "Non valido"
+    },
+    "resolve": {
+      "copy": "Tieni entrambi",
+      "replace": "Sostituisci",
+      "skip": "Salta"
+    },
     "done": "Importati {n} personaggi."
+  },
+  "wizard": {
+    "title": "Creazione",
+    "step": "Passo {n} di {t}",
+    "summary": "Riepilogo",
+    "back": "Indietro",
+    "next": "Avanti",
+    "finish": "Termina creazione",
+    "steps": {
+      "class": "Classe",
+      "background": "Background",
+      "species": "Specie",
+      "languages": "Linguaggi",
+      "scores": "Punteggi",
+      "alignment": "Allineamento",
+      "details": "Dettagli"
+    },
+    "pick": "Scegli {n}",
+    "picked": "{k} di {n}",
+    "missing": "Mancano delle scelte",
+    "complete": "Completo",
+    "filter": "Cerca…",
+    "noOptions": "Nessuna opzione disponibile per ora.",
+    "noData": "Mancano i dati di gioco: la cartella data/private non è presente su questo server.",
+    "confirmTitle": "Questa scelta annulla altre scelte",
+    "confirmText": "Se continui, verranno tolte:",
+    "confirmYes": "Continua",
+    "confirmNo": "Annulla",
+    "level1": "Si parte dal livello 1: i livelli successivi si aggiungono con l'avanzamento.",
+    "name": "Nome del personaggio",
+    "namePlaceholder": "Come si chiama?",
+    "asi": {
+      "apply": "Applica",
+      "hint": "Assegna gli aumenti e premi Applica.",
+      "current": "Aumenti attuali"
+    },
+    "scores": {
+      "method": "Metodo",
+      "array": "Array standard",
+      "roll": "Tiro dei dadi",
+      "pointbuy": "Acquisto a punti",
+      "manual": "Manuale",
+      "arrayHelp": "Assegna a ogni caratteristica uno dei valori: scegliendone uno già usato, i due si scambiano. Parto dall'array consigliato per la tua classe.",
+      "rollHelp": "4d6 scartando il più basso, sei volte. Assegna i valori tirati come sopra.",
+      "rollNow": "Tira i dadi",
+      "reroll": "Rifai i tiri",
+      "rerollOff": "Rifare i tiri è disattivato (Impostazioni).",
+      "pointbuyHelp": "Punti rimasti: {n} su {t}. Ogni caratteristica va da {min} a {max}.",
+      "manualHelp": "Inserisci i valori a mano (1–20).",
+      "base": "Base",
+      "bonus": "Bonus",
+      "total": "Totale",
+      "mod": "Mod."
+    },
+    "abilities": {
+      "str": "Forza",
+      "dex": "Destrezza",
+      "con": "Costituzione",
+      "int": "Intelligenza",
+      "wis": "Saggezza",
+      "cha": "Carisma"
+    },
+    "gamingSet": "Set da gioco (dall'equipaggiamento)",
+    "chooseOne": "Scegline uno",
+    "sum": {
+      "hp": "Punti Ferita",
+      "ac": "Classe Armatura",
+      "speed": "Velocità",
+      "pb": "Bonus di competenza",
+      "init": "Iniziativa",
+      "languages": "Linguaggi",
+      "equipment": "Equipaggiamento",
+      "features": "Privilegi",
+      "spells": "Incantesimi",
+      "gold": "Monete",
+      "errors": "Non si può ancora chiudere",
+      "done": "Creazione completata",
+      "reopen": "Modifica la creazione",
+      "reopenConfirm": "Riaprendo la creazione, alla chiusura equipaggiamento e Punti Ferita verranno rifatti da capo. Continuare?"
+    }
   }
 }

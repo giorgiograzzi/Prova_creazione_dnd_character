@@ -189,3 +189,12 @@ Convenzioni:
 - **Mano di gioco** (`AppSettings.hand`): la classe `hand-left|center|right` sulla radice sposta i comandi principali (`.xp-actions`).
 - **Impostazioni**: mano, cambio arma, rifare i tiri (`allowReroll`, usato dal wizard), promemoria backup, Esporta ora / Importa con anteprima e scelta sui conflitti (`ImportDialog`).
 - Il salvataggio parte anche su `visibilitychange`/`pagehide`. Testi in `i18n/it.json`.
+
+## Wizard di creazione (step 13) — `src/wizard/`, `src/pages/Sheet.tsx`
+- **Logica senza interfaccia** (`wizard/logic.ts`, testata): `togglePick` (scelta singola/multipla; oltre il massimo esce la più vecchia), `choose` (= `previewDecision`), punteggi (`startScores`, `chooseMethod`, `rerollScores`, `swapScore`, `stepPointBuy`, `applyAsiDraft`), chiusura (`finalizeCharacter`, `isFinalized`, `reopenCreation`), `autoComplete` (solo test).
+- **Passi**: 7 passi ufficiali + Riepilogo; i pulsanti numerati in alto sono liberi di navigare e mostrano ✓ dei passi completi, sotto la barra di avanzamento. `creationProgress` dice cosa manca.
+- **Domande** (`QuestionView`): opzioni toccabili (radio/checkbox ≥48px); quelle escluse restano visibili, barrate, con il motivo; ricerca se >12 opzioni. **Aumenti di caratteristica** (`AsiView`): bozza 0/+1/+2 per caratteristica, "Applica" attivo solo se le regole della fonte sono rispettate (l'errore è mostrato).
+- **Cascata**: se una scelta annulla altre (`removed`), un dialogo elenca cosa verrebbe tolto e perché; "Annulla" mantiene il personaggio di partenza.
+- **Punteggi** (`ScoresStep`): array standard (parte dal consigliato per la classe; scegliendo un valore già usato i due si scambiano), tiro 4d6 (una volta sola; rifare solo se attivo in Impostazioni), acquisto a punti (+/− nel budget), manuale. Mostra base, totale con i bonus e modificatore.
+- **Chiusura**: `finalizeCharacter` richiede tutti i passi completi, applica PF a media (primo livello al massimo), equipaggiamento e monete iniziali (`startingEquipment`; set da gioco se richiesto), PF attuali al massimo. Creazione "chiusa" = la prima classe ha `hpRolls`. "Modifica la creazione" la riapre (equipaggiamento e PF si rifanno alla nuova chiusura).
+- **Dati**: `data/ruleset.ts` costruisce una volta il `Ruleset` da `data/**` (senza `data/private` l'app mostra l'avviso e resta utilizzabile).

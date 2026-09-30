@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import it from "./i18n/it.json";
 import { Characters } from "./pages/Characters";
 import { Placeholder } from "./pages/Placeholder";
+import { Sheet } from "./pages/Sheet";
 import { ImportDialog, Settings, exportNow } from "./pages/Settings";
 import type { ImportPreview } from "./db/backup";
 import { TabBar, icons, type TabDef } from "./ui/xp";
@@ -53,7 +54,7 @@ export function App() {
     <div className={`xp-app hand-${hand}`}>
       <header className="xp-title">
         <h1>{current ? current.name || it.characters.unnamed : it.app.title}</h1>
-        <span className="xp-status" role="status" aria-live="polite">{saveStatus === "saved" ? "" : it.settings.saveStatus[saveStatus]}</span>
+        <span className="xp-status" role="status" aria-live="polite">{saveStatus === "error" ? it.settings.saveStatus.error : ""}</span>
         <button type="button" className="xp-title-btn" aria-label={it.menu.open} aria-haspopup="menu" aria-expanded={menu} onClick={() => setMenu(!menu)}><Menu /></button>
       </header>
       {menu && (
@@ -67,7 +68,7 @@ export function App() {
         {settings ? <Settings onBack={() => setSettings(false)} /> : (
           <>
             {shown === "characters" && <Characters onOpened={() => setTab("sheet")} />}
-            {shown === "sheet" && <Placeholder title={it.tabs.sheet} text={it.soon.sheet} />}
+            {shown === "sheet" && <Sheet />}
             {shown === "equip" && <Placeholder title={it.tabs.equip} text={it.soon.equip} />}
             {shown === "magic" && <Placeholder title={it.tabs.magic} text={it.soon.magic} />}
             {shown === "homebrew" && <Placeholder title={it.tabs.homebrew} text={it.soon.homebrew} />}

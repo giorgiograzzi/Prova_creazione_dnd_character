@@ -27,7 +27,7 @@
   --safe-r: env(safe-area-inset-right, 0px);
 }
 * { box-sizing: border-box; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-html, body, #root { height: 100%; margin: 0; }
+html, body, #root { height: 100%; min-height: 100vh; min-height: 100lvh; margin: 0; }
 /* Fuori dall'app (barra di stato in alto, area del gesto in basso su iPhone) i colori continuano quelli di titolo e tab bar */
 html { background: linear-gradient(to bottom, var(--xp-title-b) 50%, var(--xp-face-dark) 50%) fixed; }
 @media (min-width: 721px) { html { background: var(--xp-desk); } }
@@ -35,7 +35,7 @@ body { font: 16px/1.4 Tahoma, Verdana, "DejaVu Sans", sans-serif; color: var(--x
 button, input, select, textarea { font: inherit; color: inherit; }
 
 /* position: fixed + inset 0: su iPhone in modalità app 100dvh non copre tutto lo schermo */
-.xp-app { position: fixed; inset: 0; display: flex; flex-direction: column; width: 100%; max-width: 720px; margin: 0 auto; background: var(--xp-face);
+.xp-app { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100lvh; display: flex; flex-direction: column; width: 100%; max-width: 720px; margin: 0 auto; background: var(--xp-face);
   border-left: 3px solid var(--xp-border); border-right: 3px solid var(--xp-border); padding-left: var(--safe-l); padding-right: var(--safe-r); }
 
 /* barra del titolo */

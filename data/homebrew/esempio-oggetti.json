@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "name": "Esempio: oggetti",
+  "items": [
+    {
+      "id": "hb_zaino_capiente",
+      "name": { "it": "Zaino capiente" },
+      "description": "Dentro è molto più grande che fuori, ma pesa come uno zaino normale.",
+      "category": "Oggetto magico", "weight": 5, "cost": 0, "attunement": false
+    },
+    {
+      "id": "hb_anello_del_fuoco_fatuo",
+      "name": { "it": "Anello del fuoco fatuo" },
+      "description": "Un anello di rame che emana una luce tenue a comando.",
+      "category": "Oggetto magico", "weight": 0, "cost": 0, "attunement": true
+    }
+  ]
+}

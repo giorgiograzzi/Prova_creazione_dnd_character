@@ -1,0 +1,82 @@
+// MODELLO DI PACCHETTO HOMEBREW (da copiare in un file .json SENZA i commenti e riempire).
+// Si importa dalla schermata Homebrew → "Importa pacchetto". Tutte le liste sono facoltative.
+// Gli id: minuscoli, lettere, numeri e "_", iniziano con una lettera. Conviene il prefisso "hb_" per non scontrarsi coi dati di gioco.
+// Le monete sono in RAME: 1 mo = 100. Il peso è in libbre (lb). Le distanze in piedi (ft) per la gittata delle armi.
+{
+  "schemaVersion": 1,          // obbligatorio: versione del formato
+  "name": "Il mio pacchetto",  // solo un'etichetta
+
+  "weapons": [{
+    "id": "hb_mia_arma",
+    "name": { "it": "Mia arma" },
+    "description": "",
+    "category": "martial",          // simple | martial
+    "kind": "melee",                // melee | ranged
+    "damage": "1d8",                // dadi ("2d6") o numero fisso ("1")
+    "damageType": "slashing",       // id di un tipo di danno: slashing, piercing, fire, radiant...
+    "properties": ["versatile"],    // id di proprietà: light, finesse, heavy, thrown, versatile, two_handed, reach, loading, ammunition
+    "versatileDamage": "1d10",      // solo se è Versatile
+    "range": { "normal": 80, "long": 320 }, // solo a distanza o lanciata
+    "mastery": "sap",               // id di una maestria: cleave, graze, nick, push, sap, slow, topple, vex
+    "weight": 3,
+    "cost": 1500                    // in rame
+  }],
+
+  "armors": [{
+    "id": "hb_mia_armatura",
+    "name": { "it": "Mia armatura" },
+    "category": "medium",           // light | medium | heavy | shield
+    "baseAc": 14,                   // per lo scudo è il bonus
+    "dexCap": 2,                    // massimo di Destrezza; null = nessun limite; 0 = niente Destrezza
+    "strRequired": 0,
+    "donMinutes": 5,                // minuti per indossarla
+    "stealthDisadvantage": false,
+    "weight": 20, "cost": 5000
+  }],
+
+  "items": [{
+    "id": "hb_mio_oggetto",
+    "name": { "it": "Mio oggetto" },
+    "category": "Oggetto magico",
+    "weight": 1, "cost": 0,
+    "attunement": true              // richiede sintonia
+  }],
+
+  "feats": [{
+    "id": "hb_mio_talento",
+    "name": { "it": "Mio talento" },
+    "description": "Testo che il giocatore legge.",
+    "category": "general",          // origin | general | fighting_style | epic_boon
+    "prerequisites": ["level>=4"],  // condizioni, tutte da soddisfare (level>=N, ability:str>=13...)
+    "repeatable": false,
+    "effects": [                    // ciò che cambia nella scheda; l'editor ne propone un catalogo
+      { "op": "acBonus", "value": 1 },
+      { "op": "speedBonus", "value": 10 },
+      { "op": "initiativeBonus", "value": 2 },
+      { "op": "resistance", "types": ["fire"] },
+      { "op": "sense", "kind": "darkvision", "range": 60 },
+      { "op": "attackBonus", "value": 1, "attackType": "ranged" },   // any | melee | ranged
+      { "op": "saveBonus", "value": 1, "ability": "wis" },            // senza "ability" = tutti
+      { "op": "grantSkillProficiency", "skills": ["stealth"], "expertise": false },
+      { "op": "abilityScoreIncrease", "abilities": ["str"], "amount": 1, "cap": 20 },
+      { "op": "grantSpell", "spell": "hb_mia_magia", "mode": "alwaysPrepared" } // alwaysPrepared | cantrip | known
+    ]
+  }],
+
+  "spells": [{
+    "id": "hb_mia_magia",
+    "name": { "it": "Mia magia" },
+    "description": "",
+    "level": 1,                     // 0 = trucchetto
+    "school": "evocation",          // abjuration conjuration divination enchantment evocation illusion necromancy transmutation
+    "classes": ["wizard"],          // bard cleric druid paladin ranger sorcerer warlock wizard
+    "castingTime": { "unit": "action", "amount": 1 }, // action | bonus_action | reaction | minute | hour
+    "range": "18 metri",
+    "components": { "v": true, "s": true, "m": false },
+    "duration": "Istantanea",
+    "concentration": false, "ritual": false,
+    "resolution": "save_dex",       // none | save_str..save_cha | attack_melee | attack_ranged
+    "summary": "Riga breve per l'elenco.",
+    "higherLevels": ""
+  }]
+}

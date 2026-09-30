@@ -26,10 +26,8 @@ export function emptyRuleset(): Ruleset {
   return rs as Ruleset;
 }
 
-// Costruisce il ruleset da file già letti. Tollerante: se private/ manca (nessun file)
-// o una voce è invalida, l'errore finisce in `errors` e il resto funziona.
-export function buildRuleset(files: unknown[]): Ruleset {
-  const rs = emptyRuleset();
+// Aggiunge file di dati a un ruleset. Tollerante: se una voce è invalida, l'errore finisce in `errors` e il resto funziona.
+function addFiles(rs: Ruleset, files: unknown[]): Ruleset {
   for (const f of files) {
     const file = f as Partial<DataFile>;
     const schema = file.kind ? (KINDS[file.kind] as z.ZodType | undefined) : undefined;
@@ -47,4 +45,15 @@ export function buildRuleset(files: unknown[]): Ruleset {
     }
   }
   return rs;
+}
+
+// Costruisce il ruleset da file già letti (se private/ manca la lista è più corta).
+export const buildRuleset = (files: unknown[]): Ruleset => addFiles(emptyRuleset(), files);
+
+// Copia di un ruleset con in più altri file (l'homebrew): l'originale non cambia, quindi si riparte dal base a ogni modifica.
+export function extendRuleset(base: Ruleset, files: unknown[]): Ruleset {
+  const rs = emptyRuleset();
+  for (const k of Object.keys(KINDS)) (rs as Record<string, unknown>)[k] = new Map(base[k as Kind] as Map<string, unknown>);
+  rs.errors = [...base.errors];
+  return addFiles(rs, files);
 }

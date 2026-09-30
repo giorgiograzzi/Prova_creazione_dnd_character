@@ -113,3 +113,21 @@ describe("store: backup e impostazioni", () => {
     expect(backupDue({ ...DEFAULT_APP_SETTINGS, backupReminderDays: 0 }, 999 * day)).toBe(false);
   });
 });
+
+describe("store: homebrew", () => {
+  it("si salva nell'archivio e torna alla riapertura; un incantesimo aggiunto a mano sopravvive al salvataggio", async () => {
+    const { store, repo } = setup();
+    await store.getState().init();
+    const entry = { kind: "feats" as const, enabled: true, data: { id: "hb_x", name: { it: "X" }, category: "general" } };
+    await store.getState().setHomebrew([entry]);
+    const again = createAppStore({ repo });
+    await again.getState().init();
+    expect(again.getState().homebrew).toEqual([entry]);
+
+    const ch = await store.getState().create();
+    store.getState().update((c) => ({ ...c, extraSpells: ["hb_s"], feats: [{ featId: "hb_x" }] }));
+    await store.getState().flush();
+    const l = await repo.load(ch.id);
+    expect(l.ok && l.character.extraSpells).toEqual(["hb_s"]);
+  });
+});

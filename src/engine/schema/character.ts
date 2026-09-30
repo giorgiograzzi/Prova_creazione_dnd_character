@@ -44,4 +44,5 @@ export const characterSchema = z.object({
   editing: z.boolean().optional(), created: z.boolean().optional(),
   creation: z.object({ method: z.enum(["array", "roll", "pointbuy", "manual"]), rolls: z.array(int).optional() }).optional(),
   pactWeapon: z.string().optional(),
+  extraSpells: z.array(z.string()).optional(),
 });

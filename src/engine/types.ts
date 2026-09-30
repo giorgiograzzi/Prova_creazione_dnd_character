@@ -37,6 +37,7 @@ export interface Character {
   inventory: { itemId: string; qty: number; state: EquipState; attuned?: boolean; grip?: "one" | "two" }[];
   // Come sono stati generati i punteggi (creazione): array standard, tiro 4d6 (rolls = i 6 valori grezzi), acquisto a punti o manuale
   creation?: { method: "array" | "roll" | "pointbuy" | "manual"; rolls?: number[] };
+  extraSpells?: string[]; // incantesimi aggiunti a mano (homebrew): compaiono nel libro come "concessi"
   pactWeapon?: string; // Warlock con Patto della Lama: id dell'arma del patto (usa Carisma)
   coins: { cp: number; sp: number; ep: number; gp: number; pp: number };
   state: {

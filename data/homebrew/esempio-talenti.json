@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "name": "Esempio: talenti",
+  "feats": [
+    {
+      "id": "hb_pelle_di_pietra",
+      "name": { "it": "Pelle di pietra" },
+      "description": "La tua pelle si indurisce: +1 alla CA e resistenza ai danni contundenti.",
+      "category": "general", "prerequisites": ["level>=4"],
+      "effects": [
+        { "op": "acBonus", "value": 1 },
+        { "op": "resistance", "types": ["bludgeoning"] }
+      ]
+    },
+    {
+      "id": "hb_occhi_di_gatto",
+      "name": { "it": "Occhi di gatto" },
+      "description": "Vedi bene al buio e sei più pronto ai riflessi.",
+      "category": "origin",
+      "effects": [
+        { "op": "sense", "kind": "darkvision", "range": 60 },
+        { "op": "initiativeBonus", "value": 2 }
+      ]
+    },
+    {
+      "id": "hb_piedi_leggeri",
+      "name": { "it": "Piedi leggeri" },
+      "description": "Ti muovi più in fretta: +10 piedi di velocità.",
+      "category": "general",
+      "effects": [{ "op": "speedBonus", "value": 10 }]
+    }
+  ]
+}

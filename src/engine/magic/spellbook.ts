@@ -55,6 +55,12 @@ export function spellbook(ch: Character, rs: Ruleset, d: Pick<Derived, "grantedS
     });
   }
 
+  // incantesimi aggiunti a mano (homebrew): lanciabili con la caratteristica della prima classe che lancia incantesimi
+  for (const id of ch.extraSpells ?? []) {
+    const c = d.spellcasting[0];
+    add(id, { kind: "granted", label: "Homebrew", ...(c ? { ability: c.ability, dc: c.dc.value, attack: c.attack.value } : {}) });
+  }
+
   const wizard = ch.classes.some((c) => c.classId === "wizard");
   const out: SpellEntry[] = [];
   for (const [id, sources] of map) {

@@ -3,6 +3,7 @@ import { newId } from "../db/id";
 import { applyImport, exportBackup, previewImport, type ImportPreview, type Resolution } from "../db/backup";
 import type { CharacterSummary, Repo } from "../db/repo";
 import { emptyCharacter } from "../engine/character";
+import type { HbEntry } from "../engine/homebrew";
 import type { Character } from "../engine/types";
 import { normalizeSettings, type AppSettings, DEFAULT_APP_SETTINGS } from "./settings";
 
@@ -18,6 +19,7 @@ export interface AppState {
   saveStatus: SaveStatus;
   error: string | null;
   settings: AppSettings;
+  homebrew: HbEntry[]; // voci homebrew (attive e no); quelle attive entrano nel ruleset
 }
 export interface AppActions {
   init(): Promise<void>;
@@ -29,6 +31,7 @@ export interface AppActions {
   flush(): Promise<void>;
   remove(id: string): Promise<void>;
   updateSettings(patch: Partial<AppSettings>): Promise<void>;
+  setHomebrew(entries: HbEntry[]): Promise<void>;
   exportAll(): Promise<string>;
   previewImport(text: string): Promise<ImportPreview>;
   commitImport(preview: ImportPreview, resolutions?: Record<string, Resolution>): Promise<number>;
@@ -66,12 +69,13 @@ export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 8
     const enqueueSave = () => { inFlight = inFlight.then(doSave); return inFlight; };
 
     return {
-      ready: false, list: [], current: null, saveStatus: "saved", error: null, settings: DEFAULT_APP_SETTINGS,
+      ready: false, list: [], current: null, saveStatus: "saved", error: null, settings: DEFAULT_APP_SETTINGS, homebrew: [],
       async init() {
         // se l'archivio del browser non risponde l'app si apre lo stesso, con l'errore in vista (mai pagina bianca)
         try {
           const settings = normalizeSettings(await repo.getSetting("app"));
-          set({ settings, list: await repo.list(), ready: true });
+          const homebrew = (await repo.getSetting<HbEntry[]>("homebrew")) ?? [];
+          set({ settings, homebrew: Array.isArray(homebrew) ? homebrew : [], list: await repo.list(), ready: true });
         } catch (e) {
           set({ ready: true, error: `Archivio del browser non disponibile: ${e instanceof Error ? e.message : String(e)}` });
         }
@@ -110,6 +114,10 @@ export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 8
         const settings = normalizeSettings({ ...get().settings, ...patch });
         set({ settings });
         await repo.setSetting("app", settings);
+      },
+      async setHomebrew(entries) {
+        set({ homebrew: entries });
+        await repo.setSetting("homebrew", entries);
       },
       async exportAll() {
         await get().flush();

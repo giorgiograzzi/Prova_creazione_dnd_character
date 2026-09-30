@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import it from "./i18n/it.json";
 import { Characters } from "./pages/Characters";
-import { Placeholder } from "./pages/Placeholder";
+import { Homebrew } from "./pages/Homebrew";
 import { Sheet } from "./pages/Sheet";
 import { ImportDialog, Settings, exportNow } from "./pages/Settings";
 import type { ImportPreview } from "./db/backup";
@@ -72,7 +72,7 @@ export function App() {
           <>
             {shown === "characters" && <Characters onOpened={() => { setSection("status"); setTab("sheet"); }} />}
             {shown === "sheet" && <Sheet section={section} onSection={setSection} />}
-            {shown === "homebrew" && <Placeholder title={it.tabs.homebrew} text={it.soon.homebrew} />}
+            {shown === "homebrew" && <Homebrew />}
           </>
         )}
       </main>

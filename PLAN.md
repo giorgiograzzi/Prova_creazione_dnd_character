@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-17 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Step 16 completato (magie). Step 17 completato (avanzamento di livello). Prossimo: step 18 (Homebrew v1). Passo 0 (livello di partenza) aggiunto al wizard. Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-18 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Step 16 completato (magie). Step 17 completato (avanzamento di livello). Prossimo: step 19 (PWA e Docker). Passo 0 (livello di partenza) aggiunto al wizard. Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -118,7 +118,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 
 ### 18. Homebrew v1
 - Editor guidato (armi/oggetti, talenti, incantesimi semplici) con anteprima e Zod, catalogo effetti predefiniti, badge, attiva/disattiva/duplica/modifica/elimina, export/import `.json` versionato, 3-4 esempi + template commentato in `data/homebrew/`.
-- **Fatto**: creo arma, talento, incantesimo homebrew, li uso nel PG, li esporto e reimporto.
+- **Fatto**: tab Homebrew con modulo guidato per armi, armature, oggetti, talenti (con catalogo di 17 effetti predefiniti) e incantesimi; anteprima e controllo con lo schema del motore (errori in italiano, id `hb_…` sempre liberi); badge "Homebrew", attiva/disattiva, duplica, modifica, elimina; "Dai al personaggio" (oggetti nell'inventario, talenti in `feats`, incantesimi in `extraSpells` come "concessi"); export/import `.json` versionato con scarto delle voci invalide e aggiornamento per id; 4 pacchetti di esempio + `template.jsonc` commentato in `data/homebrew/` (validati da `validate:data`). Le voci stanno nell'archivio del browser (chiave `homebrew`) e il ruleset si ricostruisce da solo quando cambiano. 24 test nuovi (validazione, pacchetti, ruleset, scheda, catalogo effetti, store) e prova nel browser: talento +1 CA (16→17), arma nell'inventario, incantesimo nel libro, persistenza dopo ricarica, export.
 
 ### 19. PWA e Docker
 - Installabilità e offline completo, promemoria backup; `Dockerfile` multi-stage + nginx (fallback SPA, cache service worker), `docker-compose.yml`, `.env.example`. **Ti chiedo la porta prima di fissarla.**

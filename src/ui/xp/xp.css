@@ -275,3 +275,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .xp-dialog .xp-list .name { white-space: normal; }
 .xp-dialog .wz-score { border-bottom: 1px dotted var(--dos-shadow); }
 .xp-dialog .wz-score .n { color: var(--dos-bright); }
+
+/* Homebrew */
+.hb-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hb-chips button { min-height: var(--tap); padding: 0 12px; background: var(--xp-field); border: 2px solid var(--xp-field-border); border-radius: 3px; }
+.hb-chips button[aria-pressed="true"] { background: var(--xp-select); color: var(--xp-select-text); font-weight: 700; }
+.hb-badge { display: inline-block; padding: 0 8px; border-radius: 10px; background: #fff7c2; border: 1px solid #8a6d00; color: #4a3a00; font-size: 16px; }
+.hb-effect { border: 2px solid var(--xp-face-dark); border-radius: 4px; padding: 8px 10px; margin-bottom: 12px; background: var(--xp-field); }
+.hb-entry[data-enabled="false"] { opacity: 0.75; }
+.xp-dialog .hb-badge { background: var(--dos-bg); color: var(--dos-accent); border-color: var(--dos-accent); }
+.hb-entry { padding: 8px 10px; }

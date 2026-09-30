@@ -3,12 +3,12 @@
 export type Formula =
   | { t: "num"; v: number }
   | { t: "var"; name: string; arg?: string }
-  | { t: "bin"; op: "+" | "-" | "*"; l: Formula; r: Formula }
+  | { t: "bin"; op: "+" | "-" | "*" | "/"; l: Formula; r: Formula }
   | { t: "fn"; name: "max" | "min" | "floor"; args: Formula[] };
 
 // Variabili ammesse (con eventuale argomento dopo i due punti)
 const VARS = new Set(["pb", "level", "classLevel", "mod", "score"]);
-const TOKEN = /\s*(\d+|[a-zA-Z_]+(?::[a-z_]+)?|[-+*(),])/y;
+const TOKEN = /\s*(\d+|[a-zA-Z_]+(?::[a-z_]+)?|[-+*/(),])/y;
 
 export function parseFormula(src: string): Formula {
   const toks: string[] = [];
@@ -48,7 +48,10 @@ export function parseFormula(src: string): Formula {
   };
   const product = (): Formula => {
     let l = primary();
-    while (peek() === "*") { eat(); l = { t: "bin", op: "*", l, r: primary() }; }
+    while (peek() === "*" || peek() === "/") {
+      const op = eat() as "*" | "/";
+      l = { t: "bin", op, l, r: primary() };
+    }
     return l;
   };
   const sum = (): Formula => {

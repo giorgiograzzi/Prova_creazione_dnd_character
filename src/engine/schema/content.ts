@@ -33,7 +33,7 @@ export const backgroundSchema = z.object({
   skills: z.array(skill).length(2),
   tool: z.string(), // id o gruppo ("artisan", "musical", "gaming")
   feat: id,
-  equipment: z.record(z.enum(["A", "B", "C"]), z.array(z.string())),
+  equipment: z.partialRecord(z.enum(["A", "B", "C"]), z.array(z.string())),
 });
 
 export const featSchema = z.object({
@@ -59,7 +59,7 @@ export const classSchema = z.object({
   caster: z.enum(["none", "full", "half", "third", "pact"]).default("none"),
   spellAbility: ability.optional(),
   multiclassRequirement: z.string().optional(), // solo annotato (step 17)
-  equipment: z.record(z.enum(["A", "B", "C"]), z.array(z.string())),
+  equipment: z.partialRecord(z.enum(["A", "B", "C"]), z.array(z.string())),
   features: z.array(featureSchema),
   // Colonne della tabella 1-20 (ire, dadi, trucchetti, preparati...); 20 valori ciascuna
   table: z.record(z.string(), z.array(z.union([z.number(), z.string()])).length(20)).default({}),

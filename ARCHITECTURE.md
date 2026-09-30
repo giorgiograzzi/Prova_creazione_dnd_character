@@ -52,3 +52,26 @@ Se `data/private/` manca il ruleset è semplicemente più piccolo. I file dati h
 
 ### Homebrew
 `homebrewPackSchema`: `{ schemaVersion, name, weapons, armors, items, feats, spells }`.
+
+## Motore di calcolo (step 3) — `src/engine/compute/`
+
+`computeCharacter(character, ruleset) → Derived`. Ogni numero è un `Sourced` (`value` + `sources`: "da dove viene").
+
+| File | Ruolo |
+|---|---|
+| `collect.ts` | raccoglie gli effetti di specie (tratti per livello TOTALE), background, classi/sottoclassi (per livello di classe), talenti e scelte del giocatore |
+| `context.ts` | punteggi finali (base + `asi` + effetti, tetto 20/30/25), armatura/scudo indossati, effetti attivi (condizione `when` vera) |
+| `condition-eval.ts`, `formula-eval.ts` | valutano condizioni e formule (arrotondamento per difetto) |
+| `proficiencies.ts` | TS e armature/armi solo dalla PRIMA classe, background, effetti |
+| `rolls.ts` | TS e abilità (competenza/maestria/Factotum), vantaggio e svantaggio che si annullano |
+| `hp.ts`, `ac.ts`, `speed.ts`, `resources.ts` | PF, CA (una sola formula, la migliore), velocità/sensi/resistenze, risorse |
+| `testkit.ts` | mini-ruleset in memoria per i test (i dati veri arrivano con gli step 4-7) |
+
+Convenzioni:
+- **Scelte con `source`**: gli id scelti diventano effetti (`skills`→competenza, `expertise`→maestria, `tools:*`, `weapons:*`, `cantrips:*`, `spells:*`, `feats:*`). Gli `id` delle scelte devono essere univoci (chiave di `Character.decisions`).
+- **Id noti al motore**: privilegio `jack_of_all_trades` (Factotum), talento `medium_armor_master` (Des max 3 se Des ≥ 16).
+- **PF**: `hpRolls[i]` = livello i+1 della classe (numero tirato o `"avg"`); per la prima classe l'indice 0 è ignorato (dado massimo).
+- **Armatura**: `dexCap` null = nessun limite, 0 = nessun bonus Des. Senza addestramento: CA sì, svantaggio a For/Des, niente incantesimi, avviso; scudo senza addestramento: nessun bonus.
+- **Valori forzati** (`Character.overrides`): `ac`, `hp.max`, `initiative`, `passivePerception`, `speed.walk`; restano visibili come prima fonte.
+- Le condizioni sull'arma (`equipped`, `weaponProperty`, `attackType`) sono false qui: si valutano allo step 9 con `buildCtx(ch, rs, weapon)`.
+- Fuori dallo step 3: attacchi per arma (9), slot degli incantesimi (16), multiclasse: competenze parziali (17).

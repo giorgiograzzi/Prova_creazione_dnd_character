@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1 completato. Step 2 fatto, in attesa di approvazione dello schema effetti** (vedi ARCHITECTURE.md).
+Stato: **Step 1-3 completati** (schema approvato). Prossimo: step 4 (dati cap. A).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -38,11 +38,11 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - **File**: `package.json`, `vite.config.ts`, `tsconfig.json`, `src/**` (vuote), `.gitignore`, doc.
 - **Fatto**: `npm run dev/build/test` funzionano; niente contenuto protetto tracciato.
 
-### 2. Schema dati ed effetti (`types.ts`, `schema/`) ✅ (da approvare)
+### 2. Schema dati ed effetti (`types.ts`, `schema/`) ✅ (approvato)
 - **Obiettivo**: tipi `Character`, `Effect`, `Condition`, `Choice`, `Option`; schemi Zod per specie, background, classe, sottoclasse, talento, arma, armatura, oggetto, incantesimo, homebrew (con `schemaVersion`); parser delle condizioni (`equipped:`, `wearingArmor:`, `weaponProperty:`, `hasFeature:`, `level>=N`...); effetti minimi del brief (le `op` del file 03: modifier, grantProficiency, grantFeature/Feat/Spell/Equipment, setSpeed, grantSense, grantResistance, acFormula, abilityScoreIncrease, prerequisite/restriction, risorse con ricarica). Loader del ruleset tollerante se `private/` manca.
 - **Fatto**: schema documentato in `ARCHITECTURE.md`; test di validazione su esempi minimi; **schema effetti da te approvato prima di andare avanti.**
 
-### 3. Motore di calcolo base (`compute/`)
+### 3. Motore di calcolo base (`compute/`) ✅
 - **Obiettivo**: `computeCharacter(char, ruleset) → Derived` con `sources`: modificatori, bonus competenza, TS, abilità (competenza/maestria/Factotum), iniziativa, percezione passiva, PF max, dadi vita, velocità, sensi, CA (tutte le formule, miglior formula), risorse (usi = pb ecc.), vantaggio/svantaggio che si annullano.
 - **File**: `compute/*.ts` piccoli (`abilities`, `proficiency`, `hp`, `ac`, `speed`, `resources`, `effects`), test.
 - **Fatto**: test unitari verdi su tutte le formule del file 02 §5 e 03 §4; ogni numero ha le fonti.

@@ -15,7 +15,7 @@ export default defineConfig({
         lang: "it",
         display: "standalone",
         background_color: "#ece9d8",
-        theme_color: "#0a246a",
+        theme_color: "#0a3fb5",
       },
     }),
   ],

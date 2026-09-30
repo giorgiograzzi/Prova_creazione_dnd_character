@@ -1,3 +1,4 @@
+import it from "../i18n/it.json";
 import { computeCharacter } from "../engine/compute";
 import {
   allQuestions, creationProgress, fillHpRolls, pointBuyCost, previewDecision, recommendedArray, rollAbilityScores, setAsi, setBaseScores,
@@ -80,7 +81,7 @@ export interface Finalized { ok: boolean; errors: string[]; character: Character
 // Chiude la creazione: PF a media (primo livello al massimo), equipaggiamento e monete iniziali, PF attuali al massimo
 export function finalizeCharacter(ch: Character, rs: Ruleset, opts: { gaming_set?: string } = {}): Finalized {
   const prog = creationProgress(ch, rs);
-  if (!prog.complete) return { ok: false, errors: prog.steps.flatMap((s) => [...s.problems, ...(s.missing.length ? [`Passo "${s.step}": mancano delle scelte`] : [])]), character: ch };
+  if (!prog.complete) return { ok: false, errors: prog.steps.flatMap((s) => [...s.problems, ...(s.missing.length ? [it.wizard.stepMissing.replace("{s}", it.wizard.steps[s.step])] : [])]), character: ch };
   const eq = startingEquipment(ch, rs, opts);
   const still = eq.pending.filter((p) => p !== "$gaming_set" || !opts.gaming_set);
   if (still.length) return { ok: false, errors: [`Manca una scelta per l'equipaggiamento: ${still.join(", ")}`], character: ch };

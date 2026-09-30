@@ -95,6 +95,7 @@ export function Wizard({ ch, rs, allowReroll, onChange, onDone }: {
       </div>
       <div className="wz-bar" role="progressbar" aria-valuemin={0} aria-valuemax={STEPS.length} aria-valuenow={done}><div style={{ width: `${(done / STEPS.length) * 100}%` }} /></div>
       <h2>{view === "summary" ? t.summary : `${fmt(t.step, { n: idx + 1, t: STEPS.length })}: ${t.steps[view]}`}</h2>
+      {!rs.creation.get("creation") && <div className="xp-error" role="alert">{t.noCreation}</div>}
       {errors.length > 0 && <div className="xp-error" role="alert">{errors.map((e) => <div key={e}>{e}</div>)}</div>}
       {problems.length > 0 && view !== "scores" && <div className="xp-banner">{problems.join(" · ")}</div>}
       {body()}

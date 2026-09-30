@@ -29,6 +29,13 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
   - **Immunità alle condizioni** dei privilegi (es. Protezione della natura, Aura di coraggio): il motore sa applicare l'immunità (Pietrificato → Avvelenato), ma i privilegi non hanno ancora un effetto `immunity`.
   - Condizioni con fonte e situazionali (linea di vista, distanza): il motore le mostra come testo, con la fonte se indicata (fatto nella scheda, step 14).
 
+## 3. Homebrew (step 18): cosa non c'è ancora
+- Gli **effetti sul motore** valgono solo per i talenti (17 effetti predefiniti). Armi, armature e oggetti homebrew hanno i campi standard ma un oggetto magico non può ancora dare bonus (anello +1 CA, sintonia con effetti).
+- **Incantesimi homebrew**: si aggiungono a mano al personaggio (`extraSpells`, lanciati con la prima classe incantatrice); non compaiono nelle liste di classe per la preparazione e la creazione.
+- **Backup**: l'homebrew non è nel backup dei personaggi (si scambia con l'export `.json` del pacchetto).
+- Nessun effetto "a scelta" o con condizioni (`when`) nel catalogo: per quelli serve scrivere il `.json` a mano (vedi `data/homebrew/template.jsonc`).
+- Bug segnalato: dadi del danno delle armi (vedi PLAN.md, "Aperti").
+
 ## Nota sugli incantesimi (step 8)
 390 incantesimi dal riepilogo `04_Incantesimi`: i testi sono riassunti in parole nostre (non il testo del manuale). Per 10 incantesimi la risoluzione non entra nell'enum e resta in
 `resolutionRaw` (Indagare, "TS Des / Cos", "TS vario/vari"). L'estrazione verifica ogni incantesimo contro le liste per classe del PDF (nome, livello, classe, ◆ Concentrazione, ® Rituale).

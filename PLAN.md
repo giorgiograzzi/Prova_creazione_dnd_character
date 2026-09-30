@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-18 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Step 16 completato (magie). Step 17 completato (avanzamento di livello). Prossimo: step 19 (PWA e Docker). Passo 0 (livello di partenza) aggiunto al wizard. Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-18 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Step 16 completato (magie). Step 17 completato (avanzamento di livello). Step 18 (Homebrew v1) completato. Prossimo: step 19 (PWA e Docker). Da sistemare prima: vedi "Aperti" in fondo a questo file. Passo 0 (livello di partenza) aggiunto al wizard. Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -120,8 +120,11 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - Editor guidato (armi/oggetti, talenti, incantesimi semplici) con anteprima e Zod, catalogo effetti predefiniti, badge, attiva/disattiva/duplica/modifica/elimina, export/import `.json` versionato, 3-4 esempi + template commentato in `data/homebrew/`.
 - **Fatto**: tab Homebrew con modulo guidato per armi, armature, oggetti, talenti (con catalogo di 17 effetti predefiniti) e incantesimi; anteprima e controllo con lo schema del motore (errori in italiano, id `hb_…` sempre liberi); badge "Homebrew", attiva/disattiva, duplica, modifica, elimina; "Dai al personaggio" (oggetti nell'inventario, talenti in `feats`, incantesimi in `extraSpells` come "concessi"); export/import `.json` versionato con scarto delle voci invalide e aggiornamento per id; 4 pacchetti di esempio + `template.jsonc` commentato in `data/homebrew/` (validati da `validate:data`). Le voci stanno nell'archivio del browser (chiave `homebrew`) e il ruleset si ricostruisce da solo quando cambiano. 24 test nuovi (validazione, pacchetti, ruleset, scheda, catalogo effetti, store) e prova nel browser: talento +1 CA (16→17), arma nell'inventario, incantesimo nel libro, persistenza dopo ricarica, export.
 
+- **Rifiniture dopo la prova sul telefono**: le finestre (`Dialog`) stanno in un portale sul `body` sopra intestazione e barra in basso, con altezza massima dello schermo e corpo scorrevole (la × è sempre raggiungibile); il negozio ha il filtro **Homebrew** diviso per tipo (anche oggetti a costo 0, "Gratis") e scorre per intero; nello zaino eliminare un oggetto (✕, o − sull'ultimo) chiede conferma.
+
 ### 19. PWA e Docker
 - Installabilità e offline completo, promemoria backup; `Dockerfile` multi-stage + nginx (fallback SPA, cache service worker), `docker-compose.yml`, `.env.example`. **Ti chiedo la porta prima di fissarla.**
+- **Note dalla prova sul server (bunker)**: oggi l'app gira con `npx vite preview --host --port 4173` a mano; se il terminale si chiude (o si preme Ctrl+C) il server si ferma e Safari dice "il server ha smesso di rispondere". Con Docker: `restart: unless-stopped`. Da casa l'indirizzo è `http://192.168.1.13:4173` (Wi-Fi), da fuori serve Tailscale (`http://100.112.127.25:4173`) o il dominio HTTPS via Cloudflare Tunnel (vedi skill infra-bunker). L'icona in Home è legata a un solo indirizzo. Il service worker (autoUpdate) e `Cache-Control: no-cache` vanno verificati anche in nginx.
 - **Fatto**: build Docker parte e serve l'app; test offline.
 
 ### 20. Rifinitura, documentazione, test finali
@@ -134,3 +137,8 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - **Volume dati** (12 classi × 20 livelli): lo spezzo in batch, con validazione a ogni pezzo.
 - **Regole non coperte dai file** (condizioni, morte, riposi, oggetti magici): marcate `needsReview`, da confermare con te sul manuale.
 - **Copyright**: i 3 PDF sono ora tracciati in git; dopo lo spostamento restano nella cronologia. Se la repo è o diventa pubblica va valutato se riscriverla.
+
+## Aperti (da sistemare prima dello step 19)
+- **Dadi del danno delle armi (segnalato da Giorgio)**: "il tiro di dadi non tiene conto del numero di dadi impostato per il danno". Nel motore e nei test il danno è giusto (3d8 a una mano, 4d10 a due; `rollExpr` tira il numero di dadi richiesto), quindi serve riprodurlo nel browser con la sua arma ("La Porca Paletta", 2d20): controllare il tiro per colpire (sempre 1d20) contro il tiro per il danno, il Colpo critico (raddoppia i dadi) e cosa compare nel risultato.
+- Server di anteprima non persistente (vedi step 19).
+

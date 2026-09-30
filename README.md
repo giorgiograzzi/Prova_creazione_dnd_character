@@ -17,8 +17,20 @@ Node 22 o più recente consigliato (i test con Vitest 5 lo richiedono). `extract
 - `src/store`, `src/db` — stato (Zustand) e persistenza (Dexie)
 - `src/ui`, `src/pages` — interfaccia
 - `src/i18n/it.json` — tutti i testi
-- `data/srd`, `data/private`, `data/homebrew` — dati di gioco
+- `data/srd`, `data/private` — dati di gioco
+- `data/homebrew` — pacchetti di esempio e modello per l'homebrew (non sono dati di gioco: si importano dall'app)
 - `docs/rules/` — PDF delle regole (non tracciati)
+
+## Uso sul server
+Dopo un aggiornamento: `git pull origin <branch> && npm run extract:data && npm run build && npx vite preview --host --port 4173`
+(`extract:data` solo se cambiano i PDF/estrattori). Per lasciarlo acceso a terminale chiuso:
+`nohup npx vite preview --host --port 4173 > ~/preview.log 2>&1 &` (si ferma con `pkill -f "[v]ite preview"`).
+Apri `http://<ip-del-server>:4173` dal telefono **sulla stessa rete** (Wi-Fi) o via Tailscale; con il 4G l'indirizzo di casa non si raggiunge.
+Con la PWA in Home, dopo un aggiornamento importante chiudi e riapri l'app (se resta bianca: rimuovi l'icona e riaggiungila da Safari).
+
+## Homebrew
+Tab **Homebrew**: armi, armature, oggetti, talenti (con catalogo di effetti) e incantesimi tuoi; attiva/disattiva, duplica, modifica, elimina; "Dai al personaggio"; negozio con filtro Homebrew;
+export/import di pacchetti `.json` versionati. Esempi e modello commentato in `data/homebrew/`. Le voci stanno nel browser: per spostarle usa Esporta pacchetto.
 
 Vedi `PLAN.md` per gli step, `ARCHITECTURE.md` per le scelte tecniche.
 

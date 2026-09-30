@@ -226,6 +226,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pl-hpbar { height: 14px; border: 2px solid var(--xp-field-border); background: #fff; margin: 6px 0; }
 .pl-hpbar > div { height: 100%; background: var(--xp-ok); }
 .pl-hpbar.low > div { background: var(--xp-danger); }
+.pl-hp-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: flex-start; }
+.pl-hp-lbl { font-size: 14px; }
+.pl-hp-saves { font: inherit; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; }
+.pl-hp-saves .pl-row { margin-bottom: 2px; }
+.pl-hp-saves .pl-pip { width: 18px; height: 18px; }
+.pl-quick { display: flex; gap: 8px; margin: 8px 0 4px; }
+.pl-quick .xp-btn { flex: 1; min-width: 0; font-size: 22px; font-weight: 700; padding: 10px 0; }
+.pl-quick .pl-quick-hp { flex: 1.6; }
 .pl-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
 .pl-pips { display: inline-flex; gap: 6px; }
 .pl-pip { width: 28px; height: 28px; border: 2px solid #003c74; border-radius: 50%; background: #fff; }

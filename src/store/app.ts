@@ -1,4 +1,5 @@
 import { createStore } from "zustand/vanilla";
+import { newId } from "../db/id";
 import { applyImport, exportBackup, previewImport, type ImportPreview, type Resolution } from "../db/backup";
 import type { CharacterSummary, Repo } from "../db/repo";
 import { emptyCharacter } from "../engine/character";
@@ -35,7 +36,7 @@ export interface AppActions {
 
 export interface StoreDeps { repo: Repo; scheduler?: Scheduler; debounceMs?: number; now?: () => number; newId?: () => string }
 
-export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 800, now = Date.now, newId = () => crypto.randomUUID() }: StoreDeps) {
+export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 800, now = Date.now, newId: makeId = newId }: StoreDeps) {
   let timer: unknown = null;
   let inFlight: Promise<void> = Promise.resolve();
 
@@ -72,7 +73,7 @@ export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 8
       },
       async create() {
         await get().flush();
-        const ch = emptyCharacter(newId());
+        const ch = emptyCharacter(makeId());
         await repo.save(ch, now());
         set({ current: ch, saveStatus: "saved", error: null });
         await refreshList();
@@ -113,7 +114,7 @@ export function createAppStore({ repo, scheduler = realScheduler, debounceMs = 8
       },
       async previewImport(text) { await get().flush(); return previewImport(text, await allCharacters()); },
       async commitImport(preview, resolutions) {
-        const toSave = applyImport(preview, resolutions, newId);
+        const toSave = applyImport(preview, resolutions, makeId);
         for (const c of toSave) await repo.save(c, now());
         // se si è sostituito il personaggio aperto, lo si ricarica
         const cur = get().current;

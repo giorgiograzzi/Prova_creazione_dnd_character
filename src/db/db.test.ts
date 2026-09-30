@@ -99,3 +99,16 @@ describe("backup: export → import", () => {
     expect(p.ok && p.items).toHaveLength(1);
   });
 });
+
+describe("id casuali senza contesto sicuro", () => {
+  it("funziona anche senza crypto.randomUUID (http://192.168...)", async () => {
+    const { newId } = await import("./id");
+    const real = globalThis.crypto.randomUUID;
+    Object.defineProperty(globalThis.crypto, "randomUUID", { value: undefined, configurable: true });
+    try {
+      const a = newId(), b = newId();
+      expect(a).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+      expect(a).not.toBe(b);
+    } finally { Object.defineProperty(globalThis.crypto, "randomUUID", { value: real, configurable: true }); }
+  });
+});

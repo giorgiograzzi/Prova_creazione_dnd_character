@@ -1,3 +1,4 @@
+import { newId as makeId } from "./id";
 import { z } from "zod";
 import type { Character } from "../engine/types";
 import { migrateCharacter } from "./migrations";
@@ -54,7 +55,7 @@ function classify(index: number, ch: Character, migratedFrom: number | undefined
 
 // Cosa fare con i conflitti: sostituire l'esistente, tenere entrambi (copia con nuovo id) o saltare. Default: tenere entrambi.
 export type Resolution = "replace" | "copy" | "skip";
-export function applyImport(preview: ImportPreview, resolutions: Record<string, Resolution> = {}, newId: () => string = () => crypto.randomUUID()): Character[] {
+export function applyImport(preview: ImportPreview, resolutions: Record<string, Resolution> = {}, newId: () => string = makeId): Character[] {
   if (!preview.ok) return [];
   const out: Character[] = [];
   for (const it of preview.items) {

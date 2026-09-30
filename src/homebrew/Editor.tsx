@@ -32,7 +32,8 @@ function FlatEditor({ kind, initial, rs, existing, onSave, onCancel }: EditorPro
   const [pack, setPack] = useState(initial?.pack ?? "");
   const [tried, setTried] = useState(false);
   const id = initial?.data.id ?? newHbId(String(draft.name), takenIds(rs, existing));
-  const extra = initial ? (() => { const { id: _i, name: _n, description: _d, ...rest } = initial.data; void _i; void _n; void _d; return rest; })() : {};
+  // le cariche vengono sempre dal modulo: se le svuoti spariscono
+  const extra = initial ? (() => { const { id: _i, name: _n, description: _d, charges: _c, ...rest } = initial.data as Record<string, unknown>; void _i; void _n; void _d; void _c; return rest; })() : {};
   const result = useMemo(() => {
     const effects = [...rows.map((r) => buildEffect(r.preset, r.values)), ...advanced];
     // i campi che il modulo non mostra (copiati da una voce ufficiale) si conservano; quelli del modulo hanno la precedenza

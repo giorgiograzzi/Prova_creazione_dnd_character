@@ -84,7 +84,7 @@ export interface Derived {
   speed: Record<"walk" | "fly" | "swim" | "climb", Sourced>;
   senses: Partial<Record<"darkvision" | "blindsight" | "truesight", Sourced>>;
   resistances: string[];
-  resources: Record<string, { max: Sourced; used: number; remaining: number; recharge: string }>;
+  resources: Record<string, { max: Sourced; used: number; remaining: number; recharge: string; regain?: string }>;
   // Incantesimi concessi da specie, classi, sottoclassi, talenti (con la caratteristica risolta dalle scelte)
   grantedSpells: GrantedSpell[];
   // Slot per livello (indice 0 = 1°): totale, spesi, rimasti; Warlock: slot del patto a parte

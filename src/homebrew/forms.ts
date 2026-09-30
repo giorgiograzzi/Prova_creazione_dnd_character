@@ -19,6 +19,14 @@ export interface FieldSpec {
 const f = (key: string, label: string, type: FieldSpec["type"], extra: Partial<FieldSpec> = {}): FieldSpec => ({ key, label, type, ...extra });
 const terms = (m: Map<string, { id: string; name: { it: string } }>) => [...m.values()].map((x) => ({ id: x.id, label: x.name.it }));
 
+// Cariche degli oggetti magici (armi, armature, oggetti): massimo, quando si ricaricano, quante tornano
+const CHARGE_FIELDS: FieldSpec[] = [
+  f("chargesMax", F.chargesMax, "number", { help: F.chargesMaxHelp }),
+  f("chargesRecharge", F.chargesRecharge, "select", { options: () => fromMap(it.homebrew.cx.rechargeOpts), show: (d) => num(d.chargesMax) > 0 }),
+  f("chargesRegain", F.chargesRegain, "text", { help: F.chargesRegainHelp, show: (d) => num(d.chargesMax) > 0 && d.chargesRecharge !== "none" }),
+];
+const CHARGES_DRAFT = { chargesMax: "", chargesRecharge: "dawn", chargesRegain: "" };
+
 export type FlatKind = Exclude<HbKind, ComplexKind>;
 export const FIELDS: Record<FlatKind, FieldSpec[]> = {
   weapons: [
@@ -31,7 +39,7 @@ export const FIELDS: Record<FlatKind, FieldSpec[]> = {
     f("versatileDamage", F.versatile, "text", { help: F.versatileHelp }),
     f("rangeNormal", F.rangeNormal, "number"), f("rangeLong", F.rangeLong, "number"),
     f("mastery", F.mastery, "select", { options: (rs) => terms(rs.masteries) }),
-    f("attunement", F.attunement, "bool"),
+    f("attunement", F.attunement, "bool"), ...CHARGE_FIELDS,
     f("weight", F.weight, "number"), f("costGp", F.cost, "number", { help: F.costHelp }),
   ],
   armors: [
@@ -40,13 +48,13 @@ export const FIELDS: Record<FlatKind, FieldSpec[]> = {
     f("baseAc", F.baseAc, "number", { help: F.baseAcHelp }),
     f("dexCap", F.dexCap, "number", { help: F.dexCapHelp }),
     f("strRequired", F.strRequired, "number"), f("donMinutes", F.donMinutes, "number"),
-    f("stealthDisadvantage", F.stealth, "bool"), f("attunement", F.attunement, "bool"),
+    f("stealthDisadvantage", F.stealth, "bool"), f("attunement", F.attunement, "bool"), ...CHARGE_FIELDS,
     f("weight", F.weight, "number"), f("costGp", F.cost, "number", { help: F.costHelp }),
   ],
   items: [
     f("name", F.name, "text"), f("description", F.description, "long"),
     f("category", F.itemCategory, "text", { help: F.itemCategoryHelp }),
-    f("attunement", F.attunement, "bool"),
+    f("attunement", F.attunement, "bool"), ...CHARGE_FIELDS,
     f("weight", F.weight, "number"), f("costGp", F.cost, "number", { help: F.costHelp }),
   ],
   feats: [
@@ -83,9 +91,9 @@ export const FIELDS: Record<FlatKind, FieldSpec[]> = {
 
 export const emptyDraft = (kind: FlatKind): Draft => {
   switch (kind) {
-    case "weapons": return { name: "", description: "", category: "simple", wkind: "melee", damage: "1d6", damageType: "slashing", properties: [], versatileDamage: "", rangeNormal: "", rangeLong: "", mastery: "", attunement: false, weight: "0", costGp: "0" };
-    case "armors": return { name: "", description: "", category: "light", baseAc: "11", dexCap: "", strRequired: "0", donMinutes: "1", stealthDisadvantage: false, attunement: false, weight: "0", costGp: "0" };
-    case "items": return { name: "", description: "", category: "Oggetto magico", attunement: false, weight: "0", costGp: "0" };
+    case "weapons": return { name: "", description: "", category: "simple", wkind: "melee", damage: "1d6", damageType: "slashing", properties: [], versatileDamage: "", rangeNormal: "", rangeLong: "", mastery: "", attunement: false, ...CHARGES_DRAFT, weight: "0", costGp: "0" };
+    case "armors": return { name: "", description: "", category: "light", baseAc: "11", dexCap: "", strRequired: "0", donMinutes: "1", stealthDisadvantage: false, attunement: false, ...CHARGES_DRAFT, weight: "0", costGp: "0" };
+    case "items": return { name: "", description: "", category: "Oggetto magico", attunement: false, ...CHARGES_DRAFT, weight: "0", costGp: "0" };
     case "feats": return { name: "", description: "", category: "general", minLevel: "", repeatable: false };
     case "languages": return { name: "", description: "", rarity: "standard" };
     case "damageTypes": return { name: "", description: "" };
@@ -98,6 +106,13 @@ const num = (s: unknown): number => Number(String(s ?? "").replace(",", "."));
 const optNum = (s: unknown): number | undefined => (String(s ?? "").trim() === "" ? undefined : num(s));
 const cp = (s: unknown): number => Math.round(num(s) * 100);
 const str = (s: unknown) => String(s ?? "").trim();
+// Cariche dal modulo: assenti se il massimo è vuoto o 0; senza ricarica non c'è "quante tornano"
+const chargesOf = (d: Draft) => {
+  const max = Math.floor(num(d.chargesMax));
+  if (!(max > 0)) return {};
+  const regain = d.chargesRecharge === "none" ? "" : str(d.chargesRegain);
+  return { charges: { max, recharge: d.chargesRecharge, ...(regain ? { regain } : {}) } };
+};
 const opt = <T,>(k: string, v: T | undefined) => (v === undefined || v === "" ? {} : { [k]: v });
 
 // Modulo → dati (da validare con lo schema). `id` e `effects` arrivano da fuori.
@@ -108,14 +123,14 @@ export function draftToData(kind: FlatKind, d: Draft, id: string, effects: unkno
       const n = optNum(d.rangeNormal), l = optNum(d.rangeLong);
       return { ...base, category: d.category, kind: d.wkind, damage: str(d.damage), damageType: d.damageType, properties: d.properties,
         ...opt("versatileDamage", str(d.versatileDamage)), ...(n !== undefined ? { range: { normal: n, long: l ?? n } } : {}),
-        mastery: d.mastery, attunement: d.attunement, weight: num(d.weight), cost: cp(d.costGp), effects } as HbData;
+        mastery: d.mastery, attunement: d.attunement, ...chargesOf(d), weight: num(d.weight), cost: cp(d.costGp), effects } as HbData;
     }
     case "armors": {
       const cap = optNum(d.dexCap);
       return { ...base, category: d.category, baseAc: num(d.baseAc), dexCap: cap ?? null, strRequired: num(d.strRequired), donMinutes: num(d.donMinutes),
-        stealthDisadvantage: d.stealthDisadvantage, attunement: d.attunement, weight: num(d.weight), cost: cp(d.costGp), effects } as HbData;
+        stealthDisadvantage: d.stealthDisadvantage, attunement: d.attunement, ...chargesOf(d), weight: num(d.weight), cost: cp(d.costGp), effects } as HbData;
     }
-    case "items": return { ...base, category: str(d.category), attunement: d.attunement, weight: num(d.weight), cost: cp(d.costGp), effects } as HbData;
+    case "items": return { ...base, category: str(d.category), attunement: d.attunement, ...chargesOf(d), weight: num(d.weight), cost: cp(d.costGp), effects } as HbData;
     case "feats": {
       const lv = optNum(d.minLevel);
       return { ...base, category: d.category, prerequisites: lv ? [`level>=${lv}`] : [], repeatable: d.repeatable, effects } as HbData;
@@ -141,12 +156,13 @@ export function dataToDraft(kind: FlatKind, x: HbData): Draft {
   const s = (v: unknown) => (v === undefined || v === null ? "" : String(v));
   const gp = (v: unknown) => String(Number(v ?? 0) / 100);
   const common = { name: x.name.it, description: s(d.description) };
+  const chargesDraft = (o: Record<string, any>) => (o.charges ? { chargesMax: s(o.charges.max), chargesRecharge: o.charges.recharge ?? "dawn", chargesRegain: s(o.charges.regain) } : CHARGES_DRAFT);
   switch (kind) {
     case "weapons": return { ...common, category: d.category, wkind: d.kind, damage: d.damage, damageType: d.damageType, properties: d.properties ?? [], versatileDamage: s(d.versatileDamage),
-      rangeNormal: s(d.range?.normal), rangeLong: s(d.range?.long), mastery: d.mastery, attunement: !!d.attunement, weight: s(d.weight), costGp: gp(d.cost) };
+      rangeNormal: s(d.range?.normal), rangeLong: s(d.range?.long), mastery: d.mastery, attunement: !!d.attunement, ...chargesDraft(d), weight: s(d.weight), costGp: gp(d.cost) };
     case "armors": return { ...common, category: d.category, baseAc: s(d.baseAc), dexCap: d.dexCap === null ? "" : s(d.dexCap), strRequired: s(d.strRequired), donMinutes: s(d.donMinutes),
-      stealthDisadvantage: !!d.stealthDisadvantage, attunement: !!d.attunement, weight: s(d.weight), costGp: gp(d.cost) };
-    case "items": return { ...common, category: s(d.category), attunement: !!d.attunement, weight: s(d.weight), costGp: gp(d.cost) };
+      stealthDisadvantage: !!d.stealthDisadvantage, attunement: !!d.attunement, ...chargesDraft(d), weight: s(d.weight), costGp: gp(d.cost) };
+    case "items": return { ...common, category: s(d.category), attunement: !!d.attunement, ...chargesDraft(d), weight: s(d.weight), costGp: gp(d.cost) };
     case "feats": return { ...common, category: d.category, minLevel: s(((d.prerequisites ?? []) as string[]).map((p) => /^level>=(\d+)$/.exec(p)?.[1]).find(Boolean)), repeatable: !!d.repeatable };
     case "languages": return { ...common, rarity: s(d.extra?.rarity) || "standard" };
     case "damageTypes": return { ...common };

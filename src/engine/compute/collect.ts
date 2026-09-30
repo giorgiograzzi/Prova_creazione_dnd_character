@@ -173,10 +173,13 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
   // effetti dell'equipaggiamento (oggetti magici): arma impugnata, armatura indossata, oggetto nello zaino; con sintonia solo se sintonizzato
   for (const e of ch.inventory) {
     const f = lookupItem(rs, e.itemId);
-    if (!f || !f.def.effects.length) continue;
+    if (!f || (!f.def.effects.length && !("charges" in f.def && f.def.charges))) continue;
     const on = f.kind === "weapon" ? e.state === "wielded" : f.kind === "armor" ? e.state === "worn" : e.state !== "dropped";
     if (!on || (needsAttunement(f) && !e.attuned)) continue;
     const go = { label: f.def.name.it, picks: general, prefix: "" };
+    // cariche: una risorsa dell'oggetto (id `item:<id>`), ricaricata dai riposi o a mano se tornano solo alcune cariche
+    const cg = "charges" in f.def ? f.def.charges : undefined;
+    if (cg) add({ op: "resource", resourceId: `item:${f.def.id}`, uses: cg.max, recharge: cg.recharge, ...(cg.regain ? { regain: cg.regain } : {}) } as Effect, go);
     for (const ef of f.def.effects) {
       // i bonus di un'arma valgono solo per i suoi attacchi, non per tutti
       const own = f.kind === "weapon" && (ef.op === "attackBonus" || ef.op === "damageBonus" || ef.op === "critRange");

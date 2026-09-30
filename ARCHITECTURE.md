@@ -93,3 +93,10 @@ Convenzioni:
   `$gaming_set` = un set da gioco a scelta. Strumento a gruppo (`artisan|gaming|musical`) = scelta `<id>_tool` (`source: tools:<gruppo>`).
 - Scelte `source` aggiuntive: `skillsTools` (talento Esperto), `freespells` (sempre preparato + 1 lancio gratuito per Riposo Lungo), `resistance`.
 - `Character.asi[].cap`: 20 di default, 30 per i Doni epici.
+
+## Specie (step 6)
+- `species.json` da `scripts/extract-step6.ts`; effetti in `scripts/lib/species-rules.ts`.
+- I tratti hanno `level` di sblocco (livello TOTALE del personaggio). Gli "Usi" del PDF diventano un effetto `resource` sul tratto
+  (`pb` = bonus competenza; ricarica `long_rest`, o `short_rest` se "Riposo Breve o Lungo").
+- Le opzioni dei lignaggi portano `grantSpell` con `when: level>=3|5`; gli incantesimi di 1° sono `alwaysPrepared` con `freeCast`.
+- Scelta `size` generata per Aasimar, Umano, Tiefling. Le scelte "una tra" sono `Choice` con `options`.

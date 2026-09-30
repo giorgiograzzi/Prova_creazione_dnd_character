@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { buildRuleset } from "./ruleset";
 import { checkReferences } from "./validate";
-import { computeCharacter } from "./compute";
+import { buildCtx, computeCharacter } from "./compute";
 import { testCharacter } from "./compute/testkit";
 
 // Questi test girano solo dove esiste data/private (non tracciata): altrove vengono saltati.
@@ -48,6 +48,71 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
     expect(d.initiative.value).toBe(2 + 2); // Des +2, Allerta = competenza +2
     expect(d.hp.max.value).toBe(10 + 1 + 2); // d10 + Cos 13 (+1) + Robusto (+2 per livello)
   });
+  describe("specie (step 6)", () => {
+    const fullRs = buildRuleset([
+      ...readdirSync(DIR).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(`${DIR}/${f}`, "utf8"))),
+      { kind: "classes", entries: [{
+        id: "fighter", name: { it: "Guerriero" }, hitDie: 10, primaryAbility: ["str"], saves: ["str", "con"],
+        skillChoices: { count: 2, from: "any" }, armorTraining: [], weaponProficiency: [], equipment: {}, features: [],
+      }] },
+    ]);
+    const mk = (speciesId: string, level = 1, decisions: Record<string, string[]> = {}) =>
+      testCharacter({ speciesId, decisions, classes: [{ classId: "fighter", level, hpRolls: [] }] });
+    const spells = (ch: ReturnType<typeof mk>) =>
+      buildCtx(ch, fullRs).active.flatMap(({ effect: e }) => (e.op === "grantSpell" ? [e.spell] : []));
+
+    it("10 specie, ognuna con velocità e taglie", () => {
+      expect(fullRs.species.size).toBe(10);
+      for (const sp of fullRs.species.values()) expect(sp.sizes.length).toBeGreaterThan(0);
+      expect([...fullRs.species.values()].filter((s) => s.sizes.length > 1).map((s) => s.id).sort()).toEqual(["aasimar", "human", "tiefling"]);
+    });
+    it("Nano: scurovisione 120, resistenza al veleno, +1 PF per livello (retroattivo)", () => {
+      const d1 = computeCharacter(mk("dwarf", 1), fullRs), d5 = computeCharacter(mk("dwarf", 5), fullRs);
+      expect(d1.senses.darkvision?.value).toBe(120);
+      expect(d1.resistances).toEqual(["poison"]);
+      const base5 = computeCharacter(mk("human", 5), fullRs).hp.max.value;
+      expect(d5.hp.max.value - base5).toBe(5);
+    });
+    it("Goliath 35 ft; Elfo dei boschi 35 ft solo con quel lignaggio", () => {
+      expect(computeCharacter(mk("goliath"), fullRs).speed.walk.value).toBe(35);
+      expect(computeCharacter(mk("elf"), fullRs).speed.walk.value).toBe(30);
+      expect(computeCharacter(mk("elf", 1, { elven_lineage: ["wood_elf"] }), fullRs).speed.walk.value).toBe(35);
+    });
+    it("Elfo Drow: scurovisione 120 e incantesimi sbloccati al 3° e 5° livello TOTALE", () => {
+      const at = (l: number) => spells(mk("elf", l, { elven_lineage: ["drow"] }));
+      expect(computeCharacter(mk("elf", 1, { elven_lineage: ["drow"] }), fullRs).senses.darkvision?.value).toBe(120);
+      expect(at(1)).toEqual(["dancing_lights"]);
+      expect(at(3)).toEqual(["dancing_lights", "faerie_fire"]);
+      expect(at(5)).toEqual(["dancing_lights", "faerie_fire", "darkness"]);
+    });
+    it("Elfo: Sensi acuti dà la competenza scelta", () => {
+      const d = computeCharacter(mk("elf", 1, { keen_senses: ["survival"] }), fullRs);
+      expect(d.skills.survival.proficiency).toBe("proficient");
+      expect(d.skills.insight.proficiency).toBe("none");
+    });
+    it("Dragonide: resistenza del colore scelto; usi del soffio = competenza", () => {
+      const d = computeCharacter(mk("dragonborn", 1, { draconic_ancestry: ["gold"] }), fullRs);
+      expect(d.resistances).toEqual(["fire"]);
+      expect(d.resources.breath_weapon?.max.value).toBe(2);
+      expect(computeCharacter(mk("dragonborn", 5, { draconic_ancestry: ["gold"] }), fullRs).resources.breath_weapon?.max.value).toBe(3);
+    });
+    it("tratti di livello 3 e 5 si attivano dal livello totale (Aasimar, Dragonide)", () => {
+      const has = (sp: string, l: number, r: string) => computeCharacter(mk(sp, l), fullRs).resources[r] !== undefined;
+      expect([has("aasimar", 2, "celestial_revelation"), has("aasimar", 3, "celestial_revelation")]).toEqual([false, true]);
+      expect([has("dragonborn", 4, "draconic_flight"), has("dragonborn", 5, "draconic_flight")]).toEqual([false, true]);
+    });
+    it("Tiefling infernale: resistenza al fuoco; Gnomo: vantaggio ai TS Int/Sag/Car", () => {
+      expect(computeCharacter(mk("tiefling", 1, { fiendish_legacy: ["infernal"] }), fullRs).resistances).toEqual(["fire"]);
+      const g = computeCharacter(mk("gnome"), fullRs);
+      expect([g.saves.int.mode, g.saves.wis.mode, g.saves.cha.mode, g.saves.str.mode]).toEqual(["advantage", "advantage", "advantage", "normal"]);
+    });
+    it("Umano: Abile e Versatile concedono abilità e talento", () => {
+      const d = computeCharacter(mk("human", 1, { skillful: ["arcana"], versatile: ["skilled"] }), fullRs);
+      expect(d.skills.arcana.proficiency).toBe("proficient");
+      expect(d.feats).toContain("skilled");
+    });
+  });
+
   it("il motore usa i dati veri: Cotta di maglia + Scudo = CA 18", () => {
     const ch = testCharacter({
       classes: [{ classId: "fighter", level: 1, hpRolls: [] }],

@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-5 completati.** Prossimo: step 6 (specie). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-6 completati.** Prossimo: step 7a (classi Barbaro→Druido). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -55,8 +55,8 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - 16 background (3 caratteristiche, talento, abilità, strumento, kit A/B), talenti origine/generali/stili/doni epici con prerequisiti e ripetibilità.
 - **Fatto**: come step 4.
 
-### 6. Dati cap. C — Specie
-- 9 specie con scelte interne (ascendenza, lignaggio, retaggio, taglia, caratteristica incantatore) e tratti sbloccati a livello 3/5.
+### 6. Dati cap. C — Specie ✅
+- 10 specie con scelte interne (ascendenza, lignaggio, retaggio, taglia, caratteristica incantatore) e tratti sbloccati a livello 3/5.
 - **Fatto**: come step 4.
 
 ### 7. Dati cap. D — Classi (in due batch: 7a Barbaro→Druido, 7b Guerriero→Mago)

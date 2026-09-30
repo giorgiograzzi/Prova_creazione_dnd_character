@@ -28,3 +28,18 @@ Fonte: `01_Dati_Gioco_DnD2024.pdf`. 16 background; 75 talenti (10 origine, 43 ge
 - **Id di privilegi usati nei prerequisiti** (da usare negli step 7): `spellcasting`, `pact_magic`, `fighting_style`.
 - **Viandante**: nel PDF l'equipaggiamento contiene "gaming set a scelta" (in inglese): reso come `$gaming_set`.
 - **Talenti di origine e ASI**: gli aumenti "+1 a una tra..." si registrano in `Character.asi` (con `cap` 20/30) dallo step 10.
+
+## Step 6 — Specie
+Fonte: `01_Dati_Gioco_DnD2024.pdf`. Sono **10** specie (il piano ne indicava 9): Aasimar, Dragonide, Nano, Elfo, Gnomo, Goliath, Halfling, Umano, Orco, Tiefling.
+
+- **Codificato**: sensi, resistenze, velocità (Goliath 35, Elfo dei boschi 35), Nano +1 PF/livello, vantaggi ai TS
+  (Gnomo Int/Sag/Car; Nano/Elfo/Halfling contro condizioni → nota testuale), risorse dei tratti con "Usi" (soffio, Mani guaritrici,
+  Rivelazione celestiale, ecc.), incantesimi dei lignaggi e retaggi per livello 1/3/5 (sempre preparati, 1 lancio gratuito),
+  ascendenza draconica → resistenza, scelte (taglia, Sensi acuti, Abile, Versatile, caratteristica da incantatore).
+- **Solo testo**: Trance, Retaggio fatato (oltre al vantaggio), Esperto della pietra, Agilità halfling, Fortunato, Furtivo per natura,
+  Corporatura possente, benefici dell'Ascendenza gigante, Rivelazione celestiale (forme), Volo draconico, Forma grande.
+- **Caratteristica da incantatore** (scelta `spell_ability`): registrata come decisione, non ancora legata agli incantesimi concessi
+  dalla specie (`grantSpell.ability` resta vuoto): si risolve con gli incantesimi (step 16).
+- **Trucchetti**: la distinzione trucchetto / incantesimo di 1° nei lignaggi usa un elenco fisso (`CANTRIPS` in `scripts/lib/species-rules.ts`);
+  da riallineare ai livelli veri degli incantesimi allo step 8.
+- **Alto elfo**: "trucchetto sostituibile a ogni Riposo Lungo" non modellato.

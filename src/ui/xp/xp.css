@@ -65,11 +65,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .xp-title-btn:active, .xp-title-btn[aria-expanded="true"] { background: #1a3e9a; }
 .xp-title-btn svg { width: 26px; height: 26px; }
 
-/* menu ☰: menu grigio di Windows 95 con bordo in rilievo */
-.xp-menu { position: absolute; z-index: 30; right: 8px; top: calc(var(--tap) + var(--safe-t)); min-width: 220px; background: var(--dos-face); color: var(--dos-dark); padding: 3px;
-  border: 2px solid; border-color: var(--dos-hi) var(--dos-dark) var(--dos-dark) var(--dos-hi); box-shadow: inset -1px -1px var(--dos-shadow), 3px 3px 0 rgba(0,0,0,.35); }
-.xp-menu button { display: block; width: 100%; min-height: var(--tap); text-align: left; padding: 0 16px; background: transparent; color: var(--dos-dark); border: 0; cursor: pointer; }
-.xp-menu button:active, .xp-menu button:focus-visible { background: var(--dos-title-a); color: var(--dos-title-text); }
+.xp-menu { position: absolute; z-index: 30; right: 8px; top: calc(var(--tap) + var(--safe-t)); min-width: 220px; background: var(--xp-face); border: 2px solid var(--xp-border); border-radius: 4px; padding: 4px; box-shadow: 3px 3px 0 rgba(0,0,0,.35); }
+.xp-menu button { display: block; width: 100%; min-height: var(--tap); text-align: left; padding: 0 12px; background: transparent; border: 0; cursor: pointer; }
+.xp-menu button:active, .xp-menu button:focus-visible { background: var(--xp-select); color: var(--xp-select-text); }
 
 .xp-body { flex: 1; overflow-y: auto; padding: 12px; -webkit-overflow-scrolling: touch; }
 .xp-body h2 { margin: 0 0 12px; font-size: 20px; }

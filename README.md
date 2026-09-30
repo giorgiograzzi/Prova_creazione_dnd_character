@@ -36,6 +36,8 @@ sudo ufw allow 8097/tcp                        # se il firewall blocca la porta
   Se `data/private` manca l'app parte lo stesso, ma senza classi, specie e incantesimi (il build lo segnala).
 - Aggiornare: `git pull` e di nuovo `docker compose up -d --build`. Chi ha l'app installata vede l'avviso «nuova versione», tocca **Aggiorna**.
 - Controllo: `docker compose ps` (deve dire *healthy*) e `docker compose logs -f`.
+- Se dice `Conflict. The container name "/dnd-personaggi" is already in use`: `docker rm -f dnd-personaggi` e rilancia. Se il container resta in `Restarting`, guarda `docker compose logs --tail=20`: di solito è un errore di nginx.
+- Stato: provato sul bunker (porta 8097), funziona.
 - I personaggi e l'homebrew stanno **nel browser di ogni dispositivo**, non sul server: per spostarli o salvarli usa Esporta backup (l'app ricorda di farlo ogni 30 giorni).
 
 ### PWA: serve HTTPS

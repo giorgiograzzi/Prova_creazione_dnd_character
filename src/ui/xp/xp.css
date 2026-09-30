@@ -30,6 +30,7 @@
 html, body, #root { height: 100%; margin: 0; }
 /* Fuori dall'app (barra di stato in alto, area del gesto in basso su iPhone) i colori continuano quelli di titolo e tab bar */
 html { background: linear-gradient(to bottom, var(--xp-title-b) 50%, var(--xp-face-dark) 50%); }
+@media (min-width: 721px) { html { background: var(--xp-desk); } }
 body { font: 16px/1.4 Tahoma, Verdana, "DejaVu Sans", sans-serif; color: var(--xp-text); background: transparent; overscroll-behavior: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 

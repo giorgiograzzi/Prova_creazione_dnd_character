@@ -56,6 +56,7 @@ export interface Character {
   };
   overrides: Record<string, number>; // valori forzati a mano, visibili e rimovibili
   notes: string;
+  companions?: Companion[]; // compagni scritti a mano (bestia del Signore delle bestie, famiglio, destriero...): nessun numero è calcolato
   // true = creazione in corso o riaperta per modifiche (livello, scelte): la scheda giocabile non si apre; false = creazione chiusa.
   // Assente nei salvataggi vecchi: allora vale "chiusa" se la prima classe ha i PF per livello.
   startLevel?: number; // livello scelto al passo 0 della creazione (vale per la classe di partenza)
@@ -70,3 +71,6 @@ export interface Sourced<T = number> {
   value: T;
   sources: { label: string; value: number | string }[];
 }
+
+// Compagno: scheda semplice con dati inseriti dal giocatore (le statistiche dipendono dalla creatura scelta e dai manuali)
+export interface Companion { id: string; name: string; kind: string; hp: number; hpMax: number; ac: number; speed: string; attack: string; notes: string }

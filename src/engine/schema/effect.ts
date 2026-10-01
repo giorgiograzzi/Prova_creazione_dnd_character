@@ -82,6 +82,7 @@ export const effectSchema = z.discriminatedUnion("op", [
     apply: z.enum(["heal", "tempHp", "none"]).default("none"),
     restore: z.object({ resource: id, amount: z.union([z.number().int().min(1), z.literal("all"), z.string().refine(isValidFormula, "formula non valida")]) }).optional(), // amount: numero, "all" o formula (Ripristino stregonesco: metà livello)
     text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(),
+    onActivate: id.optional(), // id del privilegio attivabile (Ira, Forma selvatica): attivandolo l'azione parte da sola (solo se gratuita), per esempio i PF temporanei
   }),
   // Dadi di danno con un minimo (Combattere con armi possenti: 1 e 2 contano 3): vale per tutti i dadi di danno dell'attacco
   e("damageDieFloor", { min: z.number().int().min(2), attackType: z.enum(["melee", "ranged", "any"]).default("any") }),

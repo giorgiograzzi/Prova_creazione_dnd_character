@@ -217,6 +217,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 /* scheda giocabile */
 .pl-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
 .pl-tabs button { flex: 1 1 auto; min-height: var(--tap); padding: 0 12px; border: 2px solid #003c74; border-radius: 6px; background: linear-gradient(180deg,#fff,#ece9d8); cursor: pointer; }
+.pl-tabs-3 { display: grid; grid-template-columns: repeat(3, 1fr); } /* larghezze fisse: selezionare un filtro non sposta gli altri */
+.pl-tabs-3 button { padding: 0 4px; min-width: 0; }
 .pl-tabs button[aria-selected="true"] { background: var(--xp-select); color: var(--xp-select-text); font-weight: 700; }
 .pl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
 .pl-tile { text-align: left; min-height: var(--tap); padding: 6px 10px; background: var(--xp-field); border: 2px solid var(--xp-field-border); border-radius: 3px; cursor: pointer; }

@@ -10,6 +10,7 @@ import type { TabProps } from "./types";
 const t = it.play.features;
 // Voci di sola scelta (+2/+1 ai punteggi, Dono epico): si fanno al livello, qui non c'è niente da usare
 const HIDDEN = new Set(["ability_score_improvement", "epic_boon"]);
+const hidden = (f: FeatureInfo) => HIDDEN.has(f.id) || /^(aumento dei punteggi di caratteristica|dono epico)$/i.test(f.name.trim());
 const KINDS = ["species", "background", "class", "subclass", "feat"] as const;
 
 export function FeaturesTab({ ch, rs, d, update }: TabProps) {
@@ -25,7 +26,9 @@ export function FeaturesTab({ ch, rs, d, update }: TabProps) {
   // Cambiando filtro o attivando un privilegio la lista cambia altezza e le voci "scappano" fuori schermo: si riporta la vista in cima
   const toTop = () => requestAnimationFrame(() => top.current?.scrollIntoView({ block: "start" }));
 
-  const all = d.featureList.filter((f) => !HIDDEN.has(f.id));
+  // Più voci possono avere lo stesso id (talenti ripetuti, un privilegio per livello): la chiave React deve essere unica
+  const seen = new Map<string, number>();
+  const all = d.featureList.filter((f) => !hidden(f)).map((f) => { const n = seen.get(f.id) ?? 0; seen.set(f.id, n + 1); return { ...f, key: `${f.id}#${n}` }; });
   const levels = [...new Set(all.map((f) => f.level))].sort((a, b) => a - b);
   const shown = all.filter((f) => (kind === "all" || f.kind === kind) && (level === "all" || f.level === Number(level))
     && (!q || `${f.name} ${f.description}`.toLowerCase().includes(q.toLowerCase())))
@@ -42,7 +45,7 @@ export function FeaturesTab({ ch, rs, d, update }: TabProps) {
     <>
       <h2 ref={top} style={{ scrollMarginTop: 8 }}>{t.title}</h2>
       {error && <div className="xp-error" role="alert">{error}</div>}
-      <div className="pl-tabs" role="group" aria-label={t.kinds.class}>
+      <div className="pl-tabs pl-tabs-3" role="group" aria-label={t.kinds.class}>
         <button type="button" aria-pressed={kind === "all"} onClick={() => { setKind("all"); toTop(); }}>{t.all}</button>
         {KINDS.filter((k) => all.some((f) => f.kind === k)).map((k) => (
           <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); toTop(); }}>{t.kinds[k]}</button>
@@ -60,11 +63,11 @@ export function FeaturesTab({ ch, rs, d, update }: TabProps) {
       <ul className="pl-list">
         {shown.map((f) => {
           const r = f.resourceId ? d.resources[f.resourceId] : undefined;
-          const expanded = open[f.id] ?? false;
+          const expanded = open[f.key] ?? false;
           const acts = d.actions.filter((a) => a.featureId === f.id);
           return (
-            <li key={f.id} className={f.active ? "pl-feat active" : "pl-feat"}>
-              <button type="button" aria-expanded={expanded} onClick={() => setOpen({ ...open, [f.id]: !expanded })}>
+            <li key={f.key} className={f.active ? "pl-feat active" : "pl-feat"}>
+              <button type="button" aria-expanded={expanded} onClick={() => setOpen({ ...open, [f.key]: !expanded })}>
                 <span className="nm">
                   <b>{f.name}</b>{f.active && <span className="pl-badge"> {t.active}{f.picked.length ? `: ${f.activation?.options.find((o) => o.id === f.picked[0])?.name ?? ""}` : ""}</span>}
                   <br /><span className="pl-sub">{f.kind === "feat" ? t.kinds.feat : f.source}{f.level ? ` · ${fmt(t.level, { n: f.level })}` : ""}{f.needsReview ? ` · ${t.review}` : ""}</span>

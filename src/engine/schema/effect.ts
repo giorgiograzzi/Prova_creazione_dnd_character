@@ -20,7 +20,7 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("speedBonus", { value }),
   e("hpMaxPerLevel", { value, classId: id.optional() }),
   e("hpMaxBonus", { value }),
-  e("acFormula", { formula: z.string().refine(isValidFormula), shieldAllowed: z.boolean() }),
+  e("acFormula", { formula: z.string().refine(isValidFormula), shieldAllowed: z.boolean(), ignoresArmor: z.boolean().default(false) }), // ignoresArmor: vale anche con armatura addosso e la sostituisce (Forme del circolo: in Forma selvatica l'armatura non conta)
   e("acBonus", { value }),
   e("attackBonus", { value, attackType: z.enum(["melee", "ranged", "any"]).default("any") }),
   e("damageBonus", { value, attackType: z.enum(["melee", "ranged", "any"]).default("any") }),
@@ -74,7 +74,7 @@ export const effectSchema = z.discriminatedUnion("op", [
   //   variable: spendi da 1 a tutti gli usi rimasti (Imposizione delle mani: ogni uso è 1 PF). Senza `die`, il totale è il numero di usi spesi.
   e("resourceAction", {
     actionId: id, label: z.string(), resource: id, cost: z.number().int().min(0).default(1), variable: z.boolean().default(false),
-    die: z.number().int().min(2).optional(), count: z.number().int().min(1).default(1), // dadi per ogni uso speso
+    die: z.number().int().min(2).optional(), count: value.default(1), // dadi per ogni uso speso (numero o formula)
     bonus: value.optional(),
     apply: z.enum(["heal", "tempHp", "none"]).default("none"),
     restore: z.object({ resource: id, amount: z.union([z.number().int().min(1), z.literal("all")]) }).optional(),
@@ -82,6 +82,13 @@ export const effectSchema = z.discriminatedUnion("op", [
   }),
   // Dadi di danno con un minimo (Combattere con armi possenti: 1 e 2 contano 3): vale per tutti i dadi di danno dell'attacco
   e("damageDieFloor", { min: z.number().int().min(2), attackType: z.enum(["melee", "ranged", "any"]).default("any") }),
+  // Modificatore degli incantesimi lanciati (Incantesimi potenti, Discepolo della vita): compare tra le note del lancio quando l'incantesimo
+  // rientra nel filtro. Nel testo {L} = livello dello slot usato, {L+2} = livello + 2. Il filtro è esplicito (trucchetti, elenco di incantesimi),
+  // perché i dati non dicono se un incantesimo cura o fa danni.
+  e("spellModifier", {
+    label: z.string(), text: z.string(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(),
+    cantrip: z.boolean().default(false), spells: z.array(id).optional(), minLevel: z.number().int().min(1).max(9).optional(),
+  }),
   // Aura che dà un vantaggio anche agli alleati vicini (Aura di protezione, di coraggio...): sulla scheda l'effetto su di te
   // vale come sempre (altri effetti); qui si dichiara raggio e testo, mostrati in Stato per dirlo al tavolo. Con lo stesso `auraId` vale il raggio maggiore.
   e("aura", { auraId: id, label: z.string(), radius: value, text: z.string(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional() }),

@@ -1,7 +1,7 @@
 import { evalValue } from "./formula-eval";
 import { fillText } from "./text";
 import type { Ctx } from "./context";
-import type { Derived, ResourceActionInfo } from "./types";
+import type { Derived, ResourceActionInfo, SpellModInfo } from "./types";
 
 // Risorse con ricarica: usi = numero, formula ("pb", "mod:cha") o tabella per livello.
 // La tabella usa il livello della classe proprietaria (o il totale se non di classe).
@@ -13,7 +13,8 @@ export function computeResources(x: Ctx): Derived["resources"] {
     const raw = typeof e.uses === "object" && "table" in e.uses ? e.uses.table[Math.max(1, lv) - 1] ?? 0 : evalValue(e.uses as number | string, x);
     const max = Math.max(0, raw); // un modificatore negativo non dà usi negativi
     const prev = out[e.resourceId];
-    if (prev && prev.max.value >= max) continue;
+    // a parità di usi vince la ricarica più frequente (Fonte di ispirazione: Riposo Breve invece del Lungo)
+    if (prev && (prev.max.value > max || (prev.max.value === max && !(e.recharge === "short_rest" && prev.recharge !== "short_rest")))) continue;
     const used = Math.min(x.ch.state.resourcesUsed[e.resourceId] ?? 0, max);
     out[e.resourceId] = {
       max: { value: max, sources: [{ label, value: max }] },
@@ -39,10 +40,16 @@ export function computeActions(x: Ctx, resources: Derived["resources"]): Resourc
   for (const { effect: e, featureId } of x.active) {
     if (e.op !== "resourceAction" || !featureId) continue;
     out.push({
-      id: e.actionId, featureId, label: e.label, resource: e.resource, cost: e.cost, variable: e.variable, ...(e.die ? { die: e.die, count: e.count } : {}),
+      id: e.actionId, featureId, label: e.label, resource: e.resource, cost: e.cost, variable: e.variable, ...(e.die ? { die: e.die, count: evalValue(e.count ?? 1, x) } : {}),
       bonus: e.bonus === undefined ? 0 : evalValue(e.bonus, x), apply: e.apply, ...(e.restore ? { restore: e.restore } : {}),
       ...(e.text ? { text: fillText(e.text, e.values, x) } : {}), remaining: resources[e.resource]?.remaining ?? 0,
     });
   }
   return out;
+}
+
+// Modificatori degli incantesimi: testo con i numeri già calcolati (il livello dello slot si mette al lancio)
+export function computeSpellMods(x: Ctx): SpellModInfo[] {
+  return x.active.flatMap(({ effect: e }) => (e.op === "spellModifier"
+    ? [{ label: e.label, text: fillText(e.text, e.values, x), cantrip: e.cantrip, ...(e.spells ? { spells: e.spells } : {}), ...(e.minLevel ? { minLevel: e.minLevel } : {}) }] : []));
 }

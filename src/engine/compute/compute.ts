@@ -7,7 +7,7 @@ import { buildCtx } from "./context";
 import { evalValue } from "./formula-eval";
 import { computeHp } from "./hp";
 import { computeProfs } from "./proficiencies";
-import { computeActions, computeResources } from "./resources";
+import { computeActions, computeResources, computeSpellMods } from "./resources";
 import { computeAuras } from "./auras";
 import { computeGrantedSpells } from "./spells";
 import { computeSlots } from "./slots";
@@ -78,7 +78,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     speed: { ...speed, walk: withOverride(speed.walk, o["speed.walk"]) },
     senses: computeSenses(x),
     resistances: cs.resistAll.length ? [...new Set([...computeResistances(x), "all"])].sort() : computeResistances(x),
-    resources, auras, actions: computeActions(x, resources),
+    resources, auras, spellMods: computeSpellMods(x), actions: computeActions(x, resources),
     spellcasting,
     grantedSpells: computeGrantedSpells(x),
     spellSlots: computeSlots(ch, rs),

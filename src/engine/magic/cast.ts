@@ -2,6 +2,7 @@ import type { Derived } from "../compute";
 import { toggleSlot, useResource } from "../play/state";
 import type { Ruleset } from "../ruleset";
 import type { Character } from "../types";
+import { spellModNotes } from "./modifiers";
 import { spellbook } from "./spellbook";
 
 // Lancio degli incantesimi (regole di lancio del file 04 §1):
@@ -62,6 +63,7 @@ export function castSpell(ch: Character, rs: Ruleset, d: Derived, spellId: strin
       break;
   }
 
+  notes.push(...spellModNotes(d.spellMods, sp, level));
   if (level > sp.level && sp.higherLevels) notes.push(`Livello superiore (${level}°): ${sp.higherLevels}`);
   if (sp.components.m && (sp.components.materialCost || sp.components.material)) {
     notes.push(`Materiale: ${sp.components.material ?? "componente"}${sp.components.materialCost ? ` (${sp.components.materialCost} mo, va posseduto davvero)` : ""}${sp.components.materialConsumed ? " — si consuma col lancio" : ""}`);

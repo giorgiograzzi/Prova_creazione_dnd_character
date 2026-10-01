@@ -1,6 +1,6 @@
 # PLAN2.md — Privilegi giocabili (classi, sottoclassi, talenti, specie)
 
-Stato: **piano approvato; lotti 1 (Barbaro e Guerriero), 2 (Ladro e Monaco), 3 (Paladino e Ranger) e 4 (Talenti) chiusi**, Lotto 5 in attesa di ok. Continua lo step 14b di `PLAN.md`: oggi molti privilegi si leggono ma non cambiano i numeri; qui si decide cosa far diventare giocabile, in che ordine e con quali funzioni nuove del motore.
+Stato: **piano approvato; lotti 1-5 chiusi** (Barbaro, Guerriero, Ladro, Monaco, Paladino, Ranger, talenti, Chierico, Druido, Bardo), Lotto 6 in attesa di ok. Continua lo step 14b di `PLAN.md`: oggi molti privilegi si leggono ma non cambiano i numeri; qui si decide cosa far diventare giocabile, in che ordine e con quali funzioni nuove del motore.
 
 ## 0. Fonti e limiti (leggere prima)
 
@@ -18,9 +18,9 @@ Stato: **piano approvato; lotti 1 (Barbaro e Guerriero), 2 (Ladro e Monaco), 3 (
 - **B Mn** — serve prima la funzione nuova **Mn** del §3.
 - **C** — resta solo testo, con il motivo: reazione, scelta del Master, effetto sull'avversario, dipende dalla situazione o dal movimento nel turno.
 
-Totali (classi e sottoclassi, 412 voci) dopo il Lotto 3: ✔ 77 · F 133 · A 38 · B 58 · C 106.
+Totali (classi e sottoclassi, 412 voci) dopo il Lotto 5: ✔ 115 · F 132 · A 24 · B 37 · C 104.
 Specie (55 voci): F 34 · A 4 · B 7 · C 10. Talenti (75) dopo il Lotto 4: ✔ 14 · F 41 · B 0 · C 20.
-Voci B rimaste per funzione (classi, specie e talenti): M11 24 · M1 10 · M8 10 · M6 7 · M7 4 · M10 3 · M5 2 · M12 2 · M2 1 · M3 1 · M9 1 (le invocazioni e le manovre vere ne aggiungeranno molte).
+Voci B rimaste per funzione (classi, specie e talenti): M11 13 · M1 7 · M6 7 · M8 5 · M7 4 · M10 3 · M2 1 · M3 1 · M5 1 · M9 1 · M12 1 (le invocazioni e le manovre vere ne aggiungeranno molte).
 Le «A» sono dove basta un contatore: molte hanno già il contatore da `deriveUsage` (49 in tutto), il resto è testo.
 
 ## 2. Censimento
@@ -31,49 +31,49 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Classe**
 
-- **✔ fatto (lotti 1-4)**: Rage (1°) — attivabile, Danno ira; Reckless Attack (2°) — Vantaggio agli attacchi con Forza; gli attacchi contro di te hanno Vantaggio (promemoria); Feral Instinct (7°) — Vantaggio all'Iniziativa; Brutal Strike (9°) — danno extra rinunciando al Vantaggio di Attacco irruento; effetto (Spingere ecc.) è testo; Improved Brutal Strike (13°) — due effetti a scelta, danno extra; Persistent Rage (15°) — recupero usi Ira tirando Iniziativa; Improved Brutal Strike (17°) — due effetti a scelta, danno extra; Indomitable Might (18°) — minimo alla prova di Forza = punteggio
+- **✔ fatto (lotti 1-5)**: Rage (1°) — attivabile, Danno ira; Reckless Attack (2°) — Vantaggio agli attacchi con Forza; gli attacchi contro di te hanno Vantaggio (promemoria); Feral Instinct (7°) — Vantaggio all'Iniziativa; Brutal Strike (9°) — danno extra rinunciando al Vantaggio di Attacco irruento; effetto (Spingere ecc.) è testo; Improved Brutal Strike (13°) — due effetti a scelta, danno extra; Persistent Rage (15°) — recupero usi Ira tirando Iniziativa; Improved Brutal Strike (17°) — due effetti a scelta, danno extra; Indomitable Might (18°) — minimo alla prova di Forza = punteggio
 - **F** già fatto: Unarmored Defense (1°), Weapon Mastery (1°), Danger Sense (2°), Barbarian Subclass (3°), Primal Knowledge (3°), Ability Score Improvement (4°), Extra Attack (5°), Fast Movement (5°), Epic Boon (19°), Primal Champion (20°)
 - **C**: Instinctive Pounce (7°) — movimento mezza Velocità all'inizio dell'Ira: decisione di movimento; Relentless Rage (11°) — reazione a 0 PF con CD che sale: dipende dalla situazione (resta promemoria)
 
 **Sottoclasse: Path of the Berserker**
 
-- **✔ fatto (lotti 1-4)**: Frenzy (3°) — danno extra 1 volta per turno con Ira e Attacco irruento; Mindless Rage (6°) — immunità Affascinato/Spaventato durante l'Ira; Intimidating Presence (14°) — 1 volta per Riposo Lungo o spendendo un uso di Ira
+- **✔ fatto (lotti 1-5)**: Frenzy (3°) — danno extra 1 volta per turno con Ira e Attacco irruento; Mindless Rage (6°) — immunità Affascinato/Spaventato durante l'Ira; Intimidating Presence (14°) — 1 volta per Riposo Lungo o spendendo un uso di Ira
 - **C**: Retaliation (10°) — reazione
 
 **Sottoclasse: Path of the Wild Heart**
 
-- **✔ fatto (lotti 1-4)**: Rage of the Wilds (3°) — scelta all'attivazione (Orso: resistenze; Aquila e Lupo: testo); Aspect of the Wilds (6°) — scelta Gufo/Pantera/Salmone: senso o velocità
+- **✔ fatto (lotti 1-5)**: Rage of the Wilds (3°) — scelta all'attivazione (Orso: resistenze; Aquila e Lupo: testo); Aspect of the Wilds (6°) — scelta Gufo/Pantera/Salmone: senso o velocità
 - **A**: Power of the Wilds (14°) — scelta Falco/Leone/Ariete; effetti condizionati dall'Ira
 - **C**: Animal Speaker (3°) — incantesimi rituali: nessun numero; Nature Speaker (10°) — incantesimo: nessun numero
 
 **Sottoclasse: Path of the World Tree**
 
-- **✔ fatto (lotti 1-4)**: Vitality of the Tree (3°) — PF temporanei all'attivazione e a inizio turno
+- **✔ fatto (lotti 1-5)**: Vitality of the Tree (3°) — PF temporanei all'attivazione e a inizio turno
 - **C**: Branches of the Tree (6°) — reazione; Battering Roots (10°) — proprietà di maestria (Spingere/Abbattere): testo; Travel along the Tree (14°) — teletrasporto: decisione del Master/posizione
 
 **Sottoclasse: Path of the Zealot**
 
-- **✔ fatto (lotti 1-4)**: Divine Fury (3°) — danno extra 1 volta per turno (1d6 + metà livello) con Ira; Warrior of the Gods (3°) — riserva di dadi da spendere in cure; Zealous Presence (10°) — 1 volta per Riposo Lungo o spendendo un uso di Ira; Rage of the Gods (14°) — attivabile (volo, resistenze); la rinascita a 0 PF è testo
+- **✔ fatto (lotti 1-5)**: Divine Fury (3°) — danno extra 1 volta per turno (1d6 + metà livello) con Ira; Warrior of the Gods (3°) — riserva di dadi da spendere in cure; Zealous Presence (10°) — 1 volta per Riposo Lungo o spendendo un uso di Ira; Rage of the Gods (14°) — attivabile (volo, resistenze); la rinascita a 0 PF è testo
 - **B**: Fanatical Focus (6°) → **M2** (1 volta per Ira: rilancio del TS)
 
 ### GUERRIERO
 
 **Classe**
 
-- **✔ fatto (lotti 1-4)**: Second Wind (1°) — 2 usi (scalano), cura 1d10 + livello: tiro e applicazione; Tactical Mind (2°) — spende un uso di Second Wind per aggiungere 1d10 alla prova
+- **✔ fatto (lotti 1-5)**: Second Wind (1°) — 2 usi (scalano), cura 1d10 + livello: tiro e applicazione; Tactical Mind (2°) — spende un uso di Second Wind per aggiungere 1d10 alla prova
 - **F** già fatto: Fighting Style (1°), Weapon Mastery (1°), Fighter Subclass (3°), Ability Score Improvement (4°), Extra Attack (5°), Two Extra Attacks (11°), Epic Boon (19°), Three Extra Attacks (20°)
 - **A**: Action Surge (2°) — contatore; l'azione in più è testo; Indomitable (9°) — contatore; il bonus è il livello
 - **C**: Tactical Shift (5°) — movimento con Second Wind, senza Attacchi di opportunità: decisione di movimento; Tactical Master (9°) — cambio proprietà di maestria: testo; Studied Attacks (13°) — Vantaggio sul bersaglio mancato: dipende dalla situazione
 
 **Sottoclasse: Battle Master**
 
-- **✔ fatto (lotti 1-4)**: Combat Superiority (3°) — dadi per livello e azione «Usa una manovra»; le manovre vere sono da estrarre; Know Your Enemy (7°) — 1 volta per Riposo Lungo o spendendo un dado
+- **✔ fatto (lotti 1-5)**: Combat Superiority (3°) — dadi per livello e azione «Usa una manovra»; le manovre vere sono da estrarre; Know Your Enemy (7°) — 1 volta per Riposo Lungo o spendendo un dado
 - **F** già fatto: Student of War (3°)
 - **B**: Improved Combat Superiority (10°) → **M11** (dado d8 → d10 → d12 per livello); Relentless (15°) → **M11** (1d8 al posto di un dado, 1 volta per turno); Ultimate Combat Superiority (18°) → **M11** (dado al livello superiore)
 
 **Sottoclasse: Champion**
 
-- **✔ fatto (lotti 1-4)**: Remarkable Athlete (3°) — Vantaggio a Iniziativa e Atletica
+- **✔ fatto (lotti 1-5)**: Remarkable Athlete (3°) — Vantaggio a Iniziativa e Atletica
 - **F** già fatto: Improved Critical (3°), Superior Critical (15°)
 - **A**: Additional Fighting Style (7°) — seconda scelta dello stesso gruppo
 - **C**: Heroic Warrior (10°) — Ispirazione eroica a inizio turno: nessun tracciamento dei turni; Survivor (18°) — PF a inizio turno quando Sanguinante e Vantaggio ai TS sulla morte: dipende dalla situazione
@@ -85,7 +85,7 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Sottoclasse: Psi Warrior**
 
-- **✔ fatto (lotti 1-4)**: Psionic Power (3°) — dadi, Colpo psionico e Campo protettivo (le altre azioni restano testo); Guarded Mind (10°) — resistenza psichica; la rimozione di condizioni è testo
+- **✔ fatto (lotti 1-5)**: Psionic Power (3°) — dadi, Colpo psionico e Campo protettivo (le altre azioni restano testo); Guarded Mind (10°) — resistenza psichica; la rimozione di condizioni è testo
 - **F** già fatto: Telekinetic Master (18°)
 - **B**: Telekinetic Adept (7°) → **M11** (salto / movimento con dado speso)
 - **C**: Bulwark of Force (15°) — alleati con copertura: bersagli decisi sul momento
@@ -94,7 +94,7 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Classe**
 
-- **✔ fatto (lotti 1-4)**: Sneak Attack (1°) — danni extra (nei dati è un promemoria); 1 volta per turno, richiede Vantaggio/alleato; Steady Aim (3°) — azione bonus: Vantaggio, Velocità 0; Reliable Talent (7°) — minimo 10 alle prove competenti
+- **✔ fatto (lotti 1-5)**: Sneak Attack (1°) — danni extra (nei dati è un promemoria); 1 volta per turno, richiede Vantaggio/alleato; Steady Aim (3°) — azione bonus: Vantaggio, Velocità 0; Reliable Talent (7°) — minimo 10 alle prove competenti
 - **F** già fatto: Expertise (1°), Thieves' Cant (1°), Weapon Mastery (1°), Rogue Subclass (3°), Ability Score Improvement (4°), Slippery Mind (15°), Epic Boon (19°)
 - **A**: Stroke of Luck (20°) — 1 volta per Riposo Breve o Lungo
 - **C**: Cunning Action (2°) — azioni bonus di Scatto/Disimpegno/Nascondersi: nessun numero; Cunning Strike (5°) — effetti sull'avversario (Veleno, Sbilanciare, Ritirata): la CD è nel testo dell'Attacco furtivo; Uncanny Dodge (5°) — reazione; Evasion (7°) — esito del TS: dipende dall'effetto; Improved Cunning Strike (11°) — due effetti di Colpo astuto: testo; Devious Strikes (14°) — effetti sull'avversario (Stordire, Tramortire, Accecare): testo; Elusive (18°) — nessun Vantaggio contro di te: stato sul bersaglio
@@ -106,55 +106,55 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Sottoclasse: Assassin**
 
-- **✔ fatto (lotti 1-4)**: Death Strike (17°) — danno doppio nel primo round, TS
+- **✔ fatto (lotti 1-5)**: Death Strike (17°) — danno doppio nel primo round, TS
 - **F** già fatto: Assassin's Tools (3°)
 - **B**: Assassinate (3°) → **M3** (Vantaggio all'Iniziativa e nel primo round; danno extra M1); Envenom Weapons (13°) → **M1** (+2d6 veleno con Colpo astuto)
 - **C**: Infiltration Expertise (9°) — identità: fuori dal motore
 
 **Sottoclasse: Soulknife**
 
-- **✔ fatto (lotti 1-4)**: Rend Mind (17°) — 1 volta per Riposo Lungo o spendendo 3 dadi
+- **✔ fatto (lotti 1-5)**: Rend Mind (17°) — 1 volta per Riposo Lungo o spendendo 3 dadi
 - **A**: Psionic Power (3°) — dadi d6 a tabella, recupero a riposo
 - **B**: Soul Blades (9°) → **M11** (dado speso per Vantaggio o teletrasporto); Psychic Veil (13°) → **M11** (1 volta per Riposo Lungo o spendendo un dado)
 - **C**: Psychic Blades (3°) — arma evocata: non è un oggetto dell'inventario
 
 **Sottoclasse: Thief**
 
-- **✔ fatto (lotti 1-4)**: Second-Story Work (3°) — velocità di scalata
+- **✔ fatto (lotti 1-5)**: Second-Story Work (3°) — velocità di scalata
 - **C**: Fast Hands (3°) — azione bonus: Uso di un oggetto; Supreme Sneak (9°) — svantaggio alla Percezione dei nemici; Use Magic Device (13°) — uso di oggetti magici: regola; Thief's Reflexes (17°) — due turni nel primo round
 
 ### MONACO
 
 **Classe**
 
-- **✔ fatto (lotti 1-4)**: Monk's Focus (2°) — punti Focus: risorsa a tabella (livello); Uncanny Metabolism (2°) — 1 volta per Riposo Lungo: cura dado + livello; Deflect Attacks (3°) — reazione: riduzione 1d10 + Des + livello, poi spesa Focus; Slow Fall (4°) — reazione: riduzione 5 × livello; Stunning Strike (5°) — spesa Focus per attacco, 1 volta per turno: CD; Heightened Focus (10°) — Raffica ecc. con spesa Focus; Superior Defense (18°) — resistenze con Focus: spesa + durata
+- **✔ fatto (lotti 1-5)**: Monk's Focus (2°) — punti Focus: risorsa a tabella (livello); Uncanny Metabolism (2°) — 1 volta per Riposo Lungo: cura dado + livello; Deflect Attacks (3°) — reazione: riduzione 1d10 + Des + livello, poi spesa Focus; Slow Fall (4°) — reazione: riduzione 5 × livello; Stunning Strike (5°) — spesa Focus per attacco, 1 volta per turno: CD; Heightened Focus (10°) — Raffica ecc. con spesa Focus; Superior Defense (18°) — resistenze con Focus: spesa + durata
 - **F** già fatto: Martial Arts (1°), Unarmored Defense (1°), Unarmored Movement (2°), Ability Score Improvement (4°), Extra Attack (5°), Empowered Strikes (6°), Disciplined Survivor (14°), Epic Boon (19°), Body and Mind (20°)
 - **B**: Perfect Focus (15°) → **M11** (recupero Focus all'Iniziativa)
 - **C**: Evasion (7°) — esito del TS (dimezza): dipende dall'effetto; Acrobatic Movement (9°) — correre su superfici: situazionale; Self-Restoration (10°) — rimuove condizioni a fine turno; Deflect Energy (13°) — come Deflect Attacks, tutti i tipi
 
 **Sottoclasse: Warrior of Mercy**
 
-- **✔ fatto (lotti 1-4)**: Hand of Harm (3°) — 1 volta per turno, spesa Focus: danno extra; Hand of Healing (3°) — spesa Focus: cura; Hand of Ultimate Mercy (17°) — 1 volta per Riposo Lungo
+- **✔ fatto (lotti 1-5)**: Hand of Harm (3°) — 1 volta per turno, spesa Focus: danno extra; Hand of Healing (3°) — spesa Focus: cura; Hand of Ultimate Mercy (17°) — 1 volta per Riposo Lungo
 - **F** già fatto: Implements of Mercy (3°)
 - **B**: Flurry of Healing and Harm (11°) → **M11** (usi = mod Sag)
 - **C**: Physician's Touch (6°) — rimozione condizioni
 
 **Sottoclasse: Warrior of Shadow**
 
-- **✔ fatto (lotti 1-4)**: Improved Shadow Step (11°) — attacco dopo il teletrasporto; Cloak of Shadows (17°) — invisibilità: decisione/stato
+- **✔ fatto (lotti 1-5)**: Improved Shadow Step (11°) — attacco dopo il teletrasporto; Cloak of Shadows (17°) — invisibilità: decisione/stato
 - **F** già fatto: Shadow Arts (3°)
 - **C**: Shadow Step (6°) — teletrasporto
 
 **Sottoclasse: Warrior of the Elements**
 
-- **✔ fatto (lotti 1-4)**: Elemental Burst (6°) — spesa Focus: emanazione e TS; Stride of the Elements (11°) — volo/nuoto con Focus
+- **✔ fatto (lotti 1-5)**: Elemental Burst (6°) — spesa Focus: emanazione e TS; Stride of the Elements (11°) — volo/nuoto con Focus
 - **F** già fatto: Manipulate Elements (3°)
 - **A**: Elemental Attunement (3°) — attivabile spendendo Focus; danno elementale nel testo
 - **B**: Elemental Epitome (17°) → **M1** (resistenza + danno extra 1 volta per turno)
 
 **Sottoclasse: Warrior of the Open Hand**
 
-- **✔ fatto (lotti 1-4)**: Wholeness of Body (6°) — usi = mod Sag: cura; Quivering Palm (17°) — spesa Focus, TS: danni
+- **✔ fatto (lotti 1-5)**: Wholeness of Body (6°) — usi = mod Sag: cura; Quivering Palm (17°) — spesa Focus, TS: danni
 - **B**: Open Hand Technique (3°) → **M1** (effetti per Raffica (TS))
 - **C**: Fleet Step (11°) — azione bonus: situazionale
 
@@ -162,31 +162,31 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Classe**
 
-- **✔ fatto (lotti 1-4)**: Lay On Hands (1°) — riserva PF = 5 × livello, spesa libera; Paladin's Smite (2°) — Punizione divina con slot (M1) + lancio gratuito 1 volta per Riposo Lungo (A); Channel Divinity (3°); Aura of Protection (6°) — su di sé; per gli alleati serve M4; Abjure Foes (9°) — spende Channel Divinity; Aura of Courage (10°) — immunità Spaventato (M5) su di sé e alleati; Radiant Strikes (11°) — +1d8 radioso ai colpi in mischia: sempre (A); Restoring Touch (14°) — cura, rimuove condizioni con Lay On Hands; Aura Expansion (18°) — raggio 30 ft: parametro di M4
+- **✔ fatto (lotti 1-5)**: Lay On Hands (1°) — riserva PF = 5 × livello, spesa libera; Paladin's Smite (2°) — Punizione divina con slot (M1) + lancio gratuito 1 volta per Riposo Lungo (A); Channel Divinity (3°); Aura of Protection (6°) — su di sé; per gli alleati serve M4; Abjure Foes (9°) — spende Channel Divinity; Aura of Courage (10°) — immunità Spaventato (M5) su di sé e alleati; Radiant Strikes (11°) — +1d8 radioso ai colpi in mischia: sempre (A); Restoring Touch (14°) — cura, rimuove condizioni con Lay On Hands; Aura Expansion (18°) — raggio 30 ft: parametro di M4
 - **F** già fatto: Spellcasting (1°), Weapon Mastery (1°), Fighting Style (2°), Paladin Subclass (3°), Ability Score Improvement (4°), Extra Attack (5°), Epic Boon (19°)
 - **A**: Faithful Steed (5°) — lancio gratuito 1 volta per Riposo Lungo; il destriero è M10
 
 **Sottoclasse: Oath of Devotion**
 
-- **✔ fatto (lotti 1-4)**: Sacred Weapon (3°) — Channel Divinity: bonus al tiro per colpire = mod Car, luce; Aura of Devotion (7°) — immunità Affascinato; Holy Nimbus (20°) — stato attivabile 10 minuti: danni, vantaggio TS
+- **✔ fatto (lotti 1-5)**: Sacred Weapon (3°) — Channel Divinity: bonus al tiro per colpire = mod Car, luce; Aura of Devotion (7°) — immunità Affascinato; Holy Nimbus (20°) — stato attivabile 10 minuti: danni, vantaggio TS
 - **F** già fatto: Oath of Devotion Spells (3°)
 - **C**: Smite of Protection (15°) — protezione mezza copertura agli alleati
 
 **Sottoclasse: Oath of Glory**
 
-- **✔ fatto (lotti 1-4)**: Inspiring Smite (3°) — cura con Channel Divinity dopo Punizione; Peerless Athlete (3°) — Channel Divinity: Vantaggio a Atletica/Acrobazia; Aura of Alacrity (7°); Living Legend (20°) — Vantaggio a prove di Car, rilancio mancato
+- **✔ fatto (lotti 1-5)**: Inspiring Smite (3°) — cura con Channel Divinity dopo Punizione; Peerless Athlete (3°) — Channel Divinity: Vantaggio a Atletica/Acrobazia; Aura of Alacrity (7°); Living Legend (20°) — Vantaggio a prove di Car, rilancio mancato
 - **F** già fatto: Oath of Glory Spells (3°)
 - **C**: Glorious Defense (15°) — reazione
 
 **Sottoclasse: Oath of Vengeance**
 
-- **✔ fatto (lotti 1-4)**: Vow of Enmity (3°) — Channel Divinity: Vantaggio agli attacchi contro un bersaglio
+- **✔ fatto (lotti 1-5)**: Vow of Enmity (3°) — Channel Divinity: Vantaggio agli attacchi contro un bersaglio
 - **F** già fatto: Oath of Vengeance Spells (3°), Avenging Angel (20°)
 - **C**: Relentless Avenger (7°) — reazione; Soul of Vengeance (15°) — reazione
 
 **Sottoclasse: Oath of the Ancients**
 
-- **✔ fatto (lotti 1-4)**: Nature's Wrath (3°) — Channel Divinity: TS; Aura of Warding (7°) — resistenza su di sé; per gli alleati M4; Elder Champion (20°) — stato attivabile: slot, Vantaggio, rigenerazione
+- **✔ fatto (lotti 1-5)**: Nature's Wrath (3°) — Channel Divinity: TS; Aura of Warding (7°) — resistenza su di sé; per gli alleati M4; Elder Champion (20°) — stato attivabile: slot, Vantaggio, rigenerazione
 - **F** già fatto: Oath of the Ancients Spells (3°)
 - **A**: Undying Sentinel (15°) — 1 volta per Riposo Lungo; la reazione è testo
 
@@ -194,7 +194,7 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Classe**
 
-- **✔ fatto (lotti 1-4)**: Favored Enemy (1°) — Marchio del cacciatore gratuito; usi = Riposo Lungo; Tireless (10°); Precise Hunter (17°) — Vantaggio sul bersaglio di Marchio; Foe Slayer (20°) — Marchio del cacciatore con il dado d10 al 20°
+- **✔ fatto (lotti 1-5)**: Favored Enemy (1°) — Marchio del cacciatore gratuito; usi = Riposo Lungo; Tireless (10°); Precise Hunter (17°) — Vantaggio sul bersaglio di Marchio; Foe Slayer (20°) — Marchio del cacciatore con il dado d10 al 20°
 - **F** già fatto: Spellcasting (1°), Weapon Mastery (1°), Deft Explorer (2°), Fighting Style (2°), Ranger Subclass (3°), Ability Score Improvement (4°), Extra Attack (5°), Expertise (9°), Nature's Veil (14°), Feral Senses (18°), Epic Boon (19°)
 - **C**: Relentless Hunter (13°) — Concentrazione non si interrompe col danno: regola
 
@@ -205,117 +205,113 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Sottoclasse: Fey Wanderer**
 
-- **✔ fatto (lotti 1-4)**: Dreadful Strikes (3°) — 1 volta per turno, 1d4→1d6: danno psichico
+- **✔ fatto (lotti 1-5)**: Dreadful Strikes (3°) — 1 volta per turno, 1d4→1d6: danno psichico
 - **F** già fatto: Fey Wanderer Spells (3°), Otherworldly Glamour (3°)
 - **A**: Misty Wanderer (15°) — usi = mod Sag; Passo velato gratuito
 - **C**: Beguiling Twist (7°) — reazione; Fey Reinforcements (11°) — lancio gratuito Convocare fey
 
 **Sottoclasse: Gloom Stalker**
 
-- **✔ fatto (lotti 1-4)**: Dread Ambusher (3°) — attacco extra 1 volta per turno primo round, Iniziativa +Sag (F)
+- **✔ fatto (lotti 1-5)**: Dread Ambusher (3°) — attacco extra 1 volta per turno primo round, Iniziativa +Sag (F)
 - **F** già fatto: Gloom Stalker Spells (3°), Umbral Sight (3°), Iron Mind (7°)
 - **B**: Stalker's Flurry (11°) → **M1** (attacco mancato: altro attacco, 1 volta per turno)
 - **C**: Shadowy Dodge (15°) — reazione
 
 **Sottoclasse: Hunter**
 
-- **✔ fatto (lotti 1-4)**: Hunter's Lore (3°) — vedi Hunter's Prey; Hunter's Prey (3°) — scelta Uccisore di colossi (1d8 1/turno) / Pugnale... : M1 con scelta; Defensive Tactics (7°) — scelta Fuga / Multi...: A (scelta con effetti); Superior Hunter's Prey (11°) — danno extra ad un altro bersaglio
+- **✔ fatto (lotti 1-5)**: Hunter's Lore (3°) — vedi Hunter's Prey; Hunter's Prey (3°) — scelta Uccisore di colossi (1d8 1/turno) / Pugnale... : M1 con scelta; Defensive Tactics (7°) — scelta Fuga / Multi...: A (scelta con effetti); Superior Hunter's Prey (11°) — danno extra ad un altro bersaglio
 - **C**: Superior Hunter's Defense (15°) — reazione
 
 ### CHIERICO
 
 **Classe**
 
-- **F** già fatto: Spellcasting (1°), Divine Order (1°), Channel Divinity (2°), Cleric Subclass (3°), Ability Score Improvement (4°), Epic Boon (19°)
-- **A**: Sear Undead (5°) — spende Channel Divinity; danno a dadi nel testo
-- **B**: Blessed Strikes (7°) → **M1** (scelta già fatta; il danno 1d8 radioso una volta per turno è M1); Improved Blessed Strikes (14°) → **M8** (Incantesimo potente: + mod Sag ai trucchetti)
+- **✔ fatto (lotti 1-5)**: Channel Divinity (2°) — contatore per livello; Sear Undead (5°) — danni radiosi con Channel Divinity: dadi = mod Sag; Blessed Strikes (7°) — scelta Colpi/Incantesimi; il danno 1d8 è B M1; Improved Blessed Strikes (14°) — Incantesimo potente: + mod Sag ai trucchetti
+- **F** già fatto: Spellcasting (1°), Divine Order (1°), Cleric Subclass (3°), Ability Score Improvement (4°), Epic Boon (19°)
 - **C**: Divine Intervention (10°) — incantesimo richiesto: decisione del Master; Greater Divine Intervention (20°) — come sopra
 
 **Sottoclasse: Life Domain**
 
+- **✔ fatto (lotti 1-5)**: Preserve Life (3°) — spende Channel Divinity; riserva di PF = 5 × livello; Disciple of Life (3°) — cure extra 2 + livello dell'incantesimo; Blessed Healer (6°) — PF a te quando curi altri; Supreme Healing (17°) — dadi di cura al massimo
 - **F** già fatto: Life Domain Spells (3°)
-- **B**: Preserve Life (3°) → **M11** (riserva di PF = 5 × livello, distribuzione libera); Disciple of Life (3°) → **M8** (cure degli incantesimi + 2 + livello dell'incantesimo); Blessed Healer (6°) → **M8** (PF a te quando curi altri); Supreme Healing (17°) → **M8** (dadi di cura al massimo)
 
 **Sottoclasse: Light Domain**
 
+- **✔ fatto (lotti 1-5)**: Radiance of the Dawn (3°) — Channel Divinity: danni 2d10 + livello; Improved Warding Flare (6°) — ricarica e PF temporanei; Corona of Light (17°) — luce, svantaggio ai TS dei nemici
 - **F** già fatto: Light Domain Spells (3°)
-- **A**: Radiance of the Dawn (3°) — spende Channel Divinity; emanazione e danni nel testo; Warding Flare (3°) — usi = mod Sag; reazione; Corona of Light (17°) — attivabile 1 minuto, 1 volta per Riposo Lungo
-- **C**: Improved Warding Flare (6°) — PF temporanei e recupero: a evento
+- **A**: Warding Flare (3°) — contatore (usi = mod Sag); la reazione è testo
 
 **Sottoclasse: Trickery Domain**
 
+- **✔ fatto (lotti 1-5)**: Invoke Duplicity (3°) — Channel Divinity, bonus: Vantaggio agli attacchi con il duplicato
 - **F** già fatto: Trickery Domain Spells (3°)
-- **A**: Invoke Duplicity (3°) — spende Channel Divinity; il duplicato è testo
-- **C**: Blessing of the Trickster (3°) — Vantaggio a Furtività su un alleato; Trickster's Transposition (6°) — scambio di posto con il duplicato; Improved Duplicity (17°) — cure e Vantaggio legati al duplicato
+- **C**: Blessing of the Trickster (3°) — Vantaggio a Furtività a un alleato fino al Riposo Lungo: stato dell'alleato; Trickster's Transposition (6°) — scambio di posto con il duplicato; Improved Duplicity (17°) — Vantaggio degli alleati e cure legate al duplicato: situazione
 
 **Sottoclasse: War Domain**
 
-- **F** già fatto: War Domain Spells (3°), Avatar of Battle (17°)
-- **A**: Guided Strike (3°) — spende Channel Divinity; reazione +10 nel testo; War Priest (3°) — usi = mod Sag; War God's Blessing (6°) — spende Channel Divinity; reazione
+- **✔ fatto (lotti 1-5)**: Guided Strike (3°) — usi Channel Divinity: +10 al tiro per colpire (reazione); War God's Blessing (6°) — reazione con Channel Divinity; Avatar of Battle (17°) — resistenza B, P, T
+- **F** già fatto: War Domain Spells (3°)
+- **A**: War Priest (3°) — contatore (usi = mod Sag); l'attacco bonus è un'azione
 
 ### DRUIDO
 
 **Classe**
 
-- **F** già fatto: Spellcasting (1°), Primal Order (1°), Druid Subclass (3°), Ability Score Improvement (4°), Elemental Fury (7°), Epic Boon (19°)
-- **A**: Wild Shape (2°) — attivabile, usi per livello; le statistiche delle forme sono testo
-- **B**: Improved Elemental Fury (15°) → **M8** (danno +1d8 o gittata: dipende dalla scelta)
-- **C**: Druidic (1°) — linguaggio segreto; Wild Companion (2°) — spende Forma selvatica per un incantesimo: decisione d'uso; Wild Resurgence (5°) — recupero slot/usi con Forma selvatica: scambio a decisione; Beast Spells (18°) — lancio in Forma selvatica: regola d'uso; Archdruid (20°) — recuperi a Forma selvatica
+- **✔ fatto (lotti 1-5)**: Wild Shape (2°) — attivabile, usi per livello; le statistiche delle forme sono testo; Elemental Fury (7°) — scelta Potente Incantesimo / Colpo primordiale; Improved Elemental Fury (15°) — danno +1d8 o gittata: dipende dalla scelta
+- **F** già fatto: Spellcasting (1°), Primal Order (1°), Druid Subclass (3°), Ability Score Improvement (4°), Epic Boon (19°)
+- **C**: Druidic (1°) — linguaggio segreto; Wild Companion (2°) — lancio di Trova famiglio spendendo Forma selvatica: dal tab Magie; Wild Resurgence (5°) — recupero slot/usi con Forma selvatica: scambio a decisione; Beast Spells (18°) — lancio in Forma selvatica: regola d'uso; Archdruid (20°) — recuperi a Forma selvatica
 
 **Sottoclasse: Circle of the Land**
 
+- **✔ fatto (lotti 1-5)**: Land's Aid (3°) — spende Forma selvatica, cura e danni in area; Nature's Ward (10°) — immunità Avvelenato, resistenza (terreno); B M5 per Avvelenato; Nature's Sanctuary (14°) — reazione di altre creature
 - **F** già fatto: Circle of the Land Spells (3°)
-- **B**: Land's Aid (3°) → **M11** (spende Forma selvatica: cura e danno in area); Nature's Ward (10°) → **M5** (immunità Avvelenato (resistenze già nel terreno))
-- **C**: Natural Recovery (6°) — recupero slot a Riposo Breve: scelta a decisione; Nature's Sanctuary (14°) — reazione di altre creature
+- **C**: Natural Recovery (6°) — recupero slot a Riposo Breve: scelta a decisione
 
 **Sottoclasse: Circle of the Moon**
 
+- **✔ fatto (lotti 1-5)**: Circle Forms (3°) — CA 13 + Sag in Forma selvatica (effetto con active:wild_shape); PF temp testo; Improved Circle Forms (6°) — danni radiosi con attacco bestia: testo + bonus TS; Lunar Form (14°) — danno extra 1 volta per turno in Forma selvatica: B M1
 - **F** già fatto: Circle of the Moon Spells (3°)
-- **A**: Circle Forms (3°) — CA 13 + Sag in Forma selvatica (effetto con active:wild_shape); PF temp testo
-- **B**: Improved Circle Forms (6°) → **M1** (danni radiosi ai colpi in Forma selvatica; bonus ai TS); Moonlight Step (10°) → **M11** (usi = mod Sag, recupero spendendo slot); Lunar Form (14°) → **M1** (danno extra 1 volta per turno in Forma selvatica)
+- **A**: Moonlight Step (10°) — contatore (usi = mod Sag); teletrasporto e Vantaggio sono testo
 
 **Sottoclasse: Circle of the Sea**
 
+- **✔ fatto (lotti 1-5)**: Wrath of the Sea (3°) — spende Forma selvatica; emanazione e danno; Aquatic Affinity (6°) — velocità di nuoto = velocità; Stormborn (10°) — volo con aura: dipende dalla situazione
 - **F** già fatto: Circle of the Sea Spells (3°)
-- **A**: Wrath of the Sea (3°) — spende Forma selvatica; emanazione e danni nel testo; Aquatic Affinity (6°) — velocità di nuoto
-- **C**: Stormborn (10°) — volo con aura: dipende dalla situazione; Oceanic Gift (14°) — emanazione condivisa
+- **C**: Oceanic Gift (14°) — emanazione condivisa
 
 **Sottoclasse: Circle of the Stars**
 
-- **A**: Star Map (3°) — usi = mod Sag, lanci gratuiti; Starry Form (3°) — attivabile con scelta di costellazione; dado nel testo; Cosmic Omen (6°) — usi = mod Sag; reazione; Full of Stars (14°) — resistenza B/P/T con Forma stellare attiva
-- **C**: Twinkling Constellations (10°) — cambio costellazione a ogni turno
+- **✔ fatto (lotti 1-5)**: Starry Form (3°) — spende Forma selvatica: Arciere / Calice / Drago (dado); Cosmic Omen (6°) — usi = mod Sag; reazione: dado d6; Twinkling Constellations (10°) — cambio costellazione ogni turno: testo; Full of Stars (14°) — resistenze contro B, P, T nel Forma Stellare
+- **F** già fatto: Star Map (3°)
 
 ### BARDO
 
 **Classe**
 
-- **F** già fatto: Spellcasting (1°), Expertise (2°), Bard Subclass (3°), Ability Score Improvement (4°), Magical Secrets (10°), Epic Boon (19°), Words of Creation (20°)
-- **B**: Bardic Inspiration (1°) → **M11** (usi = mod Car; dado per livello; concedere a un alleato); Jack of All Trades (2°) → **M12** (metà competenza alle prove non competenti); Font of Inspiration (5°) → **M11** (recupero a Riposo Breve e uso di slot); Superior Inspiration (18°) → **M11** (recupero all'Iniziativa)
-- **C**: Countercharm (7°) — reazione
+- **✔ fatto (lotti 1-5)**: Bardic Inspiration (1°) — usi = mod Car; dado per livello; concedere a un alleato; Font of Inspiration (5°) — recupero a Riposo Breve e uso di slot
+- **F** già fatto: Spellcasting (1°), Expertise (2°), Jack of All Trades (2°), Bard Subclass (3°), Ability Score Improvement (4°), Magical Secrets (10°), Epic Boon (19°), Words of Creation (20°)
+- **C**: Countercharm (7°) — reazione; Superior Inspiration (18°) — recupero all'Iniziativa: promemoria (rimetti gli usi con +)
 
 **Sottoclasse: College of Dance**
 
+- **✔ fatto (lotti 1-5)**: Tandem Footwork (6°) — Iniziativa: bonus = dado; testo + contatore
 - **F** già fatto: Dazzling Footwork (3°)
-- **A**: Tandem Footwork (6°) — Iniziativa: bonus = dado; testo + contatore
-- **B**: Inspiring Movement (6°) → **M11** (reazione con dado speso)
-- **C**: Leading Evasion (14°) — TS di Destrezza: Evasione di gruppo
+- **C**: Inspiring Movement (6°) — reazione con dado speso; Leading Evasion (14°) — TS di Destrezza: Evasione di gruppo
 
 **Sottoclasse: College of Glamour**
 
+- **✔ fatto (lotti 1-5)**: Mantle of Inspiration (3°) — PF temporanei ad alleati; Unbreakable Majesty (14°) — reazione del bersaglio: dipende dalla situazione
 - **F** già fatto: Beguiling Magic (3°), Mantle of Majesty (6°)
-- **B**: Mantle of Inspiration (3°) → **M11** (PF temporanei ad alleati)
-- **C**: Unbreakable Majesty (14°) — reazione del bersaglio: dipende dalla situazione
 
 **Sottoclasse: College of Lore**
 
+- **✔ fatto (lotti 1-5)**: Cutting Words (3°) — reazione con dado speso: sottrae al tiro del nemico; Peerless Skill (14°) — dado aggiunto a una prova, spesa di Ispirazione
 - **F** già fatto: Bonus Proficiencies (3°), Magical Discoveries (6°)
-- **B**: Cutting Words (3°) → **M11** (reazione con dado speso: riduce il tiro del nemico); Peerless Skill (14°) → **M11** (dado aggiunto a una prova, spesa di Ispirazione)
 
 **Sottoclasse: College of Valor**
 
 - **F** già fatto: Martial Training (3°), Extra Attack (6°)
-- **B**: Combat Inspiration (3°) → **M11** (dado aggiunto a danno o CA di un alleato: spesa del dado, decisione a tiro)
-- **C**: Battle Magic (14°) — attacco bonus dopo un incantesimo: decisione d'azione
+- **C**: Combat Inspiration (3°) — dado aggiunto a danno o CA di un alleato: decisione al tavolo; Battle Magic (14°) — attacco con arma dopo un incantesimo: azione bonus
 
 ### STREGONE
 
@@ -462,13 +458,13 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 ### TALENTI
 
-- **✔ fatto (lotti 1-4)**: Savage Attacker — rilancio del danno 1 volta per turno (extra senza dadi); Athlete — scalata = Velocità; Charger — +1d8, 1 volta per turno; Crusher — promemoria per i danni contundenti; Grappler — promemoria a mani nude; Great Weapon Master — danni extra = competenza con armi Pesanti; Heavy Armor Master — promemoria con la riduzione; Piercer — promemoria per i danni perforanti; Shield Master — Colpo di scudo con la CD; Slasher — promemoria per i danni taglienti; Great Weapon Fighting — minimo 3 sui dadi di danno; Interception — promemoria con la riduzione; Boon of Combat Prowess — promemoria 1 volta per turno; Boon of Recovery — riserva di 10 dadi che curano
+- **✔ fatto (lotti 1-5)**: Savage Attacker — rilancio del danno 1 volta per turno (extra senza dadi); Athlete — scalata = Velocità; Charger — +1d8, 1 volta per turno; Crusher — promemoria per i danni contundenti; Grappler — promemoria a mani nude; Great Weapon Master — danni extra = competenza con armi Pesanti; Heavy Armor Master — promemoria con la riduzione; Piercer — promemoria per i danni perforanti; Shield Master — Colpo di scudo con la CD; Slasher — promemoria per i danni taglienti; Great Weapon Fighting — minimo 3 sui dadi di danno; Interception — promemoria con la riduzione; Boon of Combat Prowess — promemoria 1 volta per turno; Boon of Recovery — riserva di 10 dadi che curano
 - **F** già fatto: Alert, Crafter, Lucky, Magic Initiate, Musician, Skilled, Tavern Brawler, Tough, Ability Score Improvement, Chef, Elemental Adept, Fey-Touched, Heavily Armored, Keen Mind, Lightly Armored, Martial Weapon Training, Medium Armor Master, Moderately Armored, Observant, Poisoner, Resilient, Ritual Caster, Shadow-Touched, Skill Expert, Skulker, Speedy, Telekinetic, Telepathic, Weapon Master, Archery, Blind Fighting, Defense, Dueling, Thrown Weapon Fighting, Two-Weapon Fighting, Unarmed Fighting, Boon of Energy Resistance, Boon of Fortitude, Boon of Skill, Boon of Speed, Boon of Truesight
 - **C**: Healer — usa il Kit da guaritore e i Dadi Vita di un'altra creatura: oggetti e decisioni a tavolo; Actor — imitazione e Vantaggio in Inganno/Intrattenere: situazionale; Crossbow Expert — regole di attacco a distanza e ricarica; Defensive Duelist — reazione; Dual Wielder — regola delle armi; Durable — recupero con Dadi Vita: regola di Dado Vita; Inspiring Leader — usa la caratteristica scelta con l'aumento del talento, non ricavabile dalla scheda; Mage Slayer — reazione; Mounted Combatant — situazione; Polearm Master — reazione e attacco bonus; Sentinel — reazione; Sharpshooter — gittata e copertura: situazione; Spell Sniper — gittata e copertura; War Caster — reazione e concentrazione; Protection — reazione; Boon of Dimensional Travel — teletrasporto; Boon of Fate — reazione sul tiro altrui; Boon of Irresistible Offense — ignora resistenze: effetto sull'avversario; Boon of Spell Recall — recupero slot a decisione; Boon of the Night Spirit — invisibilità a condizione
 
 ## 3. Funzioni nuove del motore
 
-**Fatte nei lotti 1-4**: M1 (extra d'attacco), M2 («Nuovo turno»), M3 (Vantaggio da effetti), M4 (aure sugli alleati, Lotto 3), M5 (immunità alle condizioni), M11 (azioni di risorsa), M12 (minimo del tiro; la metà competenza resta solo per il Factotum e simili) più due piccole aggiunte: `note` (promemoria che compare tra le note) e la variabile di formula `speed` (volare pari alla Velocità). Restano M6, M7, M8, M9, M10, M13. Il Lotto 2 ha aggiunto: testi con numeri calcolati (`values`: «CD {0}»), extra d'attacco senza dadi o con costo multiplo, `count` dadi per uso nelle azioni, costo variabile nelle attivazioni (`activation.cost`) e la condizione `unarmed`. Il Lotto 3 ha aggiunto: la condizione `concentrating:<incantesimo>` (Marchio del cacciatore attivo mentre ti concentri su di esso), il costo in slot degli extra d'attacco (Punizione divina: scelta dello slot nel tiro del danno) e le aure con l'elenco in Stato. Il Lotto 4 ha aggiunto: `damageDieFloor` (minimo dei dadi di danno: Combattere con armi possenti; il tiro lo applica), la condizione `damageType:<tipo>` (tipo di danno dell'arma, contundente a mani nude) e la lettura dei talenti come privilegi con extra d'attacco automatici (Maestro delle armi possenti somma la competenza da solo).
+**Fatte nei lotti 1-5**: M1 (extra d'attacco), M2 («Nuovo turno»), M3 (Vantaggio da effetti), M4 (aure sugli alleati, Lotto 3), M5 (immunità alle condizioni), M11 (azioni di risorsa), M12 (minimo del tiro; la metà competenza resta solo per il Factotum e simili) più due piccole aggiunte: `note` (promemoria che compare tra le note) e la variabile di formula `speed` (volare pari alla Velocità). Restano M6, M7, M9, M10 (M8 fatta per cure e trucchetti: resta per Mago e Warlock). Il Lotto 2 ha aggiunto: testi con numeri calcolati (`values`: «CD {0}»), extra d'attacco senza dadi o con costo multiplo, `count` dadi per uso nelle azioni, costo variabile nelle attivazioni (`activation.cost`) e la condizione `unarmed`. Il Lotto 3 ha aggiunto: la condizione `concentrating:<incantesimo>` (Marchio del cacciatore attivo mentre ti concentri su di esso), il costo in slot degli extra d'attacco (Punizione divina: scelta dello slot nel tiro del danno) e le aure con l'elenco in Stato. Il Lotto 4 ha aggiunto: `damageDieFloor` (minimo dei dadi di danno: Combattere con armi possenti; il tiro lo applica), la condizione `damageType:<tipo>` (tipo di danno dell'arma, contundente a mani nude) e la lettura dei talenti come privilegi con extra d'attacco automatici (Maestro delle armi possenti somma la competenza da solo). Il Lotto 5 ha aggiunto: `spellModifier` (M8: note del lancio con i numeri e il livello dello slot, filtro esplicito per trucchetti o elenco di incantesimi), dadi da formula nelle azioni, `acFormula.ignoresArmor` (CA di Forme del circolo in Forma selvatica) e la ricarica più frequente a parità di usi (Fonte di ispirazione).
 
 Ogni funzione arriva con i suoi test (mini ruleset in `compute/testkit.ts`) **prima** dei privilegi che la usano. Il motore resta in `src/engine`, senza UI; i testi in `src/i18n/it.json`.
 
@@ -515,10 +511,11 @@ Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove se
 - **Verifica**: una scheda con Maestro di armi possenti e una con armatura media.
 - **Esito**: vedi `DATA_TODO.md`. Provato nel browser con un Campione di 5° con Maestro delle armi possenti, Combattere con armi possenti, Attaccante selvaggio e Caricatore: lo Spadone fa `2d6 +7` (For +4, competenza +3), gli extra compaiono nel tiro e su 80 dadi tirati il minimo è 3.
 
-### Lotto 5 — Chierico, Druido, Bardo
+### Lotto 5 — Chierico, Druido, Bardo ✅ chiuso
 - **Entra**: Incanalare divinità e sue opzioni, Colpi benedetti, domini; Forma selvatica (Forme del Circolo, Forma lunare), Forma stellare; Ispirazione bardica, Jolly, Collegi.
 - **Richiede il motore**: M11, M8, M1, M12; M10 solo per i compagni.
 - **Verifica**: lancio con bonus ai danni dei trucchetti, cure dei Chierici della Vita.
+- **Esito**: vedi `DATA_TODO.md`. Provato nel browser con una Chierica della Vita di 7° (Colpo divino come extra, Scintilla divina 2d8 + Sag tirata e spesa dall'Incanalare divinità, Scacciare non morti con CD 14 e 3d8), un Druido della Luna di 6° (CA 13 → 16 in Forma selvatica, 18 PF temporanei = 3 × livello) e un Bardo della Sapienza di 5° (Ispirazione bardica d8 con ricarica a Riposo Breve, Parole taglienti d8).
 
 ### Lotto 6 — Stregone, Mago, Warlock
 - **Entra**: punti stregoneria, Metamagia, Stregoneria innata; Arcani firma, Memorizzare, Maestria degli incantesimi, Portento, Barriera arcana, Evocazione potenziata; invocazioni, Arcanum mistico, sottoclassi.
@@ -550,5 +547,5 @@ Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove se
 ## 6. Cosa serve per i prossimi lotti
 
 1. Estrazioni a parte di **manovre** (Lotto 1, resta aperto), **Metamagie** e **invocazioni** (Lotto 6): stesso prompt, cambia la prima riga.
-2. Il tuo ok per il Lotto 5 (Chierico, Druido, Bardo).
+2. Il tuo ok per il Lotto 6 (Stregone, Mago, Warlock).
 3. Gli altri file delle regole sono già in `docs/rules/` (non tracciati) e i dati si rigenerano con `npm run extract:data`.

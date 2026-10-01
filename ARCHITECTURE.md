@@ -41,6 +41,7 @@ Corrispondono alle operazioni del file "Modificatori" §6. Ogni effetto ha `when
 - Tiri: `damageDieFloor` (minimo di ogni dado di danno), `halfProficiency`, `rollFloor` (minimo sul dado o sul totale: Talento affidabile, Potenza indomabile)
 - Attacchi: `attackRider` (dadi extra con costo in risorsa e limite `turn` / id di un privilegio; `auto` li somma sempre). Lo stato «già usato» sta in `state.once`; «Nuovo turno» azzera i limiti per turno
 - Azioni: `resourceAction` (spende usi, tira dadi, cura / PF temporanei, restituisce usi di un'altra risorsa; `variable` = usi a scelta). Compaiono in `Derived.actions` e nei Privilegi
+- Incantesimi (Lotto 5): `spellModifier` (nota del lancio con numeri; filtro esplicito `cantrip` o `spells`, `{L}`/`{L+2}` = livello dello slot). CA: `acFormula.ignoresArmor` (Forma selvatica)
 - Aure (Lotto 3): `aura` (raggio e testo per gli alleati, mostrati in Stato; con lo stesso `auraId` vale il raggio maggiore). Costo in slot degli extra: `attackRider` con `slotSpell` (+`perSlotLevel` dadi per livello: Punizione divina)
 - Formule: oltre a `pb`, `level`, `classLevel:<classe>`, `mod:<car>`, `score:<car>`, la variabile `speed` (Velocità base della specie)
 

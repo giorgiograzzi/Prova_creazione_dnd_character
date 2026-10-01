@@ -35,6 +35,7 @@ export interface AttackOption {
   notes: string[]; // promemoria: Svantaggio a gittata lunga, Ricarica, ecc.
 }
 
+export interface SpellModInfo { label: string; text: string; cantrip: boolean; spells?: string[]; minLevel?: number }
 export interface AuraInfo { id: string; label: string; radius: number; text: string }
 
 export interface AttackExtra {
@@ -110,6 +111,7 @@ export interface Derived {
   // Slot per livello (indice 0 = 1°): totale, spesi, rimasti; Warlock: slot del patto a parte
   spellSlots: { casterLevel: number; slots: number[]; used: number[]; remaining: number[]; pact?: { count: number; level: number; used: number; remaining: number } };
   spellcasting: { classId: string; ability: Ability; dc: Sourced; attack: Sourced }[];
+  spellMods: SpellModInfo[]; // modificatori degli incantesimi lanciati (note del lancio)
   auras: AuraInfo[]; // aure che valgono anche per gli alleati (raggio e testo)
   actions: ResourceActionInfo[]; // azioni delle risorse (cura, recuperi...)
   carryCapacity: number;

@@ -526,8 +526,13 @@ Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove se
 - `DATA_TODO.md` con solo ciò che resta aperto e non pianificato, le voci fatte spostate in "chiuso" con il conteggio aggiornato;
 - elenco finale delle voci rimaste solo testo, con il motivo.
 
-## 6. Cosa serve per i prossimi lotti
+## 6. Cosa resta dopo il piano
 
-1. Estrazioni a parte di **manovre** (Lotto 1, resta aperto), **Metamagie** e **invocazioni** (Lotto 6): stesso prompt, cambia la prima riga.
-2. Nessun altro lotto: il piano è completo. Le voci ancora a testo sono in `DATA_TODO.md`.
-3. Gli altri file delle regole sono già in `docs/rules/` (non tracciati) e i dati si rigenerano con `npm run extract:data`.
+Il piano è completo (lotti 1-8). Il seguito è in `DATA_TODO.md`, sezione 0 «Prossimi passi»:
+
+1. Estrazione delle **manovre** del Maestro di battaglia (stesso prompt delle Metamagie, cambia la prima riga).
+2. Confronto dei **nomi italiani** di Metamagie e invocazioni con il manuale.
+3. Limiti della magia del Warlock e del Mago (invocazioni ripetibili, prerequisiti, Distintivi nel libro).
+4. Piccole lacune degli altri lotti (tipi di danno scelti all'uso, Adepto elementale, Colpi astuti con dadi rinunciati).
+5. PWA installata che non si comporta come il browser.
+6. Gli altri file delle regole sono già in `docs/rules/` (non tracciati) e i dati si rigenerano con `npm run extract:data`.

@@ -37,6 +37,11 @@ Corrispondono alle operazioni del file "Modificatori" §6. Ogni effetto ha `when
 - Concessioni: `grantFeature`, `grantFeat`, `grantEquipment`
 - Vincoli: `prerequisite`, `restriction`
 - Risorse: `resource` (usi numero, formula o tabella 1-20; ricarica `short_rest|long_rest|dawn|none`; `partialShortRest`)
+- Vantaggio e promemoria (PLAN2, Lotto 1): `attackAdvantage`, `checkAdvantage` (per abilità o caratteristica), `initiativeAdvantage`, `conditionImmunity`, `note`
+- Tiri: `halfProficiency`, `rollFloor` (minimo sul dado o sul totale: Talento affidabile, Potenza indomabile)
+- Attacchi: `attackRider` (dadi extra con costo in risorsa e limite `turn` / id di un privilegio; `auto` li somma sempre). Lo stato «già usato» sta in `state.once`; «Nuovo turno» azzera i limiti per turno
+- Azioni: `resourceAction` (spende usi, tira dadi, cura / PF temporanei, restituisce usi di un'altra risorsa; `variable` = usi a scelta). Compaiono in `Derived.actions` e nei Privilegi
+- Formule: oltre a `pb`, `level`, `classLevel:<classe>`, `mod:<car>`, `score:<car>`, la variabile `speed` (Velocità base della specie)
 
 I valori sono numeri o formule. Un valore può essere fissato da una scelta del giocatore (`Choice`).
 

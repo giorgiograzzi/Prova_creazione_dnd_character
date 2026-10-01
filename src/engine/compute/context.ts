@@ -76,7 +76,7 @@ export function buildCtx(ch: Character, rs: Ruleset, weapon?: Weapon, hand?: { t
   const gear = wornGear(ch, rs);
   const base: CondCtx = {
     totalLevel, classLevels, scores: ch.baseScores, equipped: gear.equipped,
-    features: collected.features, feats: collected.feats, activeStates: ch.state.active ?? {},
+    features: collected.features, feats: collected.feats, activeStates: ch.state.active ?? {}, ...(ch.state.concentration ? { concentration: ch.state.concentration } : {}),
     ...(hand?.ability ? { attackAbility: hand.ability } : {}),
     classSaves: new Set(ch.classes[0] ? rs.classes.get(ch.classes[0].classId)?.saves ?? [] : []),
     ...(gear.body ? { bodyArmor: gear.body } : {}), ...(gear.shield ? { shield: gear.shield } : {}),

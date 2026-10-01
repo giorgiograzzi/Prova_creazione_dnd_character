@@ -22,7 +22,7 @@ export function rollD20(bonus: number, mode: RollMode = "normal", rng: Rng = Mat
 export interface DiceRoll { rolls: number[]; bonus: number; total: number; expr: string }
 
 // "2d6 + 3", "1d8", "d20", "5": somma di dadi e costanti (segni + e -). Null se non riconosciuta.
-export function rollExpr(expr: string, rng: Rng = Math.random, opts: { crit?: boolean } = {}): DiceRoll | null {
+export function rollExpr(expr: string, rng: Rng = Math.random, opts: { crit?: boolean; floor?: number } = {}): DiceRoll | null {  // floor: minimo di ogni dado (Combattere con armi possenti)
   const terms = expr.replace(/\s+/g, "").match(/[+-]?[^+-]+/g);
   if (!terms) return null;
   const rolls: number[] = [];
@@ -34,7 +34,7 @@ export function rollExpr(expr: string, rng: Rng = Math.random, opts: { crit?: bo
     if (m) {
       const n = (m[1] ? Number(m[1]) : 1) * (opts.crit ? 2 : 1), sides = Number(m[2]);
       if (!sides || n > 100) return null;
-      for (let i = 0; i < n; i++) rolls.push(sign * die(sides, rng));
+      for (let i = 0; i < n; i++) rolls.push(sign * Math.max(opts.floor ?? 1, die(sides, rng)));
     } else if (/^\d+$/.test(body)) bonus += sign * Number(body);
     else return null;
   }

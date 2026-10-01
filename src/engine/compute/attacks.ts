@@ -6,6 +6,7 @@ import { combineMode } from "./rolls";
 import { evalValue } from "./formula-eval";
 import type { Profs } from "./proficiencies";
 import { sum, type Part } from "./sourced";
+import { fillText } from "./text";
 import type { AttackExtra, AttackOption, ConditionState } from "./types";
 
 const AB_IT: Record<Ability, string> = { str: "For", dex: "Des", con: "Cos", int: "Int", wis: "Sag", cha: "Car" };
@@ -63,7 +64,7 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
     if (cs.d20Penalty) parts.push({ label: "Esaurimento", value: cs.d20Penalty });
     const dmgParts: Part[] = [];
     if (!offhand || x.mods[ability] < 0 || feats.has("two_weapon_fighting")) dmgParts.push({ label: `Mod ${AB_IT[ability]}`, value: x.mods[ability] });
-    let crit = 20;
+    let crit = 20, dieFloor = 0;
     const extras: AttackExtra[] = [], autoDice: string[] = [];
     const adv = [...cs.rolls.attack.adv], dis = [...cs.rolls.attack.dis];
     for (const { effect: e, label } of c2.active) {
@@ -71,12 +72,15 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
       if (e.op === "attackBonus" && (e.attackType === "any" || e.attackType === kind)) parts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "damageBonus" && (e.attackType === "any" || e.attackType === kind)) dmgParts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "critRange") crit = Math.min(crit, e.min);
+      if (e.op === "damageDieFloor" && (e.attackType === "any" || e.attackType === kind)) dieFloor = Math.max(dieFloor, e.min);
       if (e.op === "attackRider" && (e.attackType === "any" || e.attackType === kind)) {
-        const dice = `${evalValue(e.count, c2)}d${e.die}`, bonus = e.bonus === undefined ? 0 : evalValue(e.bonus, c2);
-        if (e.auto) { autoDice.push(dice); if (bonus) dmgParts.push({ label: `${e.label} (${label})`, value: bonus }); continue; }
+        const dice = e.die ? `${evalValue(e.count, c2)}d${e.die}` : "", bonus = e.bonus === undefined ? 0 : evalValue(e.bonus, c2);
+        if (e.auto) { if (dice) autoDice.push(dice); if (bonus) dmgParts.push({ label: `${e.label} (${label})`, value: bonus }); continue; }
         extras.push({
           id: e.riderId, label: e.label, dice, bonus, ...(e.damageType ? { type: e.damageType } : {}), limit: e.limit,
-          ...(e.cost ? { cost: e.cost } : {}), used: !!x.ch.state.once?.[e.riderId], ...(e.text ? { text: e.text } : {}),
+          ...(e.cost ? { cost: e.cost, costAmount: e.costAmount } : {}),
+          ...(e.slotSpell ? { slotSpell: e.slotSpell, baseLevel: rs.spells.get(e.slotSpell)?.level ?? 1, perSlotLevel: e.perSlotLevel } : {}),
+          ...(e.pactSlot ? { pactSlot: true, baseLevel: 0, perSlotLevel: e.perSlotLevel } : {}), used: !!x.ch.state.once?.[e.riderId], ...(e.text ? { text: fillText(e.text, e.values, c2) } : {}),
         });
       }
     }
@@ -108,11 +112,6 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
     if (x.mods[ability] < 0 && offhand) notes.push("Mano secondaria: il modificatore negativo si applica al danno");
     if (!proficient) notes.push("Non sei competente: niente bonus di competenza al tiro per colpire");
     const riders: string[] = [];
-    const rogue = x.classLevels.rogue;
-    if (rogue && feat.has("sneak_attack") && w && (w.properties.includes("finesse") || kind === "ranged")) {
-      riders.push(`Attacco furtivo ${rs.classes.get("rogue")?.table.attacco_furtivo?.[rogue - 1] ?? "?"} (1 volta per turno; con Vantaggio o con un alleato adiacente al bersaglio)`);
-    }
-
     const mast = w && rs.masteries.get(w.mastery);
     const mastery = w && mast ? {
       id: w.mastery, name: mast.name.it, active: x.collected.masteries.has(w.id),
@@ -129,7 +128,7 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
       id: wf?.entry.itemId ?? "unarmed", ...(w ? { weaponId: w.id } : {}), label, kind, thrown, offhand, hands: hands as 0 | 1 | 2,
       ability, abilityWhy: why, proficient, toHit: sum(parts), ...mode,
       damage: { dice, bonus, type, text: `${dice} ${sign(bonus.value)} ${dmgType}` },
-      critRange: crit, reach: w?.properties.includes("reach") ? 10 : 5, ...(range ? { range } : {}),
+      critRange: crit, ...(dieFloor ? { dieFloor } : {}), reach: w?.properties.includes("reach") ? 10 : 5, ...(range ? { range } : {}),
       ...(mastery ? { mastery } : {}), ...(ammo ? { ammo } : {}), riders, extras, notes,
     };
   };
@@ -148,6 +147,8 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
 export function attacksPerAction(x: Ctx): number {
   const f = x.collected.features;
   let n = f.has("three_extra_attacks") ? 4 : f.has("two_extra_attacks") ? 3 : f.has("extra_attack") ? 2 : 1;
+  // Lama assetata e Lama divoratrice (Warlock): attacco extra con l'arma del patto
+  n = Math.max(n, f.has("devouring_blade") ? 3 : f.has("thirsting_blade") ? 2 : 1);
   const col = x.rs.classes.get("fighter")?.table.attacchi;
   const lv = x.classLevels.fighter;
   if (col && lv) n = Math.max(n, Number(col[lv - 1]));

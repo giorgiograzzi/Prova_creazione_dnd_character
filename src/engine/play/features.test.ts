@@ -23,6 +23,7 @@ function rulesetWithFeatures() {
       ] }),
     F({ id: "warding_flare", name: { it: "Bagliore protettivo" }, description: "Reazione. Usi = mod Sag (min 1) per Riposo Lungo.",
       usage: { uses: "max(1, mod:wis)", recharge: "long_rest" } }),
+    F({ id: "big_stance", name: { it: "Postura" }, level: 1, usage: { uses: 4, recharge: "long_rest" }, activation: { resource: "big_stance", cost: 3 }, effects: [] }),
     F({ id: "revelation", name: { it: "Rivelazione" }, level: 3, usage: { uses: 1, recharge: "long_rest" },
       activation: { resource: "revelation", label: { it: "Aspetto" }, duration: "1 minuto", options: [
         { id: "wings", name: { it: "Ali" }, effects: [{ op: "setSpeed", mode: "fly", value: 30 }] },
@@ -134,5 +135,15 @@ describe("scelta per attivazione", () => {
   it("lo stato attivo è valido per il formato di salvataggio", () => {
     const c = on(barb(), "revelation", ["wings"]).character;
     expect(characterSchema.safeParse(c).success).toBe(true);
+  });
+});
+
+describe("attivazione con costo maggiore di 1", () => {
+  it("spende il costo e non parte se gli usi non bastano", () => {
+    const r = on(barb(), "big_stance");
+    expect(r.ok).toBe(true);
+    expect(r.character.state.resourcesUsed.big_stance).toBe(3);
+    const low = barb({ state: { ...testCharacter().state, resourcesUsed: { big_stance: 2 } } });
+    expect(on(low, "big_stance")).toMatchObject({ ok: false, errors: ["Nessun uso rimasto"] });
   });
 });

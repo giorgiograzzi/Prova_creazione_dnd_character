@@ -76,7 +76,7 @@ export function optionStates(slot: Slot, ch: Character, rs: Ruleset, selected: s
         });
         break;
       }
-      case "cantrips": case "spells": case "freespells": case "alwaysspells": {
+      case "cantrips": case "spells": case "freespells": case "alwaysspells": case "signaturespells": case "masteryspells": {
         let cands: Spell[] = spellChoiceCandidates(rs, c, scoped);
         // Mago: gli incantesimi preparati si scelgono dal libro
         if (kind === "spells" && slot.classId && /_prepared$/.test(c.id)) {

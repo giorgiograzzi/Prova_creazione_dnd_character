@@ -13,7 +13,7 @@ export function computeGrantedSpells(x: Ctx): GrantedSpell[] {
     out.push({
       spell: e.spell, mode: e.mode, source: label,
       ...(ability ? { ability, dc: 8 + x.mods[ability] + x.pb, attack: x.mods[ability] + x.pb } : {}),
-      ...(e.freeCast ? { freeCast: { uses: evalValue(e.freeCast.uses, x), recharge: e.freeCast.recharge } } : {}),
+      ...(e.freeCast ? { freeCast: { uses: evalValue(e.freeCast.uses, x), recharge: e.freeCast.recharge, ...(e.freeCast.unlimited ? { unlimited: true } : {}) } } : {}),
     });
   }
   return out;

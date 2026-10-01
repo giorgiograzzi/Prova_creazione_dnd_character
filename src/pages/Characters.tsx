@@ -34,7 +34,7 @@ export function Characters({ onOpened }: { onOpened: () => void }) {
       {list.length === 0 ? (
         <p className="xp-empty xp-muted">{t.empty}</p>
       ) : (
-        <ul className="xp-list">
+        <ul className="xp-list cards">
           {list.map((c) => (
             <li key={c.id} className={c.id === current?.id ? "active" : ""}>
               <div className="grow">

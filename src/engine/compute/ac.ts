@@ -9,7 +9,11 @@ export function computeAc(x: Ctx, profs: Profs, warnings: string[]): Derived["ac
   const dex = x.mods.dex;
   const candidates: { name: string; parts: Part[]; shieldOk: boolean }[] = [];
   const arm = x.bodyArmor;
-  if (arm) {
+  // Forme del circolo: in Forma selvatica l'armatura non conta, vale la formula (se attiva)
+  const form = x.active.filter(({ effect: e }) => e.op === "acFormula" && e.ignoresArmor);
+  if (form.length) {
+    for (const { effect: e, label } of form) if (e.op === "acFormula") candidates.push({ name: label, parts: [{ label, value: evalValue(e.formula, x) }], shieldOk: e.shieldAllowed });
+  } else if (arm) {
     const master = x.collected.feats.has("medium_armor_master") && x.scores.dex >= 16;
     // dexCap: null = nessun limite (leggera); 0 = nessun bonus Des (pesante, anche se negativo)
     const cap = arm.category === "medium" && master ? Math.max(arm.dexCap ?? 3, 3) : arm.dexCap;
@@ -21,7 +25,7 @@ export function computeAc(x: Ctx, profs: Profs, warnings: string[]): Derived["ac
   } else {
     candidates.push({ name: "Senza armatura", parts: [{ label: "Base", value: 10 }, { label: "Des", value: dex }], shieldOk: true });
     for (const { effect: e, label } of x.active) {
-      if (e.op !== "acFormula") continue;
+      if (e.op !== "acFormula" || e.ignoresArmor) continue;
       candidates.push({ name: label, parts: [{ label, value: evalValue(e.formula, x) }], shieldOk: e.shieldAllowed });
     }
   }

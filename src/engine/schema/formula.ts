@@ -10,7 +10,17 @@ export type Formula =
 const VARS = new Set(["pb", "level", "classLevel", "mod", "score", "speed"]); // speed = Velocità base (a piedi) della specie
 const TOKEN = /\s*(\d+|[a-zA-Z_]+(?::[a-z_]+)?|[-+*/(),])/y;
 
+// Come per le condizioni: ogni formula si analizza una volta sola
+const parsedFormulas = new Map<string, Formula>();
 export function parseFormula(src: string): Formula {
+  const hit = parsedFormulas.get(src);
+  if (hit) return hit;
+  const f = parseFormulaUncached(src);
+  parsedFormulas.set(src, f);
+  return f;
+}
+
+function parseFormulaUncached(src: string): Formula {
   const toks: string[] = [];
   TOKEN.lastIndex = 0;
   let m: RegExpExecArray | null;

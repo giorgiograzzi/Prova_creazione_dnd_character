@@ -80,6 +80,8 @@ export const effectSchema = z.discriminatedUnion("op", [
     restore: z.object({ resource: id, amount: z.union([z.number().int().min(1), z.literal("all")]) }).optional(),
     text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(),
   }),
+  // Dadi di danno con un minimo (Combattere con armi possenti: 1 e 2 contano 3): vale per tutti i dadi di danno dell'attacco
+  e("damageDieFloor", { min: z.number().int().min(2), attackType: z.enum(["melee", "ranged", "any"]).default("any") }),
   // Aura che dà un vantaggio anche agli alleati vicini (Aura di protezione, di coraggio...): sulla scheda l'effetto su di te
   // vale come sempre (altri effetti); qui si dichiara raggio e testo, mostrati in Stato per dirlo al tavolo. Con lo stesso `auraId` vale il raggio maggiore.
   e("aura", { auraId: id, label: z.string(), radius: value, text: z.string(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional() }),

@@ -85,7 +85,7 @@ export function DamageSection({ a, rs, ch, update, derived }: { a: AttackOption;
           })}
         </fieldset>
       )}
-      <DamageRoller dice={dice} bonus={bonus} type={rs.damageTypes.get(a.damage.type)?.name.it ?? a.damage.type} crit={crit} onRoll={spend} />
+      <DamageRoller dice={dice} bonus={bonus} type={rs.damageTypes.get(a.damage.type)?.name.it ?? a.damage.type} crit={crit} {...(a.dieFloor ? { floor: a.dieFloor } : {})} onRoll={spend} />
       {msg.length > 0 && <div className="xp-error" role="alert">{msg.join(" · ")}</div>}
     </div>
   );

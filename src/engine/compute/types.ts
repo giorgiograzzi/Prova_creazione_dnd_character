@@ -25,6 +25,7 @@ export interface AttackOption {
   toHit: Sourced; mode: RollMode; modeSources: string[];
   damage: { dice: string; bonus: Sourced; type: string; text: string }; // text = "2d6 + 3 tagliente"
   critRange: number; // 20, oppure 19/18 (Campione)
+  dieFloor?: number; // minimo di ogni dado di danno (Combattere con armi possenti: 3)
   reach: number; // ft
   range?: { normal: number; long: number };
   mastery?: { id: string; name: string; active: boolean; dc?: number };

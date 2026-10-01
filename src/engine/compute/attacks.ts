@@ -64,7 +64,7 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
     if (cs.d20Penalty) parts.push({ label: "Esaurimento", value: cs.d20Penalty });
     const dmgParts: Part[] = [];
     if (!offhand || x.mods[ability] < 0 || feats.has("two_weapon_fighting")) dmgParts.push({ label: `Mod ${AB_IT[ability]}`, value: x.mods[ability] });
-    let crit = 20;
+    let crit = 20, dieFloor = 0;
     const extras: AttackExtra[] = [], autoDice: string[] = [];
     const adv = [...cs.rolls.attack.adv], dis = [...cs.rolls.attack.dis];
     for (const { effect: e, label } of c2.active) {
@@ -72,6 +72,7 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
       if (e.op === "attackBonus" && (e.attackType === "any" || e.attackType === kind)) parts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "damageBonus" && (e.attackType === "any" || e.attackType === kind)) dmgParts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "critRange") crit = Math.min(crit, e.min);
+      if (e.op === "damageDieFloor" && (e.attackType === "any" || e.attackType === kind)) dieFloor = Math.max(dieFloor, e.min);
       if (e.op === "attackRider" && (e.attackType === "any" || e.attackType === kind)) {
         const dice = e.die ? `${evalValue(e.count, c2)}d${e.die}` : "", bonus = e.bonus === undefined ? 0 : evalValue(e.bonus, c2);
         if (e.auto) { if (dice) autoDice.push(dice); if (bonus) dmgParts.push({ label: `${e.label} (${label})`, value: bonus }); continue; }
@@ -126,7 +127,7 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
       id: wf?.entry.itemId ?? "unarmed", ...(w ? { weaponId: w.id } : {}), label, kind, thrown, offhand, hands: hands as 0 | 1 | 2,
       ability, abilityWhy: why, proficient, toHit: sum(parts), ...mode,
       damage: { dice, bonus, type, text: `${dice} ${sign(bonus.value)} ${dmgType}` },
-      critRange: crit, reach: w?.properties.includes("reach") ? 10 : 5, ...(range ? { range } : {}),
+      critRange: crit, ...(dieFloor ? { dieFloor } : {}), reach: w?.properties.includes("reach") ? 10 : 5, ...(range ? { range } : {}),
       ...(mastery ? { mastery } : {}), ...(ammo ? { ammo } : {}), riders, extras, notes,
     };
   };

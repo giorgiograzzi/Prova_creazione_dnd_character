@@ -3,7 +3,7 @@ import { computeCharacter } from "../compute";
 import { testCharacter, testRuleset } from "../compute/testkit";
 import { characterSchema } from "../schema";
 import type { Character } from "../types";
-import { applyExtra, clearOnce, longRest, newTurn, setActive } from "./index";
+import { applyExtra, clearOnce, longRest, newTurn, rollExpr, setActive } from "./index";
 
 // Extra d'attacco (M1) e promemoria "1 volta per turno" (M2): Lotto 1 di PLAN2
 const F = (o: Record<string, unknown>) => ({ description: "", effects: [], choices: [], level: 1, needsReview: false, origin: "private", ...o }) as never;
@@ -26,6 +26,11 @@ const rs = (() => {
     F({ id: "palm", name: { it: "Palmo" }, effects: [
       { op: "resource", resourceId: "focus", uses: 5, recharge: "short_rest" },
       { op: "attackRider", riderId: "palm", label: "Palmo", count: 0, limit: "none", cost: "focus", costAmount: 3, attackType: "any", auto: false, when: "unarmed", values: ["8 + mod:str + pb", "classLevel:barbarian"], text: "CD {0}, livello {1}" }] }),
+    // minimo dei dadi di danno e riconoscimento del tipo di danno dell'arma
+    F({ id: "floor", name: { it: "Minimo" }, effects: [
+      { op: "damageDieFloor", min: 3, attackType: "melee", when: "attackType:melee && twoHanded" },
+      { op: "attackRider", riderId: "slash", label: "Taglio", count: 0, limit: "turn", attackType: "any", auto: false, when: "damageType:slashing" },
+      { op: "attackRider", riderId: "bludgeon", label: "Botta", count: 0, limit: "turn", attackType: "any", auto: false, when: "damageType:bludgeoning" }] }),
     // sempre attivo
     F({ id: "radiant_strikes", name: { it: "Colpi radianti" }, effects: [
       { op: "attackRider", riderId: "radiant_strikes", label: "Colpi radianti", count: 1, die: 8, limit: "none", attackType: "melee", auto: true, when: "attackAbility:str" }] }),
@@ -41,9 +46,10 @@ const on = (c: Character, id: string) => setActive(c, rs, d(c), id, true).charac
 
 describe("extra d'attacco applicabili", () => {
   it("compaiono sull'attacco solo con lo stato giusto (Attacco irruento + Forza)", () => {
-    expect(sword(barb([])).extras.map((x) => x.id)).toEqual(["smite"]);
+    expect(sword(barb([])).extras.map((x) => x.id)).not.toContain("brutal_strike");
     const c = on(barb([]), "reckless_attack");
-    expect(sword(c).extras).toMatchObject([{ id: "brutal_strike", dice: "1d10", bonus: 0, limit: "turn", used: false }, { id: "smite" }]);
+    expect(sword(c).extras.map((x) => x.id)).toEqual(expect.arrayContaining(["brutal_strike", "smite"]));
+    expect(sword(c).extras.find((x) => x.id === "brutal_strike")).toMatchObject({ dice: "1d10", bonus: 0, limit: "turn", used: false });
   });
   it("i dadi si calcolano da numero o formula, con bonus e tipo di danno", () => {
     const x = sword(barb([])).extras.find((e) => e.id === "smite")!;
@@ -115,5 +121,24 @@ describe("extra senza dadi, costo multiplo, testo con numeri, colpo senz'armi", 
     c = applyExtra(c, d(c), x).character;
     expect(c.state.resourcesUsed.focus).toBe(3);
     expect(applyExtra(c, d(c), x)).toMatchObject({ ok: false, errors: ["Nessun uso rimasto"] });
+  });
+});
+
+describe("minimo dei dadi di danno e tipo di danno dell'arma", () => {
+  it("il minimo vale solo a due mani e in mischia; il tipo di danno guida gli extra (a mani nude: contundente)", () => {
+    const one = barb([]);
+    expect(sword(one).dieFloor).toBeUndefined();
+    const two = testCharacter({ classes: [{ classId: "barbarian", level: 9, hpRolls: [] }], inventory: [{ itemId: "longsword", qty: 1, state: "wielded", grip: "two" }] });
+    expect(d(two).attacks.find((a) => a.id === "longsword")!.dieFloor).toBe(3);
+    expect(sword(one).extras.map((e) => e.id)).toContain("slash");
+    expect(sword(one).extras.map((e) => e.id)).not.toContain("bludgeon");
+    const unarmed = d(one).attacks.find((a) => a.id === "unarmed")!;
+    expect(unarmed.extras.map((e) => e.id)).toContain("bludgeon");
+    expect(unarmed.extras.map((e) => e.id)).not.toContain("slash");
+  });
+  it("rollExpr con minimo: ogni dado sotto il minimo conta come il minimo", () => {
+    expect(rollExpr("2d6+1", () => 0, { floor: 3 })).toMatchObject({ rolls: [3, 3], total: 7 });
+    expect(rollExpr("2d6", () => 0.99, { floor: 3 })!.rolls).toEqual([6, 6]);
+    expect(rollExpr("1d8", () => 0)!.rolls).toEqual([1]); // senza minimo niente cambia
   });
 });

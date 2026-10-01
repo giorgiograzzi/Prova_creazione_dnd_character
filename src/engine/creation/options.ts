@@ -32,7 +32,7 @@ export function optionStates(slot: Slot, ch: Character, rs: Ruleset, selected: s
   const c = slot.choice;
   const prefix = slot.key.slice(0, slot.key.length - c.id.length);
   const scoped = Object.fromEntries(Object.entries(ch.decisions).filter(([k]) => k.startsWith(prefix)).map(([k, v]) => [k.slice(prefix.length), v]));
-  // `others` = le altre opzioni già scelte nello stesso elenco: contano come possedute (Colpo occulto richiede il Patto della lama scelto insieme)
+  // `others` = le altre opzioni già scelte nello stesso elenco: contano come possedute (Punizione occulta richiede il Patto della Lama scelto insieme)
   const cond = (src: string, others: string[] = []) => evalCondition(parseCondition(src), { ...ctx, armorTraining: profs.armor, ...(others.length ? { features: new Set([...ctx.features, ...others]) } : {}) });
   let list: OptionState[];
 

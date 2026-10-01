@@ -89,7 +89,7 @@ export function previewDecision(ch: Character, rs: Ruleset, key: string, picked:
     const o = qq.options.find((x) => x.id === id);
     return !o ? [`Opzione sconosciuta: ${id}`] : o.enabled ? [] : [`${o.name}: ${o.disabledReason ?? "non disponibile"}`];
   });
-  // un'opzione può dipendere da un'altra scelta nello stesso elenco (Colpo occulto + Patto della lama): se la selezione attuale la blocca,
+  // un'opzione può dipendere da un'altra scelta nello stesso elenco (Punizione occulta + Patto della Lama): se la selezione attuale la blocca,
   // o se tra le scelte ci sono opzioni con prerequisiti, si rivaluta con quella proposta (costoso: solo quando serve)
   let errors = problems(q);
   if (errors.length || q.choice?.options?.some((o) => o.requires && picked.includes(o.id))) { const proposed = allQuestions(setKey(ch, key, picked), rs).find((x) => x.key === key); if (proposed) errors = problems(proposed); }

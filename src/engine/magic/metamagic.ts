@@ -20,7 +20,7 @@ export function checkMetamagic(d: Pick<Derived, "chosenOptions">, spell: Pick<Sp
   if (ids.includes("quickened_spell") && spell.castingTime.unit !== "action") return fail("Incantesimo rapido: solo per incantesimi con tempo di lancio di un'azione");
   const warnings: string[] = [];
   const res = String(spell.resolution ?? "");
-  if ((ids.includes("careful_spell") || ids.includes("heightened_spell")) && !res.startsWith("save")) warnings.push("Controlla: l'incantesimo non sembra costringere a un tiro salvezza (cauto e accentuato servono solo per quello)");
+  if ((ids.includes("careful_spell") || ids.includes("heightened_spell")) && !res.startsWith("save")) warnings.push("Controlla: l'incantesimo non sembra costringere a un tiro salvezza (accurato e intensificato servono solo per quello)");
   if (ids.includes("seeking_spell") && !res.startsWith("attack")) warnings.push("Controlla: l'incantesimo non sembra avere un tiro per colpire (il cercatore serve solo per quello)");
   return { ok: true, errors: [], cost: known.reduce((n, o) => n + (o?.cost ?? 0), 0), warnings };
 }

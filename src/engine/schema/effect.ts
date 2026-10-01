@@ -72,7 +72,7 @@ export const effectSchema = z.discriminatedUnion("op", [
     // Costo in slot (Punizione divina): `count`d`die` al livello dell'incantesimo, +`perSlotLevel` dadi per ogni livello di slot in più;
     // lo slot si sceglie nel tiro del danno e si spende lanciando l'incantesimo (o con il suo lancio gratuito)
     slotSpell: id.optional(), perSlotLevel: z.number().int().min(1).default(1),
-    pactSlot: z.boolean().default(false), // costo: uno slot del Patto (Colpo occulto): 1d8 + 1d8 per livello dello slot
+    pactSlot: z.boolean().default(false), // costo: uno slot del Patto (Punizione occulta): 1d8 + 1d8 per livello dello slot
     text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(), // {0}, {1}... nel testo
   }),
   // Effetti che si comprano rinunciando a dadi di un extra d'attacco (Colpo astuto del Ladro: rinunci a d6 dell'Attacco furtivo per un effetto).

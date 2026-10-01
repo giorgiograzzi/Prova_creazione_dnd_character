@@ -108,14 +108,14 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 6: Stregone, Mago e W
       expect(o.find((x) => x.id === "eldritch_smite")!.requires).toBe("classLevel:warlock>=5 && hasFeature:pact_of_the_blade");
       expect(o.find((x) => x.id === "armor_of_shadows")!.requires).toBeUndefined();
     });
-    it("incantesimi a volontà: Armatura d'ombra, Passo ascendente, Sussurri della tomba", () => {
+    it("incantesimi a volontà: Armatura di ombre, Passo ascendente, Sussurri della tomba", () => {
       const c = inv(["armor_of_shadows", "ascendant_step", "whispers_of_the_grave"]);
       for (const s of ["mage_armor", "levitate", "speak_with_dead"]) expect(free(c, s), s).toMatchObject({ unlimited: true });
       expect(free(inv([]), "mage_armor")).toBeUndefined();
       const r = castSpell(c, R, D(c), "mage_armor", { kind: "free", resourceId: "spell:mage_armor" });
       expect(r.ok, r.errors.join()).toBe(true);
     });
-    it("Deflagrazione agonizzante, Lancia occulta e Deflagrazione repulsiva compaiono nei trucchetti", () => {
+    it("Deflagrazione agonizzante, Lancia occulta e Deflagrazione respingente compaiono nei trucchetti", () => {
       const c = inv(["agonizing_blast_eldritch_blast", "eldritch_spear_eldritch_blast", "repelling_blast_eldritch_blast"]);
       const notes = spellModNotes(D(c).spellMods, { id: "eldritch_blast", level: 0 }, 0);
       expect(notes).toEqual(expect.arrayContaining(["Deflagrazione agonizzante: con Deflagrazione occulta: +3 ai danni", "Lancia occulta: con Deflagrazione occulta: gittata +330 ft"]));
@@ -123,7 +123,7 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 6: Stregone, Mago e W
       // il bonus vale solo per il trucchetto scelto
       expect(spellModNotes(D(c).spellMods, { id: "poison_spray", level: 0 }, 0)).toEqual([]);
     });
-    it("Patto della lama: Lama assetata e divoratrice danno attacchi extra; Colpo occulto costa uno slot del Patto (1d8 + 1d8 per livello)", () => {
+    it("Patto della Lama: Lama assetata e divoratrice danno attacchi extra; Punizione occulta costa uno slot del Patto (1d8 + 1d8 per livello)", () => {
       expect(D(inv(["pact_of_the_blade"], 5)).attacksPerAction).toBe(1);
       expect(D(inv(["pact_of_the_blade", "thirsting_blade"], 5)).attacksPerAction).toBe(2);
       expect(D(inv(["pact_of_the_blade", "thirsting_blade", "devouring_blade"], 12)).attacksPerAction).toBe(3);
@@ -134,7 +134,7 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 6: Stregone, Mago e W
       expect(extraDice(x, D(c).spellSlots.pact!.level)).toBe("6d8"); // slot del Patto di 5°: 1d8 + 5d8
       expect(sword.extras.find((e) => e.id === "lifedrinker")).toMatchObject({ dice: "1d6", limit: "turn" });
     });
-    it("Altre invocazioni: Vista del diavolo (120 ft), Vista della strega (30 ft di vista del vero), Dono degli abissi (nuoto)", () => {
+    it("Altre invocazioni: Vista del diavolo (120 ft), Vista stregata (30 ft di vista del vero), Dono degli abissi (nuoto)", () => {
       const d = D(inv(["devils_sight", "witch_sight", "gift_of_the_depths"], 15));
       expect(d.senses.darkvision?.value).toBe(120);
       expect(d.senses.truesight?.value).toBe(30);

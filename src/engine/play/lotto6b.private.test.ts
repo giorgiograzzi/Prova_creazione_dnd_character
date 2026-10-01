@@ -21,16 +21,16 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Limiti della magia: Warlock
 
   describe("Warlock: invocazioni", () => {
     const base = { warlock_cantrips: ["eldritch_blast", "chill_touch"], warlock_invocations: [] as string[] };
-    it("il Patto della lama scelto nello stesso elenco sblocca Colpo occulto (prima restava bloccato)", () => {
+    it("il Patto della Lama scelto nello stesso elenco sblocca Punizione occulta (prima restava bloccato)", () => {
       const c = mk("warlock", 5, { ...base });
-      expect(opt(c, "warlock_invocations", "eldritch_smite")).toMatchObject({ enabled: false, disabledReason: expect.stringMatching(/Patto della lama/) });
+      expect(opt(c, "warlock_invocations", "eldritch_smite")).toMatchObject({ enabled: false, disabledReason: expect.stringMatching(/Patto della Lama/) });
       const withPact = mk("warlock", 5, { ...base, warlock_invocations: ["pact_of_the_blade"] });
       expect(opt(withPact, "warlock_invocations", "eldritch_smite").enabled).toBe(true);
       const r = previewDecision(mk("warlock", 5, { ...base }), R, "warlock_invocations", ["pact_of_the_blade", "eldritch_smite", "devils_sight"]);
       expect(r.ok, r.errors.join()).toBe(true);
       expect(r.character.decisions.warlock_invocations).toEqual(["pact_of_the_blade", "eldritch_smite", "devils_sight"]);
     });
-    it("senza il Patto Colpo occulto non si sceglie; togliendo il Patto la dipendente si annulla con il motivo", () => {
+    it("senza il Patto Punizione occulta non si sceglie; togliendo il Patto la dipendente si annulla con il motivo", () => {
       const bad = previewDecision(mk("warlock", 5, { ...base }), R, "warlock_invocations", ["eldritch_smite"]);
       expect(bad.ok).toBe(false);
       const c = mk("warlock", 5, { ...base, warlock_invocations: ["pact_of_the_blade", "eldritch_smite", "devils_sight"] });
@@ -40,7 +40,7 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Limiti della magia: Warlock
       const lower = previewDecision({ ...c, classes: [{ ...c.classes[0]!, level: 3 }] }, R, "warlock_cantrips", ["eldritch_blast"]);
       expect(lower.ok).toBe(true);
       expect(lower.character.decisions.warlock_invocations).not.toContain("eldritch_smite");
-      expect(lower.removed.some((x) => /Colpo occulto/.test(x.reason))).toBe(true);
+      expect(lower.removed.some((x) => /Punizione occulta/.test(x.reason))).toBe(true);
     });
     it("Deflagrazione agonizzante e simili richiedono di conoscere il trucchetto (da Warlock che infligge danni)", () => {
       const c = mk("warlock", 3, { ...base });
@@ -106,18 +106,18 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Limiti della magia: Warlock
     const D = (c: Character) => computeCharacter(c, R);
     const cast = (c: Character, id: string, level: number, metamagic: string[]) => castSpell(c, R, D(c), id, { kind: "slot", level }, { metamagic });
     const used = (c: Character) => c.state.resourcesUsed[SORCERY_POINTS] ?? 0;
-    it("Incantesimo cauto: spende 1 punto, spende lo slot e mostra quante creature (Car, minimo 1) con i numeri veri", () => {
+    it("Incantesimo accurato: spende 1 punto, spende lo slot e mostra quante creature (Car, minimo 1) con i numeri veri", () => {
       const c = sorc(["careful_spell", "twinned_spell", "quickened_spell", "empowered_spell"]);
       const r = cast(c, "burning_hands", 1, ["careful_spell"]);
       expect(r.ok, r.errors.join()).toBe(true);
       expect(used(r.character)).toBe(1);
-      expect(r.notes).toEqual(expect.arrayContaining(["Metamagia: speso 1 punto stregoneria", "Incantesimo cauto: fino a 3 creature superano il TS in automatico e non subiscono nemmeno metà danni"]));
+      expect(r.notes).toEqual(expect.arrayContaining(["Metamagia: speso 1 punto stregoneria", "Incantesimo accurato: fino a 3 creature superano il TS in automatico e non subiscono nemmeno metà danni"]));
       expect(r.character.state.slotsUsed).toBeDefined();
     });
     it("senza Metamagia le note delle opzioni scelte non compaiono; un'opzione non scelta non si può applicare", () => {
       const c = sorc(["careful_spell"]);
       const plain = castSpell(c, R, D(c), "burning_hands", { kind: "slot", level: 1 });
-      expect(plain.notes.join()).not.toMatch(/Incantesimo cauto/);
+      expect(plain.notes.join()).not.toMatch(/Incantesimo accurato/);
       expect(cast(c, "burning_hands", 1, ["heightened_spell"])).toMatchObject({ ok: false, errors: ["Opzione di Metamagia non conosciuta"] });
     });
     it("una sola opzione per incantesimo, tranne Potenziato e cercatore (costo sommato)", () => {
@@ -146,7 +146,7 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Limiti della magia: Warlock
       expect(r).toMatchObject({ ok: false, errors: ["Punti stregoneria insufficienti"] });
       expect(r.character).toBe(poor);
     });
-    it("avviso (non blocco) se l'incantesimo non costringe a un TS e usi Incantesimo cauto", () => {
+    it("avviso (non blocco) se l'incantesimo non costringe a un TS e usi Incantesimo accurato", () => {
       const c = sorc(["careful_spell"]);
       const r = cast(c, "shield", 1, ["careful_spell"]);
       expect(r.ok).toBe(true);

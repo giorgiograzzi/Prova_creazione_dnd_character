@@ -501,7 +501,7 @@ Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove se
 - **Richiede il motore**: M6, M7, M8, M9, M11.
 - **Dati da estrarre prima**: Metamagie e invocazioni.
 - **Verifica**: conversione slot ↔ punti, costo Metamagia in finestra di lancio, Arcanum una volta per Riposo Lungo.
-- **Esito**: vedi `DATA_TODO.md`. Provato nel browser: pannello Punti stregoneria (Metamagia con costo, Crea slot, slot → punti), Colpo occulto con slot del Patto (6d8), Armatura magica e Charme a volontà, Controincantesimo 1/1, Arcanum mistico per livello.
+- **Esito**: vedi `DATA_TODO.md`. Provato nel browser: pannello Punti stregoneria (Metamagia con costo, Crea slot, slot → punti), Punizione occulta con slot del Patto (6d8), Armatura magica e Charme a volontà, Controincantesimo 1/1, Arcanum mistico per livello.
 
 ### Lotto 7 — Specie ✅ chiuso
 - **Entra**: Mani che curano, Arma del soffio, Fortuna, Adrenalina, Resistenza implacabile, doni dell'Ascendenza gigante, Percezione tellurica, benefici di Forma grande (Vantaggio alle prove di Forza), più le voci F da riverificare.

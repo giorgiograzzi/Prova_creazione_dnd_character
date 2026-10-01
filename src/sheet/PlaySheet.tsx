@@ -19,8 +19,8 @@ export function PlaySheet({ ch, rs, update, onReopen, tab, onSection }: { ch: Ch
   const cls = ch.classes.map((c) => `${rs.classes.get(c.classId)?.name.it ?? c.classId} ${c.level}`).join(" / ");
   const props = { ch, rs, d, update };
   return (
-    <>
-      <p className="xp-muted" style={{ margin: "0 0 8px" }}>{[it.play.tabs[tab], cls, rs.species.get(ch.speciesId)?.name.it, rs.backgrounds.get(ch.backgroundId)?.name.it].filter(Boolean).join(" · ")}</p>
+    <div className={`pl-sheet pl-sheet-${tab}`}>
+      <p className="xp-muted pl-crumb">{[it.play.tabs[tab], cls, rs.species.get(ch.speciesId)?.name.it, rs.backgrounds.get(ch.backgroundId)?.name.it].filter(Boolean).join(" · ")}</p>
       {tab === "status" && <StatusTab {...props} onSection={onSection} />}
       {tab === "features" && <FeaturesTab {...props} />}
       {tab === "stats" && <StatsTab {...props} />}
@@ -29,6 +29,6 @@ export function PlaySheet({ ch, rs, update, onReopen, tab, onSection }: { ch: Ch
       {tab === "equip" && <Equip />}
       {tab === "magic" && <MagicTab {...props} />}
       {tab === "misc" && <MiscTab {...props} onReopen={onReopen} />}
-    </>
+    </div>
   );
 }

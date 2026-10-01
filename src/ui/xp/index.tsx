@@ -59,10 +59,10 @@ export function SectionBar({ items, current, onSelect, onBack, backLabel }: { it
   const Back = icons.back;
   return (
     <nav className="xp-sections" aria-label="Sezioni della scheda">
-      <button type="button" className="back" aria-label={backLabel} title={backLabel} onClick={onBack}><Back /></button>
+      <button type="button" className="back" aria-label={backLabel} title={backLabel} onClick={onBack}><Back /><span className="lbl" aria-hidden="true">{backLabel}</span></button>
       {items.map((s) => {
         const Icon = icons[s.icon];
-        return <button key={s.id} type="button" aria-label={s.label} title={s.label} aria-current={s.id === current ? "page" : undefined} onClick={() => onSelect(s.id)}><Icon /></button>;
+        return <button key={s.id} type="button" aria-label={s.label} title={s.label} aria-current={s.id === current ? "page" : undefined} onClick={() => onSelect(s.id)}><Icon /><span className="lbl" aria-hidden="true">{s.label}</span></button>;
       })}
     </nav>
   );

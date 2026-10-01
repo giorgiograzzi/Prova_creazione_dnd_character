@@ -40,6 +40,13 @@ export interface AttackExtra {
   text?: string;
 }
 
+// Azione di una risorsa (Seconda ripresa...): vedi l'op `resourceAction`
+export interface ResourceActionInfo {
+  id: string; featureId: string; label: string; resource: string; cost: number; variable: boolean; die?: number; bonus: number;
+  apply: "heal" | "tempHp" | "none"; restore?: { resource: string; amount: number | "all" }; text?: string;
+  remaining: number; // usi rimasti della risorsa che si spende
+}
+
 export interface LoadoutSummary { handsUsed: number; handsMax: number; body?: string; shield?: string; attuned: number; weight: number; capacity: number; problems: string[] }
 
 // Un privilegio, tratto o talento del personaggio, per l'elenco della scheda (descrizione, usi, attivazione)
@@ -99,6 +106,7 @@ export interface Derived {
   // Slot per livello (indice 0 = 1°): totale, spesi, rimasti; Warlock: slot del patto a parte
   spellSlots: { casterLevel: number; slots: number[]; used: number[]; remaining: number[]; pact?: { count: number; level: number; used: number; remaining: number } };
   spellcasting: { classId: string; ability: Ability; dc: Sourced; attack: Sourced }[];
+  actions: ResourceActionInfo[]; // azioni delle risorse (cura, recuperi...)
   carryCapacity: number;
   proficiencies: { weapons: string[]; tools: string[]; armor: string[] };
   languages: string[];

@@ -65,6 +65,16 @@ export const effectSchema = z.discriminatedUnion("op", [
     attackType: z.enum(["melee", "ranged", "any"]).default("any"),
     limit: z.string().default("none"), cost: id.optional(), auto: z.boolean().default(false), text: z.string().optional(),
   }),
+  // Azione di una risorsa (Seconda ripresa, Imposizione delle mani, Ira persistente...): spende usi di `resource`, tira dadi
+  // (die per ogni uso speso, più `bonus` una volta), applica cure o PF temporanei e può restituire usi di un'altra risorsa.
+  //   variable: spendi da 1 a tutti gli usi rimasti (Imposizione delle mani: ogni uso è 1 PF). Senza `die`, il totale è il numero di usi spesi.
+  e("resourceAction", {
+    actionId: id, label: z.string(), resource: id, cost: z.number().int().min(0).default(1), variable: z.boolean().default(false),
+    die: z.number().int().min(2).optional(), bonus: value.optional(),
+    apply: z.enum(["heal", "tempHp", "none"]).default("none"),
+    restore: z.object({ resource: id, amount: z.union([z.number().int().min(1), z.literal("all")]) }).optional(),
+    text: z.string().optional(),
+  }),
   // Promemoria che compare tra le note finché l'effetto vale (reazioni, effetti sugli avversari: non cambiano i numeri)
   e("note", { text: z.string().min(1) }),
   e("abilityScoreIncrease", {

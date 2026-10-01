@@ -323,6 +323,7 @@
     "warnings": "Avvisi",
     "name": "Nome",
     "features": {
+      "actions": { "result": "Totale {n}{d} {a}", "heal": "PF recuperati", "tempHp": "PF temporanei", "done": "Fatto", "amount": "Usi da spendere per" },
       "title": "Privilegi e tratti",
       "search": "Cerca…",
       "all": "Tutti",

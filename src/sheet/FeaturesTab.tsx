@@ -4,6 +4,7 @@ import { setActive, useResource } from "../engine/play";
 import it from "../i18n/it.json";
 import { fmt } from "../ui/format";
 import { Button, Dialog } from "../ui/xp";
+import { ActionButtons } from "./ActionButtons";
 import type { TabProps } from "./types";
 
 const t = it.play.features;
@@ -54,6 +55,7 @@ export function FeaturesTab({ ch, rs, d, update }: TabProps) {
         {shown.map((f) => {
           const r = f.resourceId ? d.resources[f.resourceId] : undefined;
           const expanded = open[f.id] ?? false;
+          const acts = d.actions.filter((a) => a.featureId === f.id);
           return (
             <li key={f.id} className={f.active ? "pl-feat active" : "pl-feat"}>
               <button type="button" aria-expanded={expanded} onClick={() => setOpen({ ...open, [f.id]: !expanded })}>
@@ -64,7 +66,7 @@ export function FeaturesTab({ ch, rs, d, update }: TabProps) {
                 {r && <span className="val">{r.remaining}/{r.max.value}</span>}
               </button>
               {expanded && f.description && <p className="pl-desc">{f.description}</p>}
-              {(r || f.activation) && (
+              {(r || f.activation || acts.length > 0) && (
                 <div className="pl-row" style={{ padding: "0 12px 8px" }}>
                   {r && <>
                     <Button aria-label={`${t.use} ${f.name}`} disabled={r.remaining <= 0} onClick={() => update((c) => useResource(c, f.resourceId!, r.max.value, 1))}>{t.use}</Button>
@@ -75,6 +77,7 @@ export function FeaturesTab({ ch, rs, d, update }: TabProps) {
                     ? <Button variant="danger" onClick={() => end(f)}>{t.end}</Button>
                     : <Button variant="primary" onClick={() => { if (f.activation!.options.length) { setPick(f); setChoice(""); setError(""); } else activate(f); }}>{t.activate}</Button>)}
                   {f.activation?.duration && <span className="pl-sub">{fmt(t.duration, { d: f.activation.duration })}</span>}
+                  {acts.length > 0 && <ActionButtons actions={acts} ch={ch} d={d} update={update} />}
                 </div>
               )}
             </li>

@@ -534,5 +534,4 @@ Il piano è completo (lotti 1-8). Il seguito è in `DATA_TODO.md`, sezione 0 «P
 2. Confronto dei **nomi italiani** di Metamagie e invocazioni con il manuale.
 3. Limiti della magia del Warlock e del Mago (invocazioni ripetibili, prerequisiti, Distintivi nel libro).
 4. Piccole lacune degli altri lotti (tipi di danno scelti all'uso, Adepto elementale, Colpi astuti con dadi rinunciati).
-5. PWA installata che non si comporta come il browser.
-6. Gli altri file delle regole sono già in `docs/rules/` (non tracciati) e i dati si rigenerano con `npm run extract:data`.
+5. Gli altri file delle regole sono già in `docs/rules/` (non tracciati) e i dati si rigenerano con `npm run extract:data`.

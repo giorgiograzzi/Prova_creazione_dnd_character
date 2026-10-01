@@ -25,11 +25,10 @@ PWA React + TypeScript strict (Zustand, Dexie, Zod, Vitest, Vite) per creare e g
 - Attribuzione nei commit e nelle PR: usa le righe che il sistema ti indica.
 
 ## Cosa fare (in ordine, un punto alla volta, chiedimi l'ok prima di passare al successivo)
-1. **PWA installata**: ho segnalato che «la PWA non funziona come il browser». Riproducilo (service worker, cache, `registerType: "prompt"` in `vite.config.ts`, `src/ui/ReloadPrompt.tsx`, nginx e Docker sulla porta 8097) e correggilo. Se serve un dettaglio da me, chiedimelo.
-2. **Manovre del Maestro di battaglia**: servono nei dati (oggi «Usa una manovra» spende il dado ma la manovra è testo). Ti darò un JSON estratto dal manuale come per Metamagie e invocazioni (`private/raw/`, ignorata da git): chiedimelo e dimmi il formato che ti serve. Poi: scelta delle manovre, effetto del dado, CD, test con i dati veri.
-3. **Limiti della magia del Warlock e del Mago** (`DATA_TODO.md`, «Aperto dal Lotto 6»): invocazioni ripetibili con più scelte, prerequisiti sui trucchetti e sul Patto, Distintivi e Maestria limitati al libro, effetto delle Metamagie, costo alternativo a slot di altre classi.
-4. **Piccole lacune**: tipo di danno scelto all'uso (Arma del soffio, Rivelazione celestiale), Adepto elementale sui tiri degli incantesimi, Colpi astuti con dadi rinunciati, bersaglio del Marchio del cacciatore.
-5. **Nomi italiani**: elenca Metamagie e invocazioni che ho tradotto io (in `scripts/lib/play-lot6.ts`) così li confronto con il manuale.
+1. **Manovre del Maestro di battaglia**: servono nei dati (oggi «Usa una manovra» spende il dado ma la manovra è testo). Ti darò un JSON estratto dal manuale come per Metamagie e invocazioni (`private/raw/`, ignorata da git): chiedimelo e dimmi il formato che ti serve. Poi: scelta delle manovre, effetto del dado, CD, test con i dati veri.
+2. **Limiti della magia del Warlock e del Mago** (`DATA_TODO.md`, «Aperto dal Lotto 6»): invocazioni ripetibili con più scelte, prerequisiti sui trucchetti e sul Patto, Distintivi e Maestria limitati al libro, effetto delle Metamagie, costo alternativo a slot di altre classi.
+3. **Piccole lacune**: tipo di danno scelto all'uso (Arma del soffio, Rivelazione celestiale), Adepto elementale sui tiri degli incantesimi, Colpi astuti con dadi rinunciati, bersaglio del Marchio del cacciatore.
+4. **Nomi italiani**: elenca Metamagie e invocazioni che ho tradotto io (in `scripts/lib/play-lot6.ts`) così li confronto con il manuale.
 
 ## Come lavorare con il motore (promemoria tecnico)
 - Effetti dichiarativi con `op` e condizione `when` senza parentesi (`A || B && C` = `A || (B && C)`). Op e condizioni elencate in `ARCHITECTURE.md`.

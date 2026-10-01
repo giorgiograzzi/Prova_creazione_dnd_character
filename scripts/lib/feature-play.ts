@@ -33,12 +33,12 @@ const stepEffects = (table: (number | string)[], id: string, classId: string, ex
   });
 };
 
-type Patch = (f: Json, owner: Json) => void;
+import { LOT1, type Patch } from "./play-lot1";
 const T = (it: string) => ({ it });
 const active = (id: string) => `active:${id}`;
 
 // Stati attivabili curati (id del privilegio → modifica). `owner` = classe, sottoclasse o specie che lo contiene.
-export const ACTIVATIONS: Record<string, Patch> = {
+const BASE: Record<string, Patch> = {
   // Ira: bonus ai danni con la Forza (colonna Danno ira), resistenze, Vantaggio ai TS di Forza, niente incantesimi (dal testo del privilegio)
   "barbarian/rage": (f, cls) => {
     f.activation = { resource: "rage", requires: "!wearingArmor:heavy", duration: "fino alla fine del tuo prossimo turno (massimo 10 minuti)" };
@@ -69,11 +69,17 @@ export const ACTIVATIONS: Record<string, Patch> = {
   "vengeance/avenging_angel": (f) => { f.activation = { resource: "avenging_angel", duration: "10 minuti" }; f.effects.push({ op: "setSpeed", mode: "fly", value: 60, when: active("avenging_angel") }); },
 };
 
-export interface PlayReport { usage: string[]; activations: string[]; missing: string[] }
+// Modifiche curate dei privilegi: stati attivabili (base) + effetti, extra d'attacco e azioni dei lotti di PLAN2
+// (se un privilegio è in entrambi, si applicano uno dopo l'altro)
+export const ACTIVATIONS: Record<string, Patch> = Object.fromEntries(
+  [...new Set([...Object.keys(BASE), ...Object.keys(LOT1)])].map((k) => [k, ((f, o, p) => { BASE[k]?.(f, o, p); LOT1[k]?.(f, o, p); }) as Patch]),
+);
+
+export interface PlayReport { usage: string[]; activations: string[]; patched: string[]; missing: string[] }
 
 // Applica contatori e attivazioni a classi, sottoclassi, specie e talenti (oggetti già letti da data/private)
 export function applyFeaturePlay(data: { classes: Json[]; subclasses: Json[]; species: Json[]; feats: Json[] }): PlayReport {
-  const rep: PlayReport = { usage: [], activations: [], missing: [] };
+  const rep: PlayReport = { usage: [], activations: [], patched: [], missing: [] };
   const ownerOf = (kind: string, o: Json, list: Json[]) => list.forEach((f) => {
     f.effects ??= [];
     if (!hasResource(f) && !hasFreeCast(f) && !once(f.description ?? "")) {
@@ -81,14 +87,18 @@ export function applyFeaturePlay(data: { classes: Json[]; subclasses: Json[]; sp
       if (u) { f.usage = u; rep.usage.push(`${kind}/${o.id}/${f.id}: ${u.uses} · ${u.recharge}`); }
     }
     const patch = ACTIVATIONS[`${o.id}/${f.id}`];
-    if (patch) { patch(f, o); rep.activations.push(`${kind}/${o.id}/${f.id}`); }
+    if (patch) {
+      f.choices ??= [];
+      patch(f, o, kind === "sottoclassi" ? data.classes.find((c) => c.id === o.classId) : undefined);
+      (f.activation ? rep.activations : rep.patched).push(`${kind}/${o.id}/${f.id}`);
+    }
   });
   for (const c of data.classes) ownerOf("classi", c, c.features ?? []);
   for (const s of data.subclasses) ownerOf("sottoclassi", s, s.features ?? []);
   for (const s of data.species) ownerOf("specie", s, s.traits ?? []);
   for (const f of data.feats) ownerOf("talenti", f, [f]);
   // ogni attivazione dichiarata deve aver trovato il suo privilegio
-  const done = new Set(rep.activations.map((a) => a.split("/").slice(1).join("/")));
+  const done = new Set([...rep.activations, ...rep.patched].map((a) => a.split("/").slice(1).join("/")));
   for (const k of Object.keys(ACTIVATIONS)) if (!done.has(k)) rep.missing.push(k);
   return rep;
 }

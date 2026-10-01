@@ -34,10 +34,13 @@ export interface AttackOption {
   notes: string[]; // promemoria: Svantaggio a gittata lunga, Ricarica, ecc.
 }
 
+export interface AuraInfo { id: string; label: string; radius: number; text: string }
+
 export interface AttackExtra {
   id: string; label: string; dice: string; bonus: number; type?: string; limit: string; cost?: string; costAmount?: number; // cost: risorsa di cui si spendono costAmount usi
   used: boolean; // già usato (1 per turno / 1 per Ira)
   text?: string;
+  slotSpell?: string; baseLevel?: number; perSlotLevel?: number; // costo in slot: l'incantesimo, il suo livello e i dadi in più per livello di slot
 }
 
 // Azione di una risorsa (Seconda ripresa...): vedi l'op `resourceAction`
@@ -106,6 +109,7 @@ export interface Derived {
   // Slot per livello (indice 0 = 1°): totale, spesi, rimasti; Warlock: slot del patto a parte
   spellSlots: { casterLevel: number; slots: number[]; used: number[]; remaining: number[]; pact?: { count: number; level: number; used: number; remaining: number } };
   spellcasting: { classId: string; ability: Ability; dc: Sourced; attack: Sourced }[];
+  auras: AuraInfo[]; // aure che valgono anche per gli alleati (raggio e testo)
   actions: ResourceActionInfo[]; // azioni delle risorse (cura, recuperi...)
   carryCapacity: number;
   proficiencies: { weapons: string[]; tools: string[]; armor: string[] };

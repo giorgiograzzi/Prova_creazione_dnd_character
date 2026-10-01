@@ -22,3 +22,9 @@ export function applyExtra(ch: Character, d: Pick<Derived, "resources">, x: Pick
   if (x.limit !== "none") next = { ...next, state: { ...next.state, once: { ...(next.state.once ?? {}), [x.id]: x.limit } } };
   return { ok: true, errors: [], character: next };
 }
+
+// Dadi di un extra con costo in slot: "2d8" al livello dell'incantesimo, +perSlotLevel dadi per ogni livello di slot in più (Punizione divina)
+export function extraDice(x: Pick<AttackExtra, "dice" | "baseLevel" | "perSlotLevel">, slotLevel: number): string {
+  const m = x.perSlotLevel === undefined ? null : /^(\d+)d(\d+)$/.exec(x.dice);
+  return m ? `${Number(m[1]) + Math.max(0, slotLevel - (x.baseLevel ?? 1)) * (x.perSlotLevel ?? 1)}d${m[2]}` : x.dice;
+}

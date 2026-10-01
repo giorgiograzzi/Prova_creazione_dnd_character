@@ -77,7 +77,8 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
         if (e.auto) { if (dice) autoDice.push(dice); if (bonus) dmgParts.push({ label: `${e.label} (${label})`, value: bonus }); continue; }
         extras.push({
           id: e.riderId, label: e.label, dice, bonus, ...(e.damageType ? { type: e.damageType } : {}), limit: e.limit,
-          ...(e.cost ? { cost: e.cost, costAmount: e.costAmount } : {}), used: !!x.ch.state.once?.[e.riderId], ...(e.text ? { text: fillText(e.text, e.values, c2) } : {}),
+          ...(e.cost ? { cost: e.cost, costAmount: e.costAmount } : {}),
+          ...(e.slotSpell ? { slotSpell: e.slotSpell, baseLevel: rs.spells.get(e.slotSpell)?.level ?? 1, perSlotLevel: e.perSlotLevel } : {}), used: !!x.ch.state.once?.[e.riderId], ...(e.text ? { text: fillText(e.text, e.values, c2) } : {}),
         });
       }
     }

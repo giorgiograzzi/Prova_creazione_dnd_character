@@ -21,8 +21,8 @@ File in `src/engine/schema/`:
 ### Condizioni
 Stringhe con `&&`, `||`, `!`. Atomi: `wearingArmor:none|light|medium|heavy|any`, `shield`,
 `equipped:<id>`, `weaponProperty:<prop>`, `usingWeapon:<id>` (l'arma dell'attacco è proprio questa: bonus di un'arma magica), `attackType:melee|ranged`, `hasFeature:<id>`, `hasFeat:<id>`,
-`level>=N`, `classLevel:<classe>>=N`, `ability:<car>>=N` (operatori `>= <= == > <`).
-Esempio: `wearingArmor:none && !shield`.
+`unarmed` (colpo senz'armi), `concentrating:<incantesimo>`, `level>=N`, `classLevel:<classe>>=N`, `ability:<car>>=N` (operatori `>= <= == > <`).
+Esempio: `wearingArmor:none && !shield`. Non ci sono parentesi: `A || B && C` vale `A || (B && C)`, per mescolare servono effetti separati.
 
 ### Effetti (`op`)
 Corrispondono alle operazioni del file "Modificatori" §6. Ogni effetto ha `when` opzionale.
@@ -41,6 +41,7 @@ Corrispondono alle operazioni del file "Modificatori" §6. Ogni effetto ha `when
 - Tiri: `halfProficiency`, `rollFloor` (minimo sul dado o sul totale: Talento affidabile, Potenza indomabile)
 - Attacchi: `attackRider` (dadi extra con costo in risorsa e limite `turn` / id di un privilegio; `auto` li somma sempre). Lo stato «già usato» sta in `state.once`; «Nuovo turno» azzera i limiti per turno
 - Azioni: `resourceAction` (spende usi, tira dadi, cura / PF temporanei, restituisce usi di un'altra risorsa; `variable` = usi a scelta). Compaiono in `Derived.actions` e nei Privilegi
+- Aure (Lotto 3): `aura` (raggio e testo per gli alleati, mostrati in Stato; con lo stesso `auraId` vale il raggio maggiore). Costo in slot degli extra: `attackRider` con `slotSpell` (+`perSlotLevel` dadi per livello: Punizione divina)
 - Formule: oltre a `pb`, `level`, `classLevel:<classe>`, `mod:<car>`, `score:<car>`, la variabile `speed` (Velocità base della specie)
 
 I valori sono numeri o formule. Un valore può essere fissato da una scelta del giocatore (`Choice`).

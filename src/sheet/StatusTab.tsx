@@ -8,6 +8,7 @@ import it from "../i18n/it.json";
 import { fmt } from "../ui/format";
 import { Button, Check, Dialog } from "../ui/xp";
 import { concentrationDc, endConcentration } from "../engine/magic";
+import { AuraList } from "./AuraList";
 import { RegainButton, RollDialog, SourcesDialog } from "./dialogs";
 import type { TabProps } from "./types";
 import { num, sign } from "./util";
@@ -109,6 +110,8 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
           </ul>
         </>
       )}
+
+      {d.auras.length > 0 && <AuraList auras={d.auras} />}
 
       {d.spellSlots.slots.some((n) => n > 0) && (
         <>

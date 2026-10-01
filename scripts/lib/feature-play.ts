@@ -35,6 +35,7 @@ const stepEffects = (table: (number | string)[], id: string, classId: string, ex
 
 import { LOT1, type Patch } from "./play-lot1";
 import { LOT2 } from "./play-lot2";
+import { LOT3 } from "./play-lot3";
 const T = (it: string) => ({ it });
 const active = (id: string) => `active:${id}`;
 
@@ -72,7 +73,7 @@ const BASE: Record<string, Patch> = {
 
 // Modifiche curate dei privilegi: stati attivabili (base) + effetti, extra d'attacco e azioni dei lotti di PLAN2
 // (se un privilegio è in entrambi, si applicano uno dopo l'altro)
-const LOTS = [BASE, LOT1, LOT2];
+const LOTS = [BASE, LOT1, LOT2, LOT3];
 export const ACTIVATIONS: Record<string, Patch> = Object.fromEntries(
   [...new Set(LOTS.flatMap((l) => Object.keys(l)))].map((k) => [k, ((f, o, p) => { for (const l of LOTS) l[k]?.(f, o, p); }) as Patch]),
 );

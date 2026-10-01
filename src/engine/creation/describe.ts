@@ -38,6 +38,7 @@ export function describeCondition(src: string | Condition, rs: Ruleset): string 
     case "attackType": return c.value === "melee" ? "attacco in mischia" : "attacco a distanza";
     case "saveProficient": return `competenza nel TS di ${AB[c.value]}`;
     case "active": return `${name(rs, c.value)} attivo`;
+    case "concentrating": return `Concentrazione su ${rs.spells.get(c.value)?.name.it ?? c.value}`;
     case "attackAbility": return `attacco con ${AB[c.value]}`;
   }
 }

@@ -64,6 +64,9 @@ export const effectSchema = z.discriminatedUnion("op", [
     damageType: z.string().optional(), // assente = come l'arma
     attackType: z.enum(["melee", "ranged", "any"]).default("any"),
     limit: z.string().default("none"), cost: id.optional(), costAmount: z.number().int().min(1).default(1), auto: z.boolean().default(false),
+    // Costo in slot (Punizione divina): `count`d`die` al livello dell'incantesimo, +`perSlotLevel` dadi per ogni livello di slot in più;
+    // lo slot si sceglie nel tiro del danno e si spende lanciando l'incantesimo (o con il suo lancio gratuito)
+    slotSpell: id.optional(), perSlotLevel: z.number().int().min(1).default(1),
     text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(), // {0}, {1}... nel testo
   }),
   // Azione di una risorsa (Seconda ripresa, Imposizione delle mani, Ira persistente...): spende usi di `resource`, tira dadi
@@ -77,6 +80,9 @@ export const effectSchema = z.discriminatedUnion("op", [
     restore: z.object({ resource: id, amount: z.union([z.number().int().min(1), z.literal("all")]) }).optional(),
     text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(),
   }),
+  // Aura che dà un vantaggio anche agli alleati vicini (Aura di protezione, di coraggio...): sulla scheda l'effetto su di te
+  // vale come sempre (altri effetti); qui si dichiara raggio e testo, mostrati in Stato per dirlo al tavolo. Con lo stesso `auraId` vale il raggio maggiore.
+  e("aura", { auraId: id, label: z.string(), radius: value, text: z.string(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional() }),
   // Promemoria che compare tra le note finché l'effetto vale (reazioni, effetti sugli avversari: non cambiano i numeri)
   e("note", { text: z.string().min(1), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional() }), // {0}, {1}... = formule calcolate
   e("abilityScoreIncrease", {

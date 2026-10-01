@@ -209,13 +209,14 @@
   },
   "play": {
     "tabs": {
+      "sheet": "Scheda",
       "status": "Stato",
       "features": "Privilegi",
       "stats": "Statistiche",
       "attacks": "Attacchi",
       "equip": "Equip",
       "magic": "Magie",
-      "misc": "Altro",
+      "misc": "Note",
       "conditions": "Condizioni"
     },
     "hp": "Punti Ferita",

@@ -21,11 +21,15 @@ export function PlaySheet({ ch, rs, update, onReopen, tab, onSection }: { ch: Ch
   return (
     <>
       <p className="xp-muted" style={{ margin: "0 0 8px" }}>{[it.play.tabs[tab], cls, rs.species.get(ch.speciesId)?.name.it, rs.backgrounds.get(ch.backgroundId)?.name.it].filter(Boolean).join(" · ")}</p>
-      {tab === "status" && <StatusTab {...props} onSection={onSection} />}
-      {tab === "features" && <FeaturesTab {...props} />}
-      {tab === "stats" && <StatsTab {...props} />}
-      {tab === "attacks" && <AttacksTab {...props} />}
-      {tab === "conditions" && <ConditionsTab {...props} onBack={() => onSection("status")} />}
+      {tab === "sheet" && (
+        <>
+          <section className="pl-sec"><StatusTab {...props} onSection={onSection} /></section>
+          <section className="pl-sec"><FeaturesTab {...props} /></section>
+          <section className="pl-sec"><h2>{it.play.tabs.stats}</h2><StatsTab {...props} /></section>
+          <section className="pl-sec"><h2>{it.play.tabs.attacks}</h2><AttacksTab {...props} /></section>
+        </>
+      )}
+      {tab === "conditions" && <ConditionsTab {...props} onBack={() => onSection("sheet")} />}
       {tab === "equip" && <Equip />}
       {tab === "magic" && <MagicTab {...props} />}
       {tab === "misc" && <MiscTab {...props} onReopen={onReopen} />}

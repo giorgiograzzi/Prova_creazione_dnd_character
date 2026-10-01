@@ -1,5 +1,7 @@
 // Sezioni della scheda del personaggio: stanno nella barra in basso al posto delle tab principali.
-// "conditions" è una schermata raggiungibile da Stato (non ha un'icona nella barra: non c'è spazio per 9 icone da 48px).
-export const SHEET_SECTIONS = ["status", "features", "stats", "attacks", "equip", "magic", "misc"] as const;
+// "sheet" è un'unica colonna scorrevole (Stato, Privilegi, Statistiche, Attacchi); Equip, Magie e Note hanno una schermata ciascuna.
+// "conditions" è una schermata raggiungibile da Stato (non ha un'icona nella barra).
+export const SHEET_SECTIONS = ["sheet", "equip", "magic", "misc"] as const;
 export type SheetSection = (typeof SHEET_SECTIONS)[number];
 export type SheetView = SheetSection | "conditions";
+export const isSheetView = (v: unknown): v is SheetView => v === "conditions" || (SHEET_SECTIONS as readonly unknown[]).includes(v);

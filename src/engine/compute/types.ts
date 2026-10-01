@@ -3,7 +3,8 @@ import type { Sourced } from "../types";
 
 export type Skill = (typeof SKILLS)[number];
 export type RollMode = "advantage" | "disadvantage" | "normal";
-export interface Roll { bonus: Sourced; mode: RollMode; modeSources: string[] }
+export interface RollFloor { min: number; on: "die" | "total"; label: string }
+export interface Roll { bonus: Sourced; mode: RollMode; modeSources: string[]; floor?: RollFloor[] }
 export type Proficiency = "none" | "half" | "proficient" | "expertise";
 
 export interface GrantedSpell {
@@ -84,6 +85,7 @@ export interface Derived {
   mods: Record<Ability, Sourced>;
   saves: Record<Ability, Roll & { proficient: boolean; autoFail: string[] }>;
   skills: Record<Skill, Roll & { ability: Ability; proficiency: Proficiency }>;
+  checks: Record<Ability, { mode: RollMode; modeSources: string[]; floor?: RollFloor[] }>; // prove di caratteristica pure
   initiative: Sourced;
   passivePerception: Sourced;
   hp: { max: Sourced; hitDice: { die: number; total: number }[]; hitDiceRemaining: number };

@@ -7,9 +7,10 @@ import { RollDialog } from "./dialogs";
 import type { TabProps } from "./types";
 import { AB, sign } from "./util";
 import type { RollMode } from "../engine/compute/types";
+import type { D20Floor } from "../engine/play";
 
 const t = it.play;
-interface Rolling { title: string; bonus: Sourced; mode: RollMode; modeSources: string[]; note?: string }
+interface Rolling { title: string; bonus: Sourced; mode: RollMode; modeSources: string[]; floor?: D20Floor[]; note?: string }
 const P = it.play.proficiency as Record<string, string>;
 
 export function StatsTab({ rs, d }: TabProps) {
@@ -19,7 +20,7 @@ export function StatsTab({ rs, d }: TabProps) {
   const check = (a: Ability): Rolling => ({
     title: fmt(t.check, { a: AB[a] }),
     bonus: { value: d.mods[a].value + cs.d20Penalty, sources: [...d.mods[a].sources, ...(cs.d20Penalty ? [{ label: "Esaurimento", value: cs.d20Penalty }] : [])] },
-    mode: cs.abilityChecks.mode, modeSources: cs.abilityChecks.modeSources,
+    mode: d.checks[a].mode, modeSources: d.checks[a].modeSources, ...(d.checks[a].floor ? { floor: d.checks[a].floor } : {}),
   });
   return (
     <>
@@ -37,7 +38,7 @@ export function StatsTab({ rs, d }: TabProps) {
         {ABILITIES.map((a) => {
           const s = d.saves[a];
           return (
-            <li key={a}><button type="button" onClick={() => setRolling({ title: fmt(t.save, { a: AB[a] }), bonus: s.bonus, mode: s.mode, modeSources: s.autoFail.length ? [`Fallimento automatico: ${s.autoFail.join(", ")}`] : s.modeSources })}>
+            <li key={a}><button type="button" onClick={() => setRolling({ title: fmt(t.save, { a: AB[a] }), bonus: s.bonus, mode: s.mode, modeSources: s.autoFail.length ? [`Fallimento automatico: ${s.autoFail.join(", ")}`] : s.modeSources, ...(s.floor ? { floor: s.floor } : {}) })}>
               <span className="prof" aria-label={s.proficient ? "Competente" : ""}>{s.proficient ? P.proficient : ""}</span>
               <span className="nm">{AB[a]}</span><span className="val">{sign(s.bonus.value)}</span>
             </button></li>
@@ -50,7 +51,7 @@ export function StatsTab({ rs, d }: TabProps) {
         {SKILLS.map((k) => {
           const s = d.skills[k];
           return (
-            <li key={k}><button type="button" onClick={() => setRolling({ title: rs_name(k, rs), bonus: s.bonus, mode: s.mode, modeSources: s.modeSources })}>
+            <li key={k}><button type="button" onClick={() => setRolling({ title: rs_name(k, rs), bonus: s.bonus, mode: s.mode, modeSources: s.modeSources, ...(s.floor ? { floor: s.floor } : {}) })}>
               <span className="prof" aria-label={s.proficiency}>{P[s.proficiency]}</span>
               <span className="nm">{rs_name(k, rs)} <span className="pl-sub">({AB[s.ability].slice(0, 3)})</span></span><span className="val">{sign(s.bonus.value)}</span>
             </button></li>

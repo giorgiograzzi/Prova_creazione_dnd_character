@@ -44,6 +44,15 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("attackAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage"), attackType: z.enum(["melee", "ranged", "any"]).default("any") }),
   e("checkAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage"), skills: z.array(skill).optional(), abilities: z.array(ability).optional() }),
   e("initiativeAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage") }),
+  // Modificatori al d20: metà competenza alle prove senza competenza (Jolly, Atleta straordinario) e minimo al tiro
+  // (Talento affidabile: sul dado, 10; Possanza indomita: sul totale, il punteggio di Forza).
+  e("halfProficiency", { abilities: z.array(ability).optional() }),
+  e("rollFloor", {
+    min: value, on: z.enum(["die", "total"]), skills: z.array(skill).optional(), abilities: z.array(ability).optional(),
+    proficientOnly: z.boolean().default(false), // solo nelle abilità in cui sei competente
+    saves: z.boolean().default(false), // vale anche per i tiri salvezza di quelle caratteristiche
+    rawChecks: z.boolean().default(false), // vale anche per le prove di caratteristica pure
+  }),
   // Immunità alle condizioni (Coraggio, Ira senza mente): la condizione non si applica finché l'effetto vale
   e("conditionImmunity", { conditions: z.array(id).min(1) }),
   // Extra d'attacco (Colpo brutale, Furia, Punizione...): dadi in più sul danno di un attacco, con costo e limite.

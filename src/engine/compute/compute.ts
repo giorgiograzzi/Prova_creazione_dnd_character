@@ -31,7 +31,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     if (e.op === "note") notes.push(`${e.text} — ${label}`);
   }
   cs.initiativeMode = combineMode(cs.rolls.initiative.adv, cs.rolls.initiative.dis);
-  const { saves, skills } = computeRolls(x, profs, notes, cs);
+  const { saves, skills, checks } = computeRolls(x, profs, notes, cs);
 
   const initiative = sum([
     { label: "Mod Des", value: x.mods.dex },
@@ -66,7 +66,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   return {
     level: x.level,
     proficiencyBonus: { value: x.pb, sources: [{ label: `Livello totale ${x.level}`, value: x.pb }] },
-    scores, mods, saves, skills,
+    scores, mods, saves, skills, checks,
     initiative: withOverride(initiative, o.initiative),
     passivePerception: withOverride(passive, o.passivePerception),
     hp: { ...hp, max: withOverride(hp.max, o["hp.max"]) },

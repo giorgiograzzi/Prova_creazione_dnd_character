@@ -85,3 +85,46 @@ describe("immunità alle condizioni dei privilegi", () => {
     expect(characterSchema.safeParse(on(barb(), "reckless_attack")).success).toBe(true);
   });
 });
+
+describe("minimo del tiro e metà competenza (M12)", () => {
+  const rsM = (() => {
+    const r = testRuleset();
+    r.classes.get("fighter")!.features.push(
+      F({ id: "remarkable_athlete", name: { it: "Atleta straordinario" }, effects: [{ op: "halfProficiency", abilities: ["str", "dex", "con"] }] }),
+      F({ id: "reliable_talent", name: { it: "Talento affidabile" }, effects: [{ op: "rollFloor", min: 10, on: "die", proficientOnly: true, saves: false, rawChecks: false }] }),
+      F({ id: "indomitable_might", name: { it: "Possanza indomita" }, effects: [{ op: "rollFloor", min: "score:str", on: "total", abilities: ["str"], proficientOnly: false, saves: true, rawChecks: true }] }),
+    );
+    return r;
+  })();
+  const fighter = (over: Partial<Character> = {}) => testCharacter({ classes: [{ classId: "fighter", level: 5, hpRolls: [] }], ...over });
+  it("Atleta straordinario: metà competenza (per difetto) alle prove di For/Des/Cos non competenti, non a Int", () => {
+    const d = computeCharacter(fighter(), rsM);
+    expect(d.skills.acrobatics.proficiency).toBe("half"); // Des
+    expect(d.skills.acrobatics.bonus.value).toBe(2 + 1); // mod Des +2, metà di +3 = 1
+    expect(d.skills.arcana.proficiency).toBe("none"); // Int
+    expect(d.skills.athletics.proficiency).toBe("proficient"); // già competente: nessun cambio
+  });
+  it("Talento affidabile: minimo 10 sul dado, solo nelle abilità competenti", () => {
+    const d = computeCharacter(fighter(), rsM);
+    expect(d.skills.acrobatics.floor).toBeUndefined();
+    expect(d.checks.str.floor).toMatchObject([{ min: 15, on: "total" }]); // Possanza indomita sulle prove pure di For
+    expect(d.saves.str.floor).toMatchObject([{ min: 15, on: "total" }]);
+    expect(d.saves.dex.floor).toBeUndefined();
+    // Atletica: Talento affidabile (sul dado) e Possanza indomita (sul totale) valgono insieme
+    expect(d.skills.athletics.floor).toMatchObject([{ min: 10, on: "die" }, { min: 15, on: "total" }]);
+  });
+});
+
+import { rollD20 } from "../play";
+describe("tiro con minimo", () => {
+  const seq = (...n: number[]) => { let i = 0; return () => (n[i++]! - 1) / 20 + 0.001; };
+  it("sul dado: un 4 conta come 10; sul totale: non si scende sotto il minimo", () => {
+    expect(rollD20(3, "normal", seq(4), [{ min: 10, on: "die", label: "Talento affidabile" }])).toMatchObject({ natural: 4, kept: 10, total: 13, raised: "Talento affidabile" });
+    expect(rollD20(3, "normal", seq(15), [{ min: 10, on: "die", label: "x" }])).toMatchObject({ kept: 15, total: 18 });
+    expect(rollD20(1, "normal", seq(5), [{ min: 15, on: "total", label: "Possanza indomita" }])).toMatchObject({ total: 15, raised: "Possanza indomita" });
+    expect(rollD20(1, "normal", seq(5), [{ min: 10, on: "die", label: "a" }, { min: 15, on: "total", label: "b" }])).toMatchObject({ total: 15, raised: "a, b" });
+  });
+  it("il 20 naturale resta un critico anche con il minimo", () => {
+    expect(rollD20(0, "normal", seq(20), [{ min: 10, on: "die", label: "a" }]).crit).toBe(true);
+  });
+});

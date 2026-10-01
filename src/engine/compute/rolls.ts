@@ -1,10 +1,10 @@
-import { ABILITIES, SKILLS, type Ability } from "../schema";
+import { ABILITIES, SKILLS, type Ability, type Effect } from "../schema";
 import type { Ctx } from "./context";
 import { SKILL_ABILITY } from "./constants";
 import { evalValue } from "./formula-eval";
 import type { Profs } from "./proficiencies";
 import { sum, type Part } from "./sourced";
-import type { ConditionState, Derived, Proficiency, RollMode, Skill } from "./types";
+import type { ConditionState, Derived, Proficiency, RollFloor, RollMode, Skill } from "./types";
 
 // Vantaggio e svantaggio non si cumulano: se ci sono entrambi si annullano (file 02 §9)
 export function combineMode(adv: string[], dis: string[]): { mode: RollMode; modeSources: string[] } {
@@ -18,6 +18,19 @@ export function combineMode(adv: string[], dis: string[]): { mode: RollMode; mod
 export function untrainedArmor(x: Ctx, profs: Profs) {
   const a = x.bodyArmor;
   return !!a && !profs.armor.has(a.category);
+}
+
+// Il minimo più alto tra gli effetti `rollFloor` che si applicano a questo tiro
+// (uno per tipo: sul dado e sul totale, che possono valere insieme)
+function floorFor(x: Ctx, match: (e: Extract<Effect, { op: "rollFloor" }>) => boolean): RollFloor[] | undefined {
+  const best: Partial<Record<"die" | "total", RollFloor>> = {};
+  for (const { effect: e, label } of x.active) {
+    if (e.op !== "rollFloor" || !match(e)) continue;
+    const min = evalValue(e.min, x);
+    if (!best[e.on] || min > best[e.on]!.min) best[e.on] = { min, on: e.on, label };
+  }
+  const list = Object.values(best);
+  return list.length ? list : undefined;
 }
 
 export function computeRolls(x: Ctx, profs: Profs, notes: string[], cs: ConditionState) {
@@ -38,20 +51,23 @@ export function computeRolls(x: Ctx, profs: Profs, notes: string[], cs: Conditio
       }
     }
     if (untrained && (a === "str" || a === "dex")) dis.push(armorDis);
-    saves[a] = { bonus: sum(parts), proficient, autoFail: cs.autoFailSaves[a] ?? [], ...combineMode(adv, dis) };
+    const floor = floorFor(x, (e) => e.saves && (!e.abilities || e.abilities.includes(a)) && (!e.proficientOnly || proficient));
+    saves[a] = { bonus: sum(parts), proficient, autoFail: cs.autoFailSaves[a] ?? [], ...combineMode(adv, dis), ...(floor ? { floor } : {}) };
   }
   for (const { effect: e, label } of x.active) {
     if (e.op === "saveAdvantage" && e.against) notes.push(`Vantaggio ai TS${e.abilities ? ` (${e.abilities.join("/")})` : ""} contro ${e.against} — ${label}`);
   }
   const jack = x.collected.features.has("jack_of_all_trades"); // Factotum del Bardo
+  const halfFor = (ab: Ability) => x.active.find(({ effect: e }) => e.op === "halfProficiency" && (!e.abilities || e.abilities.includes(ab)));
   const skills = {} as Derived["skills"];
   for (const s of SKILLS as readonly Skill[]) {
     const ab: Ability = SKILL_ABILITY[s];
-    let prof: Proficiency = profs.expertise.has(s) ? "expertise" : profs.skills.has(s) ? "proficient" : jack ? "half" : "none";
+    const half = halfFor(ab);
+    let prof: Proficiency = profs.expertise.has(s) ? "expertise" : profs.skills.has(s) ? "proficient" : jack || half ? "half" : "none";
     const parts: Part[] = [{ label: `Mod ${ab}`, value: x.mods[ab] }];
     if (prof === "proficient") parts.push({ label: "Competenza", value: x.pb });
     if (prof === "expertise") parts.push({ label: "Maestria", value: x.pb * 2 });
-    if (prof === "half") parts.push({ label: "Factotum (metà competenza)", value: Math.floor(x.pb / 2) });
+    if (prof === "half") parts.push({ label: jack ? "Factotum (metà competenza)" : `${half?.label ?? "Metà competenza"} (metà competenza)`, value: Math.floor(x.pb / 2) });
     const adv: string[] = [...cs.rolls.checks.adv], dis: string[] = [...cs.rolls.checks.dis];
     for (const { effect: e, label } of x.active) {
       if (e.op === "checkBonus" && (!e.skills || e.skills.includes(s))) parts.push({ label, value: evalValue(e.value, x) });
@@ -60,7 +76,19 @@ export function computeRolls(x: Ctx, profs: Profs, notes: string[], cs: Conditio
     if (cs.d20Penalty) parts.push({ label: "Esaurimento", value: cs.d20Penalty });
     if (untrained && (ab === "str" || ab === "dex")) dis.push(armorDis);
     if (s === "stealth" && x.bodyArmor?.stealthDisadvantage) dis.push(x.bodyArmor.name.it);
-    skills[s] = { bonus: sum(parts), ability: ab, proficiency: prof, ...combineMode(adv, dis) };
+    const floor = floorFor(x, (e) => (!e.skills || e.skills.includes(s)) && (!e.abilities || e.abilities.includes(ab)) && (!e.proficientOnly || prof === "proficient" || prof === "expertise"));
+    skills[s] = { bonus: sum(parts), ability: ab, proficiency: prof, ...combineMode(adv, dis), ...(floor ? { floor } : {}) };
   }
-  return { saves, skills };
+  // prove di caratteristica pure (senza abilità): condizioni, Vantaggio per caratteristica e minimo dei tiri (Possanza indomita)
+  const checks = {} as Derived["checks"];
+  for (const a of ABILITIES) {
+    const adv: string[] = [...cs.rolls.checks.adv], dis: string[] = [...cs.rolls.checks.dis];
+    for (const { effect: e, label } of x.active) {
+      if (e.op === "checkAdvantage" && !e.skills && (!e.abilities || e.abilities.includes(a))) (e.mode === "advantage" ? adv : dis).push(label);
+    }
+    if (untrained && (a === "str" || a === "dex")) dis.push(armorDis);
+    const floor = floorFor(x, (e) => e.rawChecks && !e.skills && !e.proficientOnly && (!e.abilities || e.abilities.includes(a)));
+    checks[a] = { ...combineMode(adv, dis), ...(floor ? { floor } : {}) };
+  }
+  return { saves, skills, checks };
 }

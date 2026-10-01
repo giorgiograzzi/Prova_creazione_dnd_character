@@ -30,6 +30,6 @@ export function spellChoiceCandidates(rs: Ruleset, choice: Choice, decisions: Re
   const [kind, list] = choice.source.split(":");
   if (kind === "cantrips") return spellsMatching(rs, { ...choice.filter, level: 0 }, decisions, list);
   if (kind === "spells") return spellsMatching(rs, choice.filter, decisions, list).filter((sp) => sp.level >= 1);
-  if (kind === "freespells" || kind === "alwaysspells") return spellsMatching(rs, choice.filter, decisions);
+  if (kind === "freespells" || kind === "alwaysspells" || kind === "signaturespells" || kind === "masteryspells") return spellsMatching(rs, choice.filter, decisions);
   return [];
 }

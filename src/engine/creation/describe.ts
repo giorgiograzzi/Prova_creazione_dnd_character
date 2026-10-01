@@ -30,13 +30,16 @@ export function describeCondition(src: string | Condition, rs: Ruleset): string 
     case "wearingArmor": return c.value === "none" ? "senza armatura" : c.value === "any" ? "con un'armatura" : `armatura ${ARMOR[c.value]}`;
     case "shield": return "con uno scudo";
     case "twoHanded": return "arma a due mani";
+    case "unarmed": return "colpo senz'armi";
     case "otherWeapon": return "con un'altra arma in mano";
     case "equipped": return `equipaggiato: ${c.value}`;
     case "usingWeapon": return `con ${name(rs, c.value)}`;
+    case "damageType": return `danni ${c.value}`;
     case "weaponProperty": return `arma con proprietà ${c.value}`;
     case "attackType": return c.value === "melee" ? "attacco in mischia" : "attacco a distanza";
     case "saveProficient": return `competenza nel TS di ${AB[c.value]}`;
     case "active": return `${name(rs, c.value)} attivo`;
+    case "concentrating": return `Concentrazione su ${rs.spells.get(c.value)?.name.it ?? c.value}`;
     case "attackAbility": return `attacco con ${AB[c.value]}`;
   }
 }

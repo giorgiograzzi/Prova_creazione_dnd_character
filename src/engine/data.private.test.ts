@@ -683,10 +683,10 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
     });
     it("Ladro: Attacco furtivo con arma Accurata o a distanza; competenza nelle armi marziali Accurate o Leggere", () => {
       const r = (w: string) => atk(run([cls("rogue", 5)], { ...sc({ dex: 16 }), inventory: inv([w, "wielded"]) }), R.weapons.get(w)!.name.it);
-      expect(r("rapier").riders[0]).toMatch(/Attacco furtivo 3d6/);
+      expect(r("rapier").extras.find((e) => e.id === "sneak_attack")).toMatchObject({ dice: "3d6", limit: "turn" });
       expect(r("rapier").proficient).toBe(true);
-      expect(r("shortbow").riders[0]).toMatch(/3d6/);
-      expect(r("longsword").riders).toEqual([]);
+      expect(r("shortbow").extras.find((e) => e.id === "sneak_attack")?.dice).toBe("3d6");
+      expect(r("longsword").extras.find((e) => e.id === "sneak_attack")).toBeUndefined();
       expect(r("longsword").proficient).toBe(false); // marziale non Accurata né Leggera
     });
     it("Warlock del Patto della Lama: l'arma del patto usa Carisma", () => {

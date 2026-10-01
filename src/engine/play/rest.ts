@@ -39,7 +39,7 @@ export function longRest(ch: Character, d: Pick<Derived, "hp" | "resources">): C
     ...ch,
     state: {
       ...noActive(ch.state), hp: d.hp.max.value, tempHp: 0, hitDiceUsed: Math.max(0, ch.state.hitDiceUsed - restored),
-      resourcesUsed: without(ch.state.resourcesUsed, rechargeOn(d, ["short_rest", "long_rest", "dawn"])), slotsUsed: {},
+      resourcesUsed: without(ch.state.resourcesUsed, rechargeOn(d, ["short_rest", "long_rest", "dawn"])), slotsUsed: {}, extraSlots: undefined,
       exhaustion: Math.max(0, ch.state.exhaustion - 1), deathSaves: { successes: 0, failures: 0 },
       conditions: wasDown ? ch.state.conditions.filter((c) => c !== "unconscious") : ch.state.conditions, conditionSources: src,
     },

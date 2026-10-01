@@ -15,6 +15,7 @@ export interface CondCtx {
   armorTraining?: Set<string>; // addestramento in armature (prerequisiti dei talenti)
   features: Set<string>;
   feats: Set<string>;
+  concentration?: string; // incantesimo di cui si mantiene la Concentrazione
   activeStates?: Record<string, string[]>; // privilegi attivati (state.active): id → scelte fatte all'attivazione
   attackAbility?: Ability; // caratteristica usata dall'attacco considerato
   classSaves?: Set<Ability>; // TS della classe di partenza
@@ -32,15 +33,18 @@ export function evalCondition(c: Condition, x: CondCtx): boolean {
       return c.value === "none" ? !x.bodyArmor : c.value === "any" ? !!x.bodyArmor : x.bodyArmor?.category === c.value;
     case "shield": return !!x.shield;
     case "twoHanded": return !!x.twoHanded;
+    case "unarmed": return !x.weapon && x.attackAbility !== undefined; // solo nel contesto di un attacco senz'armi
     case "otherWeapon": return !!x.otherWeapon;
     case "trained": return !!x.armorTraining?.has(c.value);
     case "equipped": return x.equipped.has(c.value);
     case "usingWeapon": return x.weapon?.id === c.value;
+    case "damageType": return x.weapon ? x.weapon.damageType === c.value : x.attackAbility !== undefined && c.value === "bludgeoning"; // a mani nude: contundente
     case "weaponProperty": return !!x.weapon?.properties.includes(c.value);
     case "attackType": return x.weapon?.kind === c.value;
     case "hasFeature": return x.features.has(c.value);
     case "hasFeat": return x.feats.has(c.value);
     case "active": return !!x.activeStates?.[c.value];
+    case "concentrating": return x.concentration === c.value;
     case "attackAbility": return x.attackAbility === c.value;
     case "saveProficient": return !!x.classSaves?.has(c.value);
     case "level": return cmp(x.totalLevel, c.cmp, c.n);

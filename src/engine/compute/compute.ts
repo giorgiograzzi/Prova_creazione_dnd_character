@@ -7,13 +7,15 @@ import { buildCtx } from "./context";
 import { evalValue } from "./formula-eval";
 import { computeHp } from "./hp";
 import { computeProfs } from "./proficiencies";
-import { computeActions, computeResources } from "./resources";
+import { computeActions, computeResources, computeSpellMods } from "./resources";
+import { computeAuras } from "./auras";
 import { computeGrantedSpells } from "./spells";
 import { computeSlots } from "./slots";
 import { attacksPerAction, computeAttacks } from "./attacks";
 import { analyzeLoadout } from "../equipment/loadout";
 import { combineMode, computeRolls, untrainedArmor } from "./rolls";
 import { sum, withOverride } from "./sourced";
+import { fillText } from "./text";
 import { computeResistances, computeSenses, computeSpeed } from "./speed";
 import type { Derived } from "./types";
 
@@ -28,7 +30,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   // Vantaggio all'Iniziativa dagli effetti (Istinto ferino) e promemoria (`note`)
   for (const { effect: e, label } of x.active) {
     if (e.op === "initiativeAdvantage") (e.mode === "advantage" ? cs.rolls.initiative.adv : cs.rolls.initiative.dis).push(label);
-    if (e.op === "note") notes.push(`${e.text} — ${label}`);
+    if (e.op === "note") notes.push(`${fillText(e.text, e.values, x)} — ${label}`);
   }
   cs.initiativeMode = combineMode(cs.rolls.initiative.adv, cs.rolls.initiative.dis);
   const { saves, skills, checks } = computeRolls(x, profs, notes, cs);
@@ -50,6 +52,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   const speed = applyConditionSpeed(computeSpeed(x), cs);
   const hp = computeHp(x);
   const resources = computeResources(x);
+  const auras = computeAuras(x);
   const o = ch.overrides;
   const spellcasting = ch.classes.flatMap((c) => {
     const cdef = rs.classes.get(c.classId);
@@ -57,10 +60,18 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     const ability = cdef?.spellAbility ?? (sdef?.caster === "third" ? sdef.spellAbility : undefined);
     if (!ability) return [];
     const m = x.mods[ability];
+    // Stregoneria innata e simili: CD e attacco in più, Vantaggio ai tiri per colpire con incantesimo
+    const dcParts = [{ label: "Base", value: 8 }, { label: `Mod ${ability}`, value: m }, { label: "Competenza", value: x.pb }];
+    const atkParts = [{ label: `Mod ${ability}`, value: m }, { label: "Competenza", value: x.pb }];
+    const adv: string[] = [];
+    for (const { effect: e, label } of x.active) {
+      if (e.op !== "spellBonus") continue;
+      if (e.dc !== undefined) dcParts.push({ label, value: evalValue(e.dc, x) });
+      if (e.attack !== undefined) atkParts.push({ label, value: evalValue(e.attack, x) });
+      if (e.advantage) adv.push(label);
+    }
     return [{
-      classId: c.classId, ability,
-      dc: sum([{ label: "Base", value: 8 }, { label: `Mod ${ability}`, value: m }, { label: "Competenza", value: x.pb }]),
-      attack: sum([{ label: `Mod ${ability}`, value: m }, { label: "Competenza", value: x.pb }]),
+      classId: c.classId, ability, dc: sum(dcParts), attack: sum(atkParts), ...combineMode(adv, []).mode === "advantage" ? { attackMode: "advantage" as const, attackModeSources: adv } : { attackMode: "normal" as const, attackModeSources: [] },
     }];
   });
 
@@ -75,7 +86,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     speed: { ...speed, walk: withOverride(speed.walk, o["speed.walk"]) },
     senses: computeSenses(x),
     resistances: cs.resistAll.length ? [...new Set([...computeResistances(x), "all"])].sort() : computeResistances(x),
-    resources, actions: computeActions(x, resources),
+    resources, auras, spellMods: computeSpellMods(x), chosenOptions: x.collected.options, actions: computeActions(x, resources),
     spellcasting,
     grantedSpells: computeGrantedSpells(x),
     spellSlots: computeSlots(ch, rs),

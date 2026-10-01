@@ -10,7 +10,7 @@ export type Proficiency = "none" | "half" | "proficient" | "expertise";
 export interface GrantedSpell {
   spell: string; mode: "cantrip" | "alwaysPrepared" | "known"; source: string;
   ability?: Ability; dc?: number; attack?: number;
-  freeCast?: { uses: number; recharge: string };
+  freeCast?: { uses: number; recharge: string; unlimited?: boolean };
 }
 
 // Un attacco pronto da tirare (arma impugnata, lanciata, mano secondaria o colpo senz'armi)
@@ -25,6 +25,7 @@ export interface AttackOption {
   toHit: Sourced; mode: RollMode; modeSources: string[];
   damage: { dice: string; bonus: Sourced; type: string; text: string }; // text = "2d6 + 3 tagliente"
   critRange: number; // 20, oppure 19/18 (Campione)
+  dieFloor?: number; // minimo di ogni dado di danno (Combattere con armi possenti: 3)
   reach: number; // ft
   range?: { normal: number; long: number };
   mastery?: { id: string; name: string; active: boolean; dc?: number };
@@ -34,18 +35,25 @@ export interface AttackOption {
   notes: string[]; // promemoria: Svantaggio a gittata lunga, Ricarica, ecc.
 }
 
+export interface SpellModInfo { label: string; text: string; cantrip: boolean; all?: boolean; school?: string; spells?: string[]; minLevel?: number }
+export interface AuraInfo { id: string; label: string; radius: number; text: string }
+
 export interface AttackExtra {
-  id: string; label: string; dice: string; bonus: number; type?: string; limit: string; cost?: string; // cost: risorsa di cui si spende 1 uso
+  id: string; label: string; dice: string; bonus: number; type?: string; limit: string; cost?: string; costAmount?: number; // cost: risorsa di cui si spendono costAmount usi
   used: boolean; // già usato (1 per turno / 1 per Ira)
   text?: string;
+  slotSpell?: string; pactSlot?: boolean; baseLevel?: number; perSlotLevel?: number; // costo in slot: l'incantesimo, il suo livello e i dadi in più per livello di slot
 }
 
 // Azione di una risorsa (Seconda ripresa...): vedi l'op `resourceAction`
 export interface ResourceActionInfo {
-  id: string; featureId: string; label: string; resource: string; cost: number; variable: boolean; die?: number; bonus: number;
-  apply: "heal" | "tempHp" | "none"; restore?: { resource: string; amount: number | "all" }; text?: string;
+  id: string; featureId: string; label: string; resource?: string; cost: number; variable: boolean; die?: number; count?: number; bonus: number;
+  apply: "heal" | "tempHp" | "none"; restore?: { resource: string; amount: number | "all" }; text?: string; // restore.amount: già calcolato
   remaining: number; // usi rimasti della risorsa che si spende
 }
+
+// Opzione scelta con un costo (Metamagia: punti stregoneria)
+export interface ChosenOption { id: string; name: string; description?: string; cost: number; choiceId: string }
 
 export interface LoadoutSummary { handsUsed: number; handsMax: number; body?: string; shield?: string; attuned: number; weight: number; capacity: number; problems: string[] }
 
@@ -56,7 +64,7 @@ export interface FeatureInfo {
   source: string; // chi lo dà: "Barbaro", "Aasimar", "Iniziato alla magia"
   level: number; // livello di sblocco (0 = talento)
   resourceId?: string; // contatore degli usi (in Derived.resources)
-  activation?: { resource?: string; requires?: string; label?: string; duration?: string; options: { id: string; name: string; description?: string }[] };
+  activation?: { resource?: string; cost?: number; alt?: { resource: string; cost: number; when?: string }; requires?: string; label?: string; duration?: string; options: { id: string; name: string; description?: string }[] };
   active: boolean;
   picked: string[]; // scelta fatta all'attivazione
   needsReview: boolean;
@@ -105,7 +113,10 @@ export interface Derived {
   grantedSpells: GrantedSpell[];
   // Slot per livello (indice 0 = 1°): totale, spesi, rimasti; Warlock: slot del patto a parte
   spellSlots: { casterLevel: number; slots: number[]; used: number[]; remaining: number[]; pact?: { count: number; level: number; used: number; remaining: number } };
-  spellcasting: { classId: string; ability: Ability; dc: Sourced; attack: Sourced }[];
+  spellcasting: { classId: string; ability: Ability; dc: Sourced; attack: Sourced; attackMode: RollMode; attackModeSources: string[] }[];
+  chosenOptions: ChosenOption[]; // opzioni scelte che hanno un costo (Metamagia)
+  spellMods: SpellModInfo[]; // modificatori degli incantesimi lanciati (note del lancio)
+  auras: AuraInfo[]; // aure che valgono anche per gli alleati (raggio e testo)
   actions: ResourceActionInfo[]; // azioni delle risorse (cura, recuperi...)
   carryCapacity: number;
   proficiencies: { weapons: string[]; tools: string[]; armor: string[] };

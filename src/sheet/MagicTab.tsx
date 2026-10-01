@@ -9,6 +9,7 @@ import { fmt } from "../ui/format";
 import { Button, Dialog } from "../ui/xp";
 import { QuestionView } from "../wizard/QuestionView";
 import { choose } from "../wizard/logic";
+import { SorceryPanel } from "./SorceryPanel";
 import { SourcesDialog } from "./dialogs";
 import type { TabProps } from "./types";
 import { AB, sign } from "./util";
@@ -43,6 +44,7 @@ export function MagicTab({ ch, rs, d, update }: TabProps) {
   return (
     <>
       <h2>{t.title}</h2>
+      <SorceryPanel d={d} update={update} />
       {first && (
         <div className="pl-grid">
           <button type="button" className="pl-tile" onClick={() => setStat("dc")}>{t.dc}<b>{first.dc.value}</b><span className="pl-sub">{AB[first.ability]}</span></button>
@@ -99,7 +101,7 @@ export function MagicTab({ ch, rs, d, update }: TabProps) {
               return (
                 <li key={e.id}><button type="button" onClick={() => setOpen(e)}>
                   <span className="nm"><b>{e.spell.name.it}</b>{conc === e.id && <span className="pl-badge"> ●</span>}
-                    <br /><span className="pl-sub">{[...new Set(e.sources.map((s) => t.statusTags[s.kind]))].join(", ")}{e.spell.concentration ? " · ◆" : ""}{e.spell.ritual ? " · ®" : ""}{free ? ` · ${free.remaining}/${free.max}` : ""}</span></span>
+                    <br /><span className="pl-sub">{[...new Set(e.sources.map((s) => t.statusTags[s.kind]))].join(", ")}{e.spell.concentration ? " · ◆" : ""}{e.spell.ritual ? " · ®" : ""}{free ? ` · ${free.unlimited ? t.atWill : `${free.remaining}/${free.max}`}` : ""}</span></span>
                 </button></li>
               );
             })}
@@ -145,7 +147,7 @@ function SpellDialog({ entry, ch, rs, d, update, onClose }: TabProps & { entry: 
     const p = d.spellSlots.pact;
     if (p && p.level >= sp.level) opts.push({ key: "pact", label: fmt(t.castPact, { n: p.level, r: p.remaining }), via: { kind: "pact" }, disabled: p.remaining <= 0 });
   }
-  for (const s of entry.sources) if (s.free) opts.push({ key: s.free.resourceId + s.label, label: `${fmt(t.castFree, { r: s.free.remaining, m: s.free.max })} — ${s.label}`, via: { kind: "free", resourceId: s.free.resourceId }, disabled: s.free.remaining <= 0 });
+  for (const s of entry.sources) if (s.free) opts.push({ key: s.free.resourceId + s.label, label: `${s.free.unlimited ? t.atWill : fmt(t.castFree, { r: s.free.remaining, m: s.free.max })} — ${s.label}`, via: { kind: "free", resourceId: s.free.resourceId }, disabled: !s.free.unlimited && s.free.remaining <= 0 });
   if (entry.ritualOk) opts.push({ key: "ritual", label: t.castRitual, via: { kind: "ritual" } });
 
   return (

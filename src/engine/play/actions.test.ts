@@ -24,6 +24,10 @@ const rs = (() => {
       { op: "resource", resourceId: "rage", uses: 3, recharge: "long_rest" },
       { op: "resourceAction", actionId: "persist", label: "Recupera le Ire", resource: "persistent_rage", cost: 1, variable: false, apply: "none", restore: { resource: "rage", amount: "all" } },
     ] }),
+    F({ id: "double", name: { it: "Doppio dado" }, effects: [
+      { op: "resource", resourceId: "dd", uses: 3, recharge: "short_rest" },
+      { op: "resourceAction", actionId: "two_dice", label: "Due dadi", resource: "dd", cost: 1, count: 2, die: 6, bonus: 1, apply: "heal", variable: false, values: ["8 + pb"], text: "CD {0}" },
+      { op: "resourceAction", actionId: "free", label: "Gratis", resource: "dd", cost: 0, variable: false, apply: "none", bonus: "5 * classLevel:fighter" }] }),
     F({ id: "zealous", name: { it: "Presenza zelante" }, usage: { uses: 1, recharge: "long_rest" }, effects: [
       { op: "resourceAction", actionId: "zealous_again", label: "Ripristina spendendo un'Ira", resource: "rage", cost: 1, variable: false, apply: "none", restore: { resource: "zealous", amount: 1 } },
     ] }),
@@ -79,5 +83,19 @@ describe("azioni di risorsa", () => {
     const z = fighter({ rage: 1, zealous: 1 });
     const rz = runAction(z, d(z), "zealous_again");
     expect(rz.character.state.resourcesUsed).toEqual({ rage: 2 });
+  });
+});
+
+describe("dadi per uso e azioni gratuite", () => {
+  it("count = dadi per ogni uso speso; il testo ha i numeri calcolati", () => {
+    const c = fighter({}, 1);
+    expect(d(c).actions.find((a) => a.id === "two_dice")).toMatchObject({ die: 6, count: 2, text: "CD 11" }); // 8 + competenza 3
+    const r = runAction(c, d(c), "two_dice", undefined, () => 0.5);
+    expect(r).toMatchObject({ ok: true, rolls: [4, 4], total: 9 });
+    expect(r.character.state.hp).toBe(10);
+  });
+  it("un'azione senza costo vale anche a risorsa esaurita", () => {
+    const c = fighter({ dd: 3 });
+    expect(runAction(c, d(c), "free")).toMatchObject({ ok: true, total: 25, spent: 0 });
   });
 });

@@ -39,6 +39,15 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("grantToolProficiency", { tools: z.array(z.string()).min(1) }),
   e("grantArmorTraining", { training: z.array(armorTraining).min(1) }),
   e("saveAdvantage", { abilities: z.array(ability).optional(), against: z.string().optional() }),
+  // Vantaggio / Svantaggio da effetti (Attacco irruento, Istinto ferino, Ira): sugli attacchi, sulle prove (per abilità o per
+  // caratteristica) e sull'Iniziativa. Vantaggio e Svantaggio si annullano come sempre (combineMode).
+  e("attackAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage"), attackType: z.enum(["melee", "ranged", "any"]).default("any") }),
+  e("checkAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage"), skills: z.array(skill).optional(), abilities: z.array(ability).optional() }),
+  e("initiativeAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage") }),
+  // Immunità alle condizioni (Coraggio, Ira senza mente): la condizione non si applica finché l'effetto vale
+  e("conditionImmunity", { conditions: z.array(id).min(1) }),
+  // Promemoria che compare tra le note finché l'effetto vale (reazioni, effetti sugli avversari: non cambiano i numeri)
+  e("note", { text: z.string().min(1) }),
   e("abilityScoreIncrease", {
     abilities: z.array(ability).min(1), amount: z.number().int(), cap: z.number().int().default(20),
   }),

@@ -12,7 +12,7 @@ import { computeGrantedSpells } from "./spells";
 import { computeSlots } from "./slots";
 import { attacksPerAction, computeAttacks } from "./attacks";
 import { analyzeLoadout } from "../equipment/loadout";
-import { computeRolls, untrainedArmor } from "./rolls";
+import { combineMode, computeRolls, untrainedArmor } from "./rolls";
 import { sum, withOverride } from "./sourced";
 import { computeResistances, computeSenses, computeSpeed } from "./speed";
 import type { Derived } from "./types";
@@ -24,7 +24,13 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   const notes: string[] = [];
   const warnings: string[] = [];
   const { scores, mods } = computeScores(x);
-  const cs = resolveConditions(x.ch, x.rs);
+  const cs = resolveConditions(x.ch, x.rs, x.active.flatMap(({ effect: e }) => (e.op === "conditionImmunity" ? e.conditions : [])));
+  // Vantaggio all'Iniziativa dagli effetti (Istinto ferino) e promemoria (`note`)
+  for (const { effect: e, label } of x.active) {
+    if (e.op === "initiativeAdvantage") (e.mode === "advantage" ? cs.rolls.initiative.adv : cs.rolls.initiative.dis).push(label);
+    if (e.op === "note") notes.push(`${e.text} — ${label}`);
+  }
+  cs.initiativeMode = combineMode(cs.rolls.initiative.adv, cs.rolls.initiative.dis);
   const { saves, skills } = computeRolls(x, profs, notes, cs);
 
   const initiative = sum([

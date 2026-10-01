@@ -52,11 +52,12 @@ export function computeRolls(x: Ctx, profs: Profs, notes: string[], cs: Conditio
     if (prof === "proficient") parts.push({ label: "Competenza", value: x.pb });
     if (prof === "expertise") parts.push({ label: "Maestria", value: x.pb * 2 });
     if (prof === "half") parts.push({ label: "Factotum (metà competenza)", value: Math.floor(x.pb / 2) });
+    const adv: string[] = [...cs.rolls.checks.adv], dis: string[] = [...cs.rolls.checks.dis];
     for (const { effect: e, label } of x.active) {
       if (e.op === "checkBonus" && (!e.skills || e.skills.includes(s))) parts.push({ label, value: evalValue(e.value, x) });
+      if (e.op === "checkAdvantage" && (!e.skills || e.skills.includes(s)) && (!e.abilities || e.abilities.includes(ab))) (e.mode === "advantage" ? adv : dis).push(label);
     }
     if (cs.d20Penalty) parts.push({ label: "Esaurimento", value: cs.d20Penalty });
-    const adv: string[] = [...cs.rolls.checks.adv], dis: string[] = [...cs.rolls.checks.dis];
     if (untrained && (ab === "str" || ab === "dex")) dis.push(armorDis);
     if (s === "stealth" && x.bodyArmor?.stealthDisadvantage) dis.push(x.bodyArmor.name.it);
     skills[s] = { bonus: sum(parts), ability: ab, proficiency: prof, ...combineMode(adv, dis) };

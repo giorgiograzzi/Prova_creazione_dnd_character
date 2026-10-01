@@ -64,13 +64,14 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
     const dmgParts: Part[] = [];
     if (!offhand || x.mods[ability] < 0 || feats.has("two_weapon_fighting")) dmgParts.push({ label: `Mod ${AB_IT[ability]}`, value: x.mods[ability] });
     let crit = 20;
+    const adv = [...cs.rolls.attack.adv], dis = [...cs.rolls.attack.dis];
     for (const { effect: e, label } of c2.active) {
+      if (e.op === "attackAdvantage" && (e.attackType === "any" || e.attackType === kind)) (e.mode === "advantage" ? adv : dis).push(label);
       if (e.op === "attackBonus" && (e.attackType === "any" || e.attackType === kind)) parts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "damageBonus" && (e.attackType === "any" || e.attackType === kind)) dmgParts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "critRange") crit = Math.min(crit, e.min);
     }
 
-    const adv = [...cs.rolls.attack.adv], dis = [...cs.rolls.attack.dis];
     if (untrained && (ability === "str" || ability === "dex")) dis.push("Armatura senza addestramento");
     if (w?.properties.includes("heavy") && ((kind === "melee" && x.scores.str < 13) || (kind === "ranged" && x.scores.dex < 13))) dis.push(`Arma Pesante con ${kind === "melee" ? "For" : "Des"} sotto 13`);
     const mode = combineMode(adv, dis);

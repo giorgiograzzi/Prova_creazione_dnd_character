@@ -45,6 +45,7 @@ html, body, #root { height: 100%; margin: 0; }
 /* Fuori dall'app (barra di stato in alto, area del gesto in basso su iPhone) i colori continuano quelli di titolo e tab bar */
 html { background: linear-gradient(to bottom, var(--xp-title-b) 50%, var(--xp-face-dark) 50%) fixed; }
 @media (min-width: 721px) { html { background: var(--xp-desk); } }
+.pl-crumb { margin: 0 0 8px; }
 body { font: 16px/1.4 Tahoma, Verdana, "DejaVu Sans", sans-serif; color: var(--xp-text); background: transparent; overscroll-behavior: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 
@@ -277,6 +278,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .xp-sections { display: flex; background: var(--xp-face-dark); border-top: 2px solid var(--xp-border); padding-bottom: var(--safe-b); }
 .xp-sections button { flex: 1; min-width: 0; min-height: 56px; display: grid; place-items: center; padding: 0; background: transparent; border: 0; border-right: 1px solid #a9a591; cursor: pointer; color: var(--xp-text); }
 .xp-sections button:last-child { border-right: 0; }
+.xp-sections .lbl { display: none; }
 .xp-sections svg { width: 28px; height: 28px; }
 .xp-sections button[aria-current="page"] { background: var(--xp-face); box-shadow: inset 0 4px 0 var(--xp-accent); }
 .xp-sections .back { background: var(--xp-select); color: var(--xp-select-text); }
@@ -311,3 +313,78 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pwa-toast { position: fixed; z-index: 900; left: 12px; right: 12px; bottom: calc(var(--tap) + var(--safe-b) + 16px); max-width: 420px; margin: 0 auto;
   padding: 10px 12px 2px; background: var(--xp-face); color: var(--xp-text, #000); border: 2px solid var(--xp-border); border-radius: 6px; box-shadow: 3px 3px 0 rgba(0,0,0,.35); }
 .pwa-toast p { margin: 0 0 8px; }
+
+/* ===== Form factor =====
+   telefono: < 720px (colonna unica, barra in basso)
+   tablet:   720-1023px (finestra più larga, barra in basso, griglie a più colonne)
+   desktop:  >= 1024px (finestra centrata sul "desktop" blu, navigazione laterale con etichette, contenuto a più colonne)
+   Le dimensioni dei bersagli restano >= 48px anche col mouse: valgono per schermi touch ibridi. */
+
+/* tablet */
+@media (min-width: 720px) {
+  .xp-app { max-width: 960px; border-left: 3px solid var(--xp-border); border-right: 3px solid var(--xp-border); }
+  .xp-body { padding: 16px 20px; }
+  .xp-body h2 { font-size: 22px; }
+  .pl-grid { grid-template-columns: repeat(4, 1fr); }
+  .wz-sum { grid-template-columns: repeat(4, 1fr); }
+  .xp-dialog { max-width: 640px; }
+  .xp-list.cards { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 720px) and (max-width: 1023px) { .pwa-toast { bottom: calc(56px + var(--safe-b) + 16px); } }
+
+/* telefono in orizzontale: poca altezza, la barra del titolo e quella in basso si stringono */
+@media (max-height: 480px) and (orientation: landscape) {
+  :root { --tap: 44px; }
+  .xp-tab, .xp-sections button { min-height: 44px; }
+  .xp-tab span { display: none; }
+  .xp-dialog { max-height: calc(100dvh - 12px); }
+  .xp-overlay { padding-top: 6px; padding-bottom: 6px; }
+}
+
+/* desktop */
+@media (min-width: 1024px) {
+  html { background: radial-gradient(ellipse at 30% 20%, #3a7bf0, var(--xp-desk) 60%, #123a9c); }
+  .xp-app { top: 16px; bottom: 16px; height: auto; max-width: 1440px; width: calc(100% - 64px); border: 3px solid var(--xp-border); border-radius: 10px 10px 4px 4px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.45); display: grid; grid-template-columns: 232px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
+  .xp-title { grid-column: 1 / -1; }
+  .xp-body { grid-column: 2; grid-row: 2; padding: 20px 28px; scrollbar-gutter: stable; }
+  .xp-menu { top: calc(var(--tap) + 4px); right: 12px; }
+  /* la navigazione passa a sinistra, in colonna, con etichette */
+  .xp-tabs, .xp-sections { grid-column: 1; grid-row: 2; flex-direction: column; justify-content: flex-start; gap: 2px; padding: 8px; border-top: 0; border-right: 2px solid var(--xp-border); overflow-y: auto; }
+  .xp-tab, .xp-sections button { flex: none; width: 100%; min-height: var(--tap); flex-direction: row; justify-content: flex-start; gap: 12px; padding: 0 12px; text-align: left; border: 0; border-radius: 4px; font-size: 16px; }
+  .xp-tab:hover, .xp-sections button:hover { background: #e2dfcf; }
+  .xp-tab[aria-selected="true"], .xp-sections button[aria-current="page"] { background: var(--xp-select); color: var(--xp-select-text); box-shadow: none; text-decoration: none; font-weight: 700; }
+  .xp-sections button { display: flex; align-items: center; }
+  .xp-sections .lbl { display: inline; }
+  .xp-sections .back { margin-bottom: 8px; background: var(--xp-face); color: var(--xp-text); border: 2px solid #003c74; border-radius: 6px; }
+  .xp-sections .back:hover { background: #fff; }
+  .xp-btn:hover:not([disabled]), .pl-tile:hover, .pl-tabs button:hover, .wz-opt:hover:not([aria-disabled="true"]) { filter: none; background-color: #f4f2e6; }
+  .xp-btn.primary:hover:not([disabled]) { background: #34821f; }
+  .xp-btn.danger:hover:not([disabled]) { background: #c01818; }
+  .xp-list li:hover:not(.active) { background: #f4f2e6; }
+  .xp-title h1 { font-size: 20px; }
+
+  /* contenuto a più colonne */
+  .pl-grid { grid-template-columns: repeat(6, 1fr); }
+  .wz-sum { grid-template-columns: repeat(6, 1fr); }
+  .xp-dialog { max-width: 720px; }
+  .xp-list.cards { grid-template-columns: repeat(3, 1fr); }
+  .xp-list.cards li { border-right: 1px solid var(--xp-face-dark); }
+  .pwa-toast { left: auto; right: 32px; bottom: 32px; margin: 0; }
+  /* le liste lunghe della scheda scorrono su due colonne */
+  .pl-sheet-stats, .pl-sheet-features, .pl-sheet-attacks, .pl-sheet-magic, .pl-sheet-misc { column-count: 2; column-gap: 24px; }
+  .pl-sheet-stats > *, .pl-sheet-features > *, .pl-sheet-attacks > *, .pl-sheet-magic > *, .pl-sheet-misc > * { break-inside: avoid-column; }
+  .pl-sheet .pl-crumb, .pl-sheet h2 { column-span: all; }
+  .wz-opts.long { max-height: 55dvh; }
+}
+@media (min-width: 1024px) and (max-height: 700px) { .xp-app { top: 0; bottom: 0; border-radius: 0; width: 100%; } }
+
+/* schermi molto grandi: il contenuto non si allarga all'infinito */
+@media (min-width: 1600px) {
+  .xp-app { max-width: 1560px; }
+  .pl-sheet-stats, .pl-sheet-features, .pl-sheet-attacks, .pl-sheet-magic, .pl-sheet-misc { column-count: 3; }
+  .xp-list.cards { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* stampa: solo il contenuto */
+@media print { html { background: #fff; } .xp-app { position: static; width: auto; max-width: none; border: 0; box-shadow: none; display: block; } .xp-title, .xp-tabs, .xp-sections, .pwa-toast { display: none; } .xp-body { overflow: visible; } }

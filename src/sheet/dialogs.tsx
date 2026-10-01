@@ -9,7 +9,7 @@ import { sign } from "./util";
 
 const t = it.play;
 
-const fmtFloor = (f: D20Floor) => (f.on === "die" ? t.floorDie : t.floorTotal).replace("{n}", String(f.min)).replace("{l}", f.label);
+const fmtFloor = (f: D20Floor) => (f.on === "die" ? t.floorDie : f.on === "reroll" ? t.floorReroll : t.floorTotal).replace("{n}", String(f.min)).replace("{l}", f.label);
 
 export function SourceList({ s }: { s: Sourced }) {
   return (

@@ -43,6 +43,7 @@ Corrispondono alle operazioni del file "Modificatori" §6. Ogni effetto ha `when
 - Azioni: `resourceAction` (spende usi, tira dadi, cura / PF temporanei, restituisce usi di un'altra risorsa; `variable` = usi a scelta). Compaiono in `Derived.actions` e nei Privilegi
 - Incantesimi (Lotto 5): `spellModifier` (nota del lancio con numeri; filtro esplicito `cantrip` o `spells`, `{L}`/`{L+2}` = livello dello slot). CA: `acFormula.ignoresArmor` (Forma selvatica)
 - Magia (Lotto 6): `freeCast` (`unlimited` = a volontà), `spellBonus` (`dc`, `attack`, `advantage`), `restore.amount` (numero, `all` o formula), `resource` e `activation.alt` (costo alternativo), `attackRider.pactSlot`, `rollFloor`; `state.extraSlots` (slot creati con i punti) e `state.once`. Fonti di scelta `signaturespells` e `masteryspells`; gli effetti di una scelta seguono la sua `when`
+- Specie (Lotto 7): `rerollOnes` (ritiro di un 1 sul d20; `Derived.d20Reroll` per attacchi e Iniziativa, `RollFloor.on: "reroll"` nelle prove e nei TS). Le azioni di una scelta di specie si legano alla loro risorsa
 - Aure (Lotto 3): `aura` (raggio e testo per gli alleati, mostrati in Stato; con lo stesso `auraId` vale il raggio maggiore). Costo in slot degli extra: `attackRider` con `slotSpell` (+`perSlotLevel` dadi per livello: Punizione divina)
 - Formule: oltre a `pb`, `level`, `classLevel:<classe>`, `mod:<car>`, `score:<car>`, la variabile `speed` (Velocità base della specie)
 

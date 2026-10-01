@@ -54,6 +54,8 @@ export const effectSchema = z.discriminatedUnion("op", [
     rawChecks: z.boolean().default(false), // vale anche per le prove di caratteristica pure
   }),
   // Immunità alle condizioni (Coraggio, Ira senza mente): la condizione non si applica finché l'effetto vale
+  // Fortuna (Halfling): se un d20 di una prova, un TS o un attacco dà 1, lo ritiri e usi il nuovo risultato
+  e("rerollOnes", {}),
   e("conditionImmunity", { conditions: z.array(id).min(1) }),
   // Extra d'attacco (Colpo brutale, Furia, Punizione...): dadi in più sul danno di un attacco, con costo e limite.
   // `auto`: si somma sempre (Colpi radianti); altrimenti compare come opzione sull'attacco ("Applica") e si segna come usata.

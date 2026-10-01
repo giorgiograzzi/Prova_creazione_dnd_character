@@ -4,15 +4,18 @@ export type Rng = () => number;
 const die = (sides: number, rng: Rng) => 1 + Math.floor(rng() * sides);
 
 export interface D20Roll { dice: number[]; natural: number; kept: number; total: number; mode: RollMode; crit: boolean; fumble: boolean; raised?: string }
-export interface D20Floor { min: number; on: "die" | "total"; label: string }
+export interface D20Floor { min: number; on: "die" | "total" | "reroll"; label: string }
 
 // Tiro di d20 con Vantaggio (si tiene il più alto) o Svantaggio (il più basso)
 // floors: minimi del tiro. Sul dado (Talento affidabile) un d20 più basso conta come il minimo; sul totale (Possanza indomita) il totale non scende sotto il minimo.
 export function rollD20(bonus: number, mode: RollMode = "normal", rng: Rng = Math.random, floors: D20Floor[] = []): D20Roll {
-  const dice = mode === "normal" ? [die(20, rng)] : [die(20, rng), die(20, rng)];
+  const luck = floors.find((f) => f.on === "reroll");
+  const raised: string[] = [];
+  // Fortuna: ogni d20 che dà 1 si ritira (il nuovo risultato vale)
+  const roll20 = () => { const r = die(20, rng); if (luck && r === 1) { if (!raised.includes(luck.label)) raised.push(`${luck.label}: ritirato un 1`); return die(20, rng); } return r; };
+  const dice = mode === "normal" ? [roll20()] : [roll20(), roll20()];
   const kept = mode === "advantage" ? Math.max(...dice) : mode === "disadvantage" ? Math.min(...dice) : dice[0]!;
   let used = kept, total = kept + bonus;
-  const raised: string[] = [];
   const die_ = floors.find((f) => f.on === "die"), tot = floors.find((f) => f.on === "total");
   if (die_ && kept < die_.min) { used = die_.min; total = used + bonus; raised.push(die_.label); }
   if (tot && total < tot.min) { total = tot.min; raised.push(tot.label); }

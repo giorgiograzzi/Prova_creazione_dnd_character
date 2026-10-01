@@ -37,8 +37,9 @@ export function computeResources(x: Ctx): Derived["resources"] {
 // Azioni delle risorse (Seconda ripresa...): una per ogni effetto `resourceAction` attivo, con il bonus già calcolato
 export function computeActions(x: Ctx, resources: Derived["resources"]): ResourceActionInfo[] {
   const out: ResourceActionInfo[] = [];
-  for (const { effect: e, featureId } of x.active) {
-    if (e.op !== "resourceAction" || !featureId) continue;
+  for (const { effect: e, featureId: fid } of x.active) {
+    if (e.op !== "resourceAction") continue;
+    const featureId = fid ?? e.resource ?? e.actionId; // le scelte di specie non hanno un tratto: l'azione si lega alla sua risorsa
     out.push({
       id: e.actionId, featureId, label: e.label, ...(e.resource ? { resource: e.resource } : {}), cost: e.cost, variable: e.variable, ...(e.die ? { die: e.die, count: evalValue(e.count ?? 1, x) } : {}),
       bonus: e.bonus === undefined ? 0 : evalValue(e.bonus, x), apply: e.apply,

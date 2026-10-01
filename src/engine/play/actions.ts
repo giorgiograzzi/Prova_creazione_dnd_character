@@ -17,7 +17,7 @@ export function runAction(ch: Character, d: Pick<Derived, "actions" | "resources
   if (a.variable && (units < 1 || units > (r?.remaining ?? 0))) return fail(`Scegli da 1 a ${r?.remaining ?? 0} usi`);
   if (units > 0 && (!a.resource || !r || r.remaining < units)) return fail("Nessun uso rimasto");
   let next = units > 0 && r && a.resource ? useResource(ch, a.resource, r.max.value, units) : ch;
-  let rolls: number[] = [], total = units;
+  let rolls: number[] = [], total = a.variable ? units : 0; // Imposizione delle mani: 1 uso = 1 PF; le altre azioni valgono solo dadi e bonus
   if (a.die) {
     const roll = rollExpr(`${Math.max(1, units) * (a.count ?? 1)}d${a.die}`, rng);
     rolls = roll?.rolls ?? []; total = rolls.reduce((s, v) => s + v, 0);

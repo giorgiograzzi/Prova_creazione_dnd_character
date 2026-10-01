@@ -136,7 +136,7 @@ export function StatusTab({ ch, rs, d, update, onSection }: TabProps & { onSecti
       )}
       {dlg?.kind === "hp" && <HpDialog {...{ ch, update, dead, damage, heal }} onClose={() => setDlg(null)} />}
       {dlg?.kind === "saves" && <SavesDialog {...{ ch, update, dead, dying, stable }} onRollSave={() => setDlg({ kind: "save" })} onClose={() => setDlg(null)} />}
-      {dlg?.kind === "init" && <RollDialog title={t.init} bonus={d.initiative} mode={d.conditions.initiativeMode.mode} modeSources={d.conditions.initiativeMode.modeSources} onClose={() => setDlg(null)} />}
+      {dlg?.kind === "init" && <RollDialog title={t.init} bonus={d.initiative} mode={d.conditions.initiativeMode.mode} modeSources={d.conditions.initiativeMode.modeSources} {...(d.d20Reroll.length ? { floor: d.d20Reroll } : {})} onClose={() => setDlg(null)} />}
       {dlg?.kind === "save" && <DeathSaveDialog onRoll={(n) => { const r = deathSave(ch, n); update(() => r.character); }} onClose={() => setDlg(null)} />}
       {dlg?.kind === "short" && <ShortRest {...{ ch, d, update }} onClose={() => setDlg(null)} />}
       {dlg?.kind === "long" && (

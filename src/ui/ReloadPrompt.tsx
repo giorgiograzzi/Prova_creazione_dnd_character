@@ -12,8 +12,12 @@ export function ReloadPrompt() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_url, registration) {
-      // Controlla periodicamente se c'è un nuovo build
-      if (registration) setInterval(() => void registration.update(), CHECK_INTERVAL_MS);
+      if (!registration) return;
+      const check = () => { registration.update().catch(() => {}); }; // offline: l'errore non conta
+      // Controlla subito, ogni ora e ogni volta che l'app torna in primo piano (un'app installata resta in memoria per giorni e il browser non ricontrolla da solo)
+      check();
+      setInterval(check, CHECK_INTERVAL_MS);
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(); });
     },
   });
 

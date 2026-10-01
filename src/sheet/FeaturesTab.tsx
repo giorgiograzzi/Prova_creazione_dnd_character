@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FeatureInfo } from "../engine/compute/types";
 import { setActive, useResource } from "../engine/play";
 import it from "../i18n/it.json";
@@ -8,6 +8,8 @@ import { ActionButtons } from "./ActionButtons";
 import type { TabProps } from "./types";
 
 const t = it.play.features;
+// Voci di sola scelta (+2/+1 ai punteggi, Dono epico): si fanno al livello, qui non c'è niente da usare
+const HIDDEN = new Set(["ability_score_improvement", "epic_boon"]);
 const KINDS = ["species", "background", "class", "subclass", "feat"] as const;
 
 export function FeaturesTab({ ch, rs, d, update }: TabProps) {
@@ -19,7 +21,11 @@ export function FeaturesTab({ ch, rs, d, update }: TabProps) {
   const [choice, setChoice] = useState("");
   const [error, setError] = useState("");
 
-  const all = d.featureList;
+  const top = useRef<HTMLHeadingElement>(null);
+  // Cambiando filtro o attivando un privilegio la lista cambia altezza e le voci "scappano" fuori schermo: si riporta la vista in cima
+  const toTop = () => requestAnimationFrame(() => top.current?.scrollIntoView({ block: "start" }));
+
+  const all = d.featureList.filter((f) => !HIDDEN.has(f.id));
   const levels = [...new Set(all.map((f) => f.level))].sort((a, b) => a - b);
   const shown = all.filter((f) => (kind === "all" || f.kind === kind) && (level === "all" || f.level === Number(level))
     && (!q || `${f.name} ${f.description}`.toLowerCase().includes(q.toLowerCase())))
@@ -28,23 +34,23 @@ export function FeaturesTab({ ch, rs, d, update }: TabProps) {
   const activate = (f: FeatureInfo, picks: string[] = []) => {
     const r = setActive(ch, rs, d, f.id, true, picks);
     if (!r.ok) { setError(r.errors[0] ?? ""); return; }
-    setError(""); update(() => r.character); setPick(null);
+    setError(""); update(() => r.character); setPick(null); toTop();
   };
-  const end = (f: FeatureInfo) => { const r = setActive(ch, rs, d, f.id, false); update(() => r.character); setError(""); };
+  const end = (f: FeatureInfo) => { const r = setActive(ch, rs, d, f.id, false); update(() => r.character); setError(""); toTop(); };
 
   return (
     <>
-      <h2>{t.title}</h2>
+      <h2 ref={top} style={{ scrollMarginTop: 8 }}>{t.title}</h2>
       {error && <div className="xp-error" role="alert">{error}</div>}
       <div className="pl-tabs" role="group" aria-label={t.kinds.class}>
-        <button type="button" aria-pressed={kind === "all"} onClick={() => setKind("all")}>{t.all}</button>
+        <button type="button" aria-pressed={kind === "all"} onClick={() => { setKind("all"); toTop(); }}>{t.all}</button>
         {KINDS.filter((k) => all.some((f) => f.kind === k)).map((k) => (
-          <button key={k} type="button" aria-pressed={kind === k} onClick={() => setKind(k)}>{t.kinds[k]}</button>
+          <button key={k} type="button" aria-pressed={kind === k} onClick={() => { setKind(k); toTop(); }}>{t.kinds[k]}</button>
         ))}
       </div>
       <div className="pl-row">
         <input className="xp-input" style={{ flex: 1, minWidth: 140 }} type="search" placeholder={t.search} aria-label={t.search} value={q} onChange={(e) => setQ(e.target.value)} />
-        <select className="xp-select" style={{ width: "auto" }} aria-label={t.allLevels} value={level} onChange={(e) => setLevel(e.target.value)}>
+        <select className="xp-select" style={{ width: "auto" }} aria-label={t.allLevels} value={level} onChange={(e) => { setLevel(e.target.value); toTop(); }}>
           <option value="all">{t.allLevels}</option>
           {levels.map((l) => <option key={l} value={l}>{l === 0 ? t.kinds.feat : fmt(t.level, { n: l })}</option>)}
         </select>

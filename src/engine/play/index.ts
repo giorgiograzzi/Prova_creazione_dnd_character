@@ -2,3 +2,4 @@ export * from "./dice";
 export * from "./hp";
 export * from "./rest";
 export * from "./state";
+export * from "./riders";

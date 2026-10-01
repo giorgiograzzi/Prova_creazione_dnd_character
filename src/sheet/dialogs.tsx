@@ -47,11 +47,11 @@ export function RollDialog({ title, bonus, mode, modeSources, note, extra, hint,
 }
 
 // Tiro del danno di un attacco: dadi + bonus, con i dadi raddoppiati sul critico
-export function DamageRoller({ dice, bonus, type, crit }: { dice: string; bonus: number; type: string; crit: boolean }) {
+export function DamageRoller({ dice, bonus, type, crit, onRoll }: { dice: string; bonus: number; type: string; crit: boolean; onRoll?: () => void }) {
   const [res, setRes] = useState<{ total: number; rolls: number[]; crit: boolean } | null>(null);
   const roll = () => {
     const r = rollExpr(dice, Math.random, { crit });
-    if (r) setRes({ total: Math.max(0, r.total + bonus), rolls: r.rolls, crit });
+    if (r) { setRes({ total: Math.max(0, r.total + bonus), rolls: r.rolls, crit }); onRoll?.(); }
   };
   return (
     <div>

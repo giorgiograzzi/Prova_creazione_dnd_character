@@ -36,6 +36,7 @@ export const characterSchema = z.object({
     mounted: z.boolean().optional(),
     pactUsed: int.optional(), concentration: z.string().optional(),
     active: z.record(z.string(), z.array(z.string())).optional(), // privilegi attivati (Ira...): id → scelte fatte all'attivazione
+    once: z.record(z.string(), z.string()).optional(), // extra d'attacco già usati: id → "turn" oppure l'id del privilegio attivo (1 per Ira)
   }),
   overrides: z.record(z.string(), z.number()),
   notes: z.string(),

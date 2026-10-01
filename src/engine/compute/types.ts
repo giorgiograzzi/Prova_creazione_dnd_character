@@ -29,7 +29,14 @@ export interface AttackOption {
   mastery?: { id: string; name: string; active: boolean; dc?: number };
   ammo?: { itemId: string; available: number };
   riders: string[]; // danni extra a parole (Attacco furtivo...)
+  extras: AttackExtra[]; // extra d'attacco applicabili (Colpo brutale...): somma i dadi al danno e segna l'uso
   notes: string[]; // promemoria: Svantaggio a gittata lunga, Ricarica, ecc.
+}
+
+export interface AttackExtra {
+  id: string; label: string; dice: string; bonus: number; type?: string; limit: string; cost?: string; // cost: risorsa di cui si spende 1 uso
+  used: boolean; // già usato (1 per turno / 1 per Ira)
+  text?: string;
 }
 
 export interface LoadoutSummary { handsUsed: number; handsMax: number; body?: string; shield?: string; attuned: number; weight: number; capacity: number; problems: string[] }

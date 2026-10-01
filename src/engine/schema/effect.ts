@@ -46,6 +46,16 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("initiativeAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage") }),
   // Immunità alle condizioni (Coraggio, Ira senza mente): la condizione non si applica finché l'effetto vale
   e("conditionImmunity", { conditions: z.array(id).min(1) }),
+  // Extra d'attacco (Colpo brutale, Furia, Punizione...): dadi in più sul danno di un attacco, con costo e limite.
+  // `auto`: si somma sempre (Colpi radianti); altrimenti compare come opzione sull'attacco ("Applica") e si segna come usata.
+  //   limit: "turn" = 1 volta per turno (si azzera con «Nuovo turno»); un id di privilegio = 1 volta finché è attivo (1 per Ira); "none" = senza limite.
+  //   cost: risorsa di cui si spende 1 uso quando lo applichi.
+  e("attackRider", {
+    riderId: id, label: z.string(), count: value, die: z.number().int().min(2), bonus: value.optional(),
+    damageType: z.string().optional(), // assente = come l'arma
+    attackType: z.enum(["melee", "ranged", "any"]).default("any"),
+    limit: z.string().default("none"), cost: id.optional(), auto: z.boolean().default(false), text: z.string().optional(),
+  }),
   // Promemoria che compare tra le note finché l'effetto vale (reazioni, effetti sugli avversari: non cambiano i numeri)
   e("note", { text: z.string().min(1) }),
   e("abilityScoreIncrease", {

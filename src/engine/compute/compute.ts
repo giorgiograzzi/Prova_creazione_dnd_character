@@ -13,7 +13,7 @@ import { computeGrantedSpells } from "./spells";
 import { computeSlots } from "./slots";
 import { attacksPerAction, computeAttacks } from "./attacks";
 import { analyzeLoadout } from "../equipment/loadout";
-import { combineMode, computeRolls, untrainedArmor } from "./rolls";
+import { combineMode, computeRolls, rerollFloor, untrainedArmor } from "./rolls";
 import { sum, withOverride } from "./sourced";
 import { fillText } from "./text";
 import { computeResistances, computeSenses, computeSpeed } from "./speed";
@@ -80,6 +80,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     proficiencyBonus: { value: x.pb, sources: [{ label: `Livello totale ${x.level}`, value: x.pb }] },
     scores, mods, saves, skills, checks,
     initiative: withOverride(initiative, o.initiative),
+    d20Reroll: rerollFloor(x),
     passivePerception: withOverride(passive, o.passivePerception),
     hp: { ...hp, max: withOverride(hp.max, o["hp.max"]) },
     ac: { ...withOverride(ac, o.ac), formula: ac.formula },

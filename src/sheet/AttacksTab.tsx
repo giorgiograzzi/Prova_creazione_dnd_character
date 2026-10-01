@@ -39,7 +39,7 @@ export function AttacksTab({ ch, rs, d, update }: TabProps) {
 export function AttackRollDialog({ a, rs, ch, resources, update, derived, onClose }: { a: AttackOption; rs: TabProps["rs"]; ch?: Character; resources?: Record<string, ChargeRes>; update?: (fn: (c: Character) => Character) => void; derived?: TabProps["d"]; onClose: () => void }) {
   const charges = resources?.[`item:${a.id}`];
   return (
-    <RollDialog title={`${a.label} — ${t.attackRoll}`} bonus={a.toHit} mode={a.mode} modeSources={a.modeSources} hint={t.attackD20}
+    <RollDialog title={`${a.label} — ${t.attackRoll}`} bonus={a.toHit} mode={a.mode} modeSources={a.modeSources} hint={t.attackD20} {...(derived?.d20Reroll.length ? { floor: derived.d20Reroll } : {})}
       note={[...a.notes, ...a.riders].join(" · ") || undefined} onClose={onClose}
       extra={<>{charges && update && <div style={{ marginTop: 12 }}><h3>{t.charges}</h3><ChargeControls id={`item:${a.id}`} name={a.label} r={charges} update={update} /></div>}<DamageSection a={a} rs={rs} ch={ch} update={update} derived={derived} /></>} />
   );

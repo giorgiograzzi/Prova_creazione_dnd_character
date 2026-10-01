@@ -41,6 +41,9 @@ export const characterSchema = z.object({
   }),
   overrides: z.record(z.string(), z.number()),
   notes: z.string(),
+  companions: z.array(z.object({
+    id: z.string().min(1), name: z.string(), kind: z.string(), hp: int.min(0), hpMax: int.min(0), ac: int.min(0), speed: z.string(), attack: z.string(), notes: z.string(),
+  })).optional(),
   xp: int.min(0).optional(),
   startLevel: int.min(1).max(20).optional(), startingGold: int.min(0).optional(),
   editing: z.boolean().optional(), created: z.boolean().optional(),

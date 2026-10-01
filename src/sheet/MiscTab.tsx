@@ -1,6 +1,7 @@
 import { setCoins, setOverride, OVERRIDE_KEYS } from "../engine/play";
 import it from "../i18n/it.json";
 import { Button } from "../ui/xp";
+import { CompanionsPanel } from "./CompanionsPanel";
 import type { TabProps } from "./types";
 import { num } from "./util";
 
@@ -21,6 +22,7 @@ export function MiscTab({ ch, d, update, onReopen }: TabProps & { onReopen: () =
           </label>
         ))}
       </div>
+      <CompanionsPanel ch={ch} update={update} />
       <h3>{t.notes}</h3>
       <textarea className="xp-input" style={{ minHeight: 160, padding: 8 }} aria-label={t.notes} placeholder={t.notesHelp} value={ch.notes} onChange={(e) => update((c) => ({ ...c, notes: e.target.value }))} />
       <h3>{t.overrides}</h3>

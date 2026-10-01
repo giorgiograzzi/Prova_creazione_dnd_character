@@ -84,9 +84,14 @@ export const LOT1: Record<string, Patch> = {
     ] };
   },
   // ── Albero del mondo ────────────────────────────────────────────────────
-  "world_tree/vitality_of_the_tree": (f) => {
-    f.effects.push(action({ actionId: "vitality_of_the_tree", label: "PF temporanei all'ingresso in Ira", resource: "rage", cost: 0, bonus: "classLevel:barbarian", apply: "tempHp", when: active("rage") }));
+  "world_tree/vitality_of_the_tree": (f, _sub, cls) => {
+    f.effects.push(action({ actionId: "vitality_of_the_tree", label: "PF temporanei all'ingresso in Ira", resource: "rage", cost: 0, bonus: "classLevel:barbarian", apply: "tempHp", when: active("rage"), onActivate: "rage" }));
+    // inizio di ogni turno in Ira: una creatura entro 10 ft riceve tanti d6 quanto il Danno ira (non vanno a te: nessuna applicazione)
+    for (const [from, to, v] of ranges(cls?.table?.danno_ira ?? []))
+      f.effects.push(action({ actionId: "vitality_start_turn", label: "PF temporanei a una creatura (inizio turno)", cost: 0, die: 6, count: Number(v), when: `${active("rage")} && ${lvl("barbarian", from, to)}`,
+        text: "All'inizio di ogni tuo turno in Ira: una creatura entro 10 ft ottiene questi PF temporanei." }));
   },
+
   // ── Zelota ──────────────────────────────────────────────────────────────
   "zealot/divine_fury": (f) => {
     f.effects.push(rider({ riderId: "divine_fury", label: "Furia divina", count: 1, die: 6, bonus: "floor(classLevel:barbarian / 2)", limit: "turn", when: active("rage"),

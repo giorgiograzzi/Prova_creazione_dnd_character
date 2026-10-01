@@ -1,8 +1,9 @@
-import { buildCtx, holds } from "../compute";
+import { buildCtx, computeCharacter, holds } from "../compute";
 import type { Derived } from "../compute";
 import { describeCondition } from "../creation/describe";
 import type { Ruleset } from "../ruleset";
 import type { Character } from "../types";
+import { runAction } from "./actions";
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, Math.floor(n)));
 const set = (ch: Character, s: Partial<Character["state"]>): Character => ({ ...ch, state: { ...ch.state, ...s } });
@@ -57,7 +58,7 @@ export function clearOnce(ch: Character, scope: string): Character {
 
 // Attivare e disattivare un privilegio (Ira, Forma selvatica...). Attivare consuma un uso della risorsa indicata dal privilegio
 // e, se c'è una scelta (aspetto, elemento...), ne richiede una e la salva. Disattivare non restituisce l'uso.
-export function setActive(ch: Character, rs: Ruleset, d: Pick<Derived, "featureList" | "resources">, id: string, on: boolean, picks: string[] = []): { ok: boolean; errors: string[]; character: Character } {
+export function setActive(ch: Character, rs: Ruleset, d: Pick<Derived, "featureList" | "resources">, id: string, on: boolean, picks: string[] = []): { ok: boolean; errors: string[]; character: Character; notes?: string[] } {
   const fail = (e: string) => ({ ok: false, errors: [e], character: ch });
   const f = d.featureList.find((x) => x.id === id);
   if (!f?.activation) return fail("Questo privilegio non si attiva");
@@ -81,5 +82,21 @@ export function setActive(ch: Character, rs: Ruleset, d: Pick<Derived, "featureL
       next = useResource(ch, alt.resource, ar.max.value, alt.cost);
     }
   }
-  return { ok: true, errors: [], character: clearOnce(set(next, { active: { ...(next.state.active ?? {}), [id]: a.options.length ? picks : [] } }), id) };
+  const started = clearOnce(set(next, { active: { ...(next.state.active ?? {}), [id]: a.options.length ? picks : [] } }), id);
+  const { character, notes } = runOnActivate(started, rs, id);
+  return { ok: true, errors: [], character, ...(notes.length ? { notes } : {}) };
+}
+
+// Azioni gratuite che partono da sole quando si attiva un privilegio (PF temporanei dell'Ira del Mondo-albero e della Forma selvatica)
+function runOnActivate(ch: Character, rs: Ruleset, id: string): { character: Character; notes: string[] } {
+  const d = computeCharacter(ch, rs);
+  let next = ch;
+  const notes: string[] = [];
+  for (const a of d.actions.filter((x) => x.onActivate === id && x.cost === 0 && !x.variable)) {
+    const r = runAction(next, d, a.id);
+    if (!r.ok) continue;
+    next = r.character;
+    notes.push(`${a.label}: ${r.total ?? 0}`);
+  }
+  return { character: next, notes };
 }

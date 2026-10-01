@@ -9,6 +9,7 @@ export interface Entry {
   effect: Effect;
   label: string;
   classId?: string; // per risorse a tabella e caratteristica da incantatore: classe proprietaria
+  featureId?: string; // privilegio, tratto o talento che contiene l'effetto (azioni di risorsa)
 }
 
 type ActivationDef = { resource?: string; requires?: string; label?: { it: string }; duration?: string; options?: { id: string; name: { it: string }; description?: string; effects: Effect[] }[] };
@@ -27,7 +28,7 @@ const SKILL_IDS = new Set<string>(SKILLS);
 
 type Picks = (choiceId: string) => string[] | undefined;
 // prefix: chiave delle scelte interne di un talento concesso da una scelta ("asi_fighter_4/"): due acquisizioni non si mescolano
-type Owner = { label: string; classId?: string; picks: Picks; prefix: string };
+type Owner = { label: string; classId?: string; featureId?: string; picks: Picks; prefix: string };
 type Holder = { name: { it: string }; effects: Effect[]; choices: Choice[] } & PlayFields;
 
 const withAbility = (c: Choice, spell: Effect & { op: "grantSpell" }): Effect =>
@@ -82,7 +83,7 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
       const a = o.picks(o.prefix + effect.abilityFrom)?.[0];
       if (a) effect = { ...effect, ability: a as never };
     }
-    out.entries.push(o.classId ? { effect, label: o.label, classId: o.classId } : { effect, label: o.label });
+    out.entries.push({ effect, label: o.label, ...(o.classId ? { classId: o.classId } : {}), ...(o.featureId ? { featureId: o.featureId } : {}) });
     if (effect.op === "grantFeature") out.features.add(effect.feature);
     if (effect.op === "grantFeat") addFeat(effect.feat, undefined, general, effect.via ? `${effect.via}/` : "");
   };
@@ -128,7 +129,7 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
     if (!f?.repeatable) { if (seenFeats.has(id)) return; seenFeats.add(id); }
     out.feats.add(id);
     if (f) {
-      const fo = { label: f.name.it, prefix, picks: instance ? (cid: string) => instance[cid] ?? base(cid) : base };
+      const fo = { label: f.name.it, featureId: f.id, prefix, picks: instance ? (cid: string) => instance[cid] ?? base(cid) : base };
       addHolder(f, fo);
       playOf(f, fo, "feat", f.name.it, 0);
     }
@@ -138,7 +139,7 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
     for (const f of list) {
       if (f.level > lvl) continue;
       out.features.add(f.id);
-      const fo = { ...o, label: `${o.label}: ${f.name.it}` };
+      const fo = { ...o, label: `${o.label}: ${f.name.it}`, featureId: f.id };
       addHolder(f, fo);
       playOf(f, fo, kind, o.label, f.level);
     }

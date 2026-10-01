@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { RollMode } from "../engine/compute/types";
-import { rollD20, rollExpr, useResource, type D20Roll } from "../engine/play";
+import { rollD20, rollExpr, useResource, type D20Floor, type D20Roll } from "../engine/play";
 import type { Character } from "../engine/types";
 import type { Sourced } from "../engine/types";
 import it from "../i18n/it.json";
@@ -8,6 +8,8 @@ import { Button, Dialog, Segmented } from "../ui/xp";
 import { sign } from "./util";
 
 const t = it.play;
+
+const fmtFloor = (f: D20Floor) => (f.on === "die" ? t.floorDie : t.floorTotal).replace("{n}", String(f.min)).replace("{l}", f.label);
 
 export function SourceList({ s }: { s: Sourced }) {
   return (
@@ -18,8 +20,8 @@ export function SourceList({ s }: { s: Sourced }) {
 }
 
 // Tiro di d20: mostra formula, vantaggio/svantaggio (con il motivo), risultato e da dove viene il bonus
-export function RollDialog({ title, bonus, mode, modeSources, note, extra, hint, onClose }: {
-  title: string; bonus: Sourced; mode: RollMode; modeSources: string[]; note?: string; extra?: React.ReactNode; hint?: string; onClose: () => void;
+export function RollDialog({ title, bonus, mode, modeSources, floor, note, extra, hint, onClose }: {
+  title: string; bonus: Sourced; mode: RollMode; modeSources: string[]; floor?: D20Floor[]; note?: string; extra?: React.ReactNode; hint?: string; onClose: () => void;
 }) {
   const [m, setM] = useState<RollMode>(mode);
   const [res, setRes] = useState<D20Roll | null>(null);
@@ -31,11 +33,12 @@ export function RollDialog({ title, bonus, mode, modeSources, note, extra, hint,
         options={(["disadvantage", "normal", "advantage"] as const).map((v) => ({ value: v, label: t.mode[v] }))} />
       {modeSources.length > 0 && <p className="xp-muted">{modeSources.join(" · ")}</p>}
       {note && <p className="xp-muted">{note}</p>}
-      <div className="xp-actions"><Button variant="primary" onClick={() => setRes(rollD20(bonus.value, m))}>{res ? t.rollAgain : t.roll}</Button></div>
+      {floor?.map((f) => <p key={f.on} className="xp-muted">{fmtFloor(f)}</p>)}
+      <div className="xp-actions"><Button variant="primary" onClick={() => setRes(rollD20(bonus.value, m, Math.random, floor))}>{res ? t.rollAgain : t.roll}</Button></div>
       {res && (
         <div className="pl-result" role="status" aria-live="polite">
           <b>{res.total}</b>
-          <span>{t.natural} {res.natural}{res.dice.length > 1 ? ` (${res.dice.join(", ")})` : ""}{res.crit ? " · 20!" : res.fumble ? " · 1" : ""}</span>
+          <span>{t.natural} {res.natural}{res.dice.length > 1 ? ` (${res.dice.join(", ")})` : ""}{res.crit ? " · 20!" : res.fumble ? " · 1" : ""}{res.raised ? ` · ${t.raised.replace("{l}", res.raised)}` : ""}</span>
         </div>
       )}
       {extra}
@@ -47,11 +50,11 @@ export function RollDialog({ title, bonus, mode, modeSources, note, extra, hint,
 }
 
 // Tiro del danno di un attacco: dadi + bonus, con i dadi raddoppiati sul critico
-export function DamageRoller({ dice, bonus, type, crit }: { dice: string; bonus: number; type: string; crit: boolean }) {
+export function DamageRoller({ dice, bonus, type, crit, onRoll }: { dice: string; bonus: number; type: string; crit: boolean; onRoll?: () => void }) {
   const [res, setRes] = useState<{ total: number; rolls: number[]; crit: boolean } | null>(null);
   const roll = () => {
     const r = rollExpr(dice, Math.random, { crit });
-    if (r) setRes({ total: Math.max(0, r.total + bonus), rolls: r.rolls, crit });
+    if (r) { setRes({ total: Math.max(0, r.total + bonus), rolls: r.rolls, crit }); onRoll?.(); }
   };
   return (
     <div>

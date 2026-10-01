@@ -1,6 +1,6 @@
 import { evalValue } from "./formula-eval";
 import type { Ctx } from "./context";
-import type { Derived } from "./types";
+import type { Derived, ResourceActionInfo } from "./types";
 
 // Risorse con ricarica: usi = numero, formula ("pb", "mod:cha") o tabella per livello.
 // La tabella usa il livello della classe proprietaria (o il totale se non di classe).
@@ -28,6 +28,20 @@ export function computeResources(x: Ctx): Derived["resources"] {
     const used = Math.min(x.ch.state.resourcesUsed[id] ?? 0, max);
     const name = x.rs.spells.get(e.spell)?.name.it ?? e.spell;
     out[id] = { max: { value: max, sources: [{ label: `${label} — ${name}`, value: max }] }, used, remaining: max - used, recharge: e.freeCast.recharge };
+  }
+  return out;
+}
+
+// Azioni delle risorse (Seconda ripresa...): una per ogni effetto `resourceAction` attivo, con il bonus già calcolato
+export function computeActions(x: Ctx, resources: Derived["resources"]): ResourceActionInfo[] {
+  const out: ResourceActionInfo[] = [];
+  for (const { effect: e, featureId } of x.active) {
+    if (e.op !== "resourceAction" || !featureId) continue;
+    out.push({
+      id: e.actionId, featureId, label: e.label, resource: e.resource, cost: e.cost, variable: e.variable, ...(e.die ? { die: e.die } : {}),
+      bonus: e.bonus === undefined ? 0 : evalValue(e.bonus, x), apply: e.apply, ...(e.restore ? { restore: e.restore } : {}),
+      ...(e.text ? { text: e.text } : {}), remaining: resources[e.resource]?.remaining ?? 0,
+    });
   }
   return out;
 }

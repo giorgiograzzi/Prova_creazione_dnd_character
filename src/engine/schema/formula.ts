@@ -7,7 +7,7 @@ export type Formula =
   | { t: "fn"; name: "max" | "min" | "floor"; args: Formula[] };
 
 // Variabili ammesse (con eventuale argomento dopo i due punti)
-const VARS = new Set(["pb", "level", "classLevel", "mod", "score"]);
+const VARS = new Set(["pb", "level", "classLevel", "mod", "score", "speed"]); // speed = Velocità base (a piedi) della specie
 const TOKEN = /\s*(\d+|[a-zA-Z_]+(?::[a-z_]+)?|[-+*/(),])/y;
 
 export function parseFormula(src: string): Formula {

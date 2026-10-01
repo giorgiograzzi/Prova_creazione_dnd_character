@@ -7,12 +7,12 @@ import { buildCtx } from "./context";
 import { evalValue } from "./formula-eval";
 import { computeHp } from "./hp";
 import { computeProfs } from "./proficiencies";
-import { computeResources } from "./resources";
+import { computeActions, computeResources } from "./resources";
 import { computeGrantedSpells } from "./spells";
 import { computeSlots } from "./slots";
 import { attacksPerAction, computeAttacks } from "./attacks";
 import { analyzeLoadout } from "../equipment/loadout";
-import { computeRolls, untrainedArmor } from "./rolls";
+import { combineMode, computeRolls, untrainedArmor } from "./rolls";
 import { sum, withOverride } from "./sourced";
 import { computeResistances, computeSenses, computeSpeed } from "./speed";
 import type { Derived } from "./types";
@@ -24,8 +24,14 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   const notes: string[] = [];
   const warnings: string[] = [];
   const { scores, mods } = computeScores(x);
-  const cs = resolveConditions(x.ch, x.rs);
-  const { saves, skills } = computeRolls(x, profs, notes, cs);
+  const cs = resolveConditions(x.ch, x.rs, x.active.flatMap(({ effect: e }) => (e.op === "conditionImmunity" ? e.conditions : [])));
+  // Vantaggio all'Iniziativa dagli effetti (Istinto ferino) e promemoria (`note`)
+  for (const { effect: e, label } of x.active) {
+    if (e.op === "initiativeAdvantage") (e.mode === "advantage" ? cs.rolls.initiative.adv : cs.rolls.initiative.dis).push(label);
+    if (e.op === "note") notes.push(`${e.text} — ${label}`);
+  }
+  cs.initiativeMode = combineMode(cs.rolls.initiative.adv, cs.rolls.initiative.dis);
+  const { saves, skills, checks } = computeRolls(x, profs, notes, cs);
 
   const initiative = sum([
     { label: "Mod Des", value: x.mods.dex },
@@ -43,6 +49,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   const ac = computeAc(x, profs, warnings);
   const speed = applyConditionSpeed(computeSpeed(x), cs);
   const hp = computeHp(x);
+  const resources = computeResources(x);
   const o = ch.overrides;
   const spellcasting = ch.classes.flatMap((c) => {
     const cdef = rs.classes.get(c.classId);
@@ -60,7 +67,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   return {
     level: x.level,
     proficiencyBonus: { value: x.pb, sources: [{ label: `Livello totale ${x.level}`, value: x.pb }] },
-    scores, mods, saves, skills,
+    scores, mods, saves, skills, checks,
     initiative: withOverride(initiative, o.initiative),
     passivePerception: withOverride(passive, o.passivePerception),
     hp: { ...hp, max: withOverride(hp.max, o["hp.max"]) },
@@ -68,7 +75,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     speed: { ...speed, walk: withOverride(speed.walk, o["speed.walk"]) },
     senses: computeSenses(x),
     resistances: cs.resistAll.length ? [...new Set([...computeResistances(x), "all"])].sort() : computeResistances(x),
-    resources: computeResources(x),
+    resources, actions: computeActions(x, resources),
     spellcasting,
     grantedSpells: computeGrantedSpells(x),
     spellSlots: computeSlots(ch, rs),

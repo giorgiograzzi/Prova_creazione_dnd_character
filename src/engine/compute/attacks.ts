@@ -6,7 +6,7 @@ import { combineMode } from "./rolls";
 import { evalValue } from "./formula-eval";
 import type { Profs } from "./proficiencies";
 import { sum, type Part } from "./sourced";
-import type { AttackOption, ConditionState } from "./types";
+import type { AttackExtra, AttackOption, ConditionState } from "./types";
 
 const AB_IT: Record<Ability, string> = { str: "For", dex: "Des", con: "Cos", int: "Int", wis: "Sag", cha: "Car" };
 const sign = (n: number) => (n >= 0 ? `+ ${n}` : `- ${-n}`);
@@ -64,13 +64,23 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
     const dmgParts: Part[] = [];
     if (!offhand || x.mods[ability] < 0 || feats.has("two_weapon_fighting")) dmgParts.push({ label: `Mod ${AB_IT[ability]}`, value: x.mods[ability] });
     let crit = 20;
+    const extras: AttackExtra[] = [], autoDice: string[] = [];
+    const adv = [...cs.rolls.attack.adv], dis = [...cs.rolls.attack.dis];
     for (const { effect: e, label } of c2.active) {
+      if (e.op === "attackAdvantage" && (e.attackType === "any" || e.attackType === kind)) (e.mode === "advantage" ? adv : dis).push(label);
       if (e.op === "attackBonus" && (e.attackType === "any" || e.attackType === kind)) parts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "damageBonus" && (e.attackType === "any" || e.attackType === kind)) dmgParts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "critRange") crit = Math.min(crit, e.min);
+      if (e.op === "attackRider" && (e.attackType === "any" || e.attackType === kind)) {
+        const dice = `${evalValue(e.count, c2)}d${e.die}`, bonus = e.bonus === undefined ? 0 : evalValue(e.bonus, c2);
+        if (e.auto) { autoDice.push(dice); if (bonus) dmgParts.push({ label: `${e.label} (${label})`, value: bonus }); continue; }
+        extras.push({
+          id: e.riderId, label: e.label, dice, bonus, ...(e.damageType ? { type: e.damageType } : {}), limit: e.limit,
+          ...(e.cost ? { cost: e.cost } : {}), used: !!x.ch.state.once?.[e.riderId], ...(e.text ? { text: e.text } : {}),
+        });
+      }
     }
 
-    const adv = [...cs.rolls.attack.adv], dis = [...cs.rolls.attack.dis];
     if (untrained && (ability === "str" || ability === "dex")) dis.push("Armatura senza addestramento");
     if (w?.properties.includes("heavy") && ((kind === "melee" && x.scores.str < 13) || (kind === "ranged" && x.scores.dex < 13))) dis.push(`Arma Pesante con ${kind === "melee" ? "For" : "Des"} sotto 13`);
     const mode = combineMode(adv, dis);
@@ -84,6 +94,7 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
       if (feats.has("unarmed_fighting")) opts2.push(load.wielded.length === 0 && !x.shield ? "1d8" : "1d6");
       dice = opts2.reduce((b, d) => (avg(d) > avg(b) ? d : b));
     }
+    if (autoDice.length) dice = `${dice}+${autoDice.join("+")}`;
     const bonus = sum(dmgParts.length ? dmgParts : [{ label: "Nessun bonus", value: 0 }]);
     const dmgType = rs.damageTypes.get(type)?.name.it ?? type;
 
@@ -119,7 +130,7 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
       ability, abilityWhy: why, proficient, toHit: sum(parts), ...mode,
       damage: { dice, bonus, type, text: `${dice} ${sign(bonus.value)} ${dmgType}` },
       critRange: crit, reach: w?.properties.includes("reach") ? 10 : 5, ...(range ? { range } : {}),
-      ...(mastery ? { mastery } : {}), ...(ammo ? { ammo } : {}), riders, notes,
+      ...(mastery ? { mastery } : {}), ...(ammo ? { ammo } : {}), riders, extras, notes,
     };
   };
 

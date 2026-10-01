@@ -39,6 +39,44 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("grantToolProficiency", { tools: z.array(z.string()).min(1) }),
   e("grantArmorTraining", { training: z.array(armorTraining).min(1) }),
   e("saveAdvantage", { abilities: z.array(ability).optional(), against: z.string().optional() }),
+  // Vantaggio / Svantaggio da effetti (Attacco irruento, Istinto ferino, Ira): sugli attacchi, sulle prove (per abilità o per
+  // caratteristica) e sull'Iniziativa. Vantaggio e Svantaggio si annullano come sempre (combineMode).
+  e("attackAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage"), attackType: z.enum(["melee", "ranged", "any"]).default("any") }),
+  e("checkAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage"), skills: z.array(skill).optional(), abilities: z.array(ability).optional() }),
+  e("initiativeAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage") }),
+  // Modificatori al d20: metà competenza alle prove senza competenza (Jolly, Atleta straordinario) e minimo al tiro
+  // (Talento affidabile: sul dado, 10; Possanza indomita: sul totale, il punteggio di Forza).
+  e("halfProficiency", { abilities: z.array(ability).optional() }),
+  e("rollFloor", {
+    min: value, on: z.enum(["die", "total"]), skills: z.array(skill).optional(), abilities: z.array(ability).optional(),
+    proficientOnly: z.boolean().default(false), // solo nelle abilità in cui sei competente
+    saves: z.boolean().default(false), // vale anche per i tiri salvezza di quelle caratteristiche
+    rawChecks: z.boolean().default(false), // vale anche per le prove di caratteristica pure
+  }),
+  // Immunità alle condizioni (Coraggio, Ira senza mente): la condizione non si applica finché l'effetto vale
+  e("conditionImmunity", { conditions: z.array(id).min(1) }),
+  // Extra d'attacco (Colpo brutale, Furia, Punizione...): dadi in più sul danno di un attacco, con costo e limite.
+  // `auto`: si somma sempre (Colpi radianti); altrimenti compare come opzione sull'attacco ("Applica") e si segna come usata.
+  //   limit: "turn" = 1 volta per turno (si azzera con «Nuovo turno»); un id di privilegio = 1 volta finché è attivo (1 per Ira); "none" = senza limite.
+  //   cost: risorsa di cui si spende 1 uso quando lo applichi.
+  e("attackRider", {
+    riderId: id, label: z.string(), count: value, die: z.number().int().min(2), bonus: value.optional(),
+    damageType: z.string().optional(), // assente = come l'arma
+    attackType: z.enum(["melee", "ranged", "any"]).default("any"),
+    limit: z.string().default("none"), cost: id.optional(), auto: z.boolean().default(false), text: z.string().optional(),
+  }),
+  // Azione di una risorsa (Seconda ripresa, Imposizione delle mani, Ira persistente...): spende usi di `resource`, tira dadi
+  // (die per ogni uso speso, più `bonus` una volta), applica cure o PF temporanei e può restituire usi di un'altra risorsa.
+  //   variable: spendi da 1 a tutti gli usi rimasti (Imposizione delle mani: ogni uso è 1 PF). Senza `die`, il totale è il numero di usi spesi.
+  e("resourceAction", {
+    actionId: id, label: z.string(), resource: id, cost: z.number().int().min(0).default(1), variable: z.boolean().default(false),
+    die: z.number().int().min(2).optional(), bonus: value.optional(),
+    apply: z.enum(["heal", "tempHp", "none"]).default("none"),
+    restore: z.object({ resource: id, amount: z.union([z.number().int().min(1), z.literal("all")]) }).optional(),
+    text: z.string().optional(),
+  }),
+  // Promemoria che compare tra le note finché l'effetto vale (reazioni, effetti sugli avversari: non cambiano i numeri)
+  e("note", { text: z.string().min(1) }),
   e("abilityScoreIncrease", {
     abilities: z.array(ability).min(1), amount: z.number().int(), cap: z.number().int().default(20),
   }),

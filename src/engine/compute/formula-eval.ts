@@ -5,6 +5,7 @@ export interface FormulaCtx {
   level: number;
   classLevels: Record<string, number>;
   scores: Record<Ability, number>;
+  baseSpeed?: number; // Velocità base della specie (variabile `speed`: «volare pari alla Velocità»)
 }
 
 export const abilityMod = (score: number) => Math.floor((score - 10) / 2);
@@ -15,6 +16,7 @@ export function evalFormulaNode(f: Formula, c: FormulaCtx): number {
     case "var": {
       if (f.name === "pb") return c.pb;
       if (f.name === "level") return c.level;
+      if (f.name === "speed") return c.baseSpeed ?? 30;
       if (f.name === "classLevel") return c.classLevels[f.arg ?? ""] ?? 0;
       const sc = c.scores[f.arg as Ability];
       if (sc === undefined) throw new Error(`Caratteristica sconosciuta "${f.arg}"`);

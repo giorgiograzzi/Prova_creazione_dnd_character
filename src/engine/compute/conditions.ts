@@ -18,7 +18,7 @@ const uniq = <T>(a: T[]) => [...new Set(a)];
 //  - Vantaggio e Svantaggio sullo stesso tiro si annullano (combineMode);
 //  - Esaurimento è a livelli (state.exhaustion, 0-6).
 // Gli effetti con `when`/`unless` (fonte in vista, attaccante entro 5 ft...) non sono calcolabili: vanno in `situational`.
-export function resolveConditions(ch: Character, rs: Ruleset): ConditionState {
+export function resolveConditions(ch: Character, rs: Ruleset, extraImmune: string[] = []): ConditionState {
   const level = Math.max(0, Math.min(6, Math.floor(ch.state.exhaustion)));
   const seed = ch.state.conditions.filter((c) => c !== "exhaustion");
   if (level > 0) seed.push("exhaustion");
@@ -31,7 +31,7 @@ export function resolveConditions(ch: Character, rs: Ruleset): ConditionState {
   };
   seed.forEach(visit);
 
-  const immune = new Set<string>();
+  const immune = new Set<string>(extraImmune); // immunità dei privilegi (Coraggio, Ira senza mente) + quelle delle condizioni
   for (const id of active) for (const e of rs.conditions.get(id)!.effects) if (e.type === "condition_immunity") e.conditions?.forEach((c) => immune.add(c));
   const blocked = [...immune].filter((c) => active.delete(c));
 

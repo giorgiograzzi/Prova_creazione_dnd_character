@@ -89,6 +89,6 @@ export function buildCtx(ch: Character, rs: Ruleset, weapon?: Weapon, hand?: { t
   const active = collected.entries.filter((e) => holds(e.effect.when, full));
   return {
     ...full, ch, rs, collected, active, mods, parts,
-    pb: proficiencyByLevel(totalLevel), level: totalLevel,
+    pb: proficiencyByLevel(totalLevel), level: totalLevel, baseSpeed: rs.species.get(ch.speciesId)?.speed ?? 30,
   };
 }

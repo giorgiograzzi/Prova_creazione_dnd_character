@@ -3,7 +3,8 @@ import type { Sourced } from "../types";
 
 export type Skill = (typeof SKILLS)[number];
 export type RollMode = "advantage" | "disadvantage" | "normal";
-export interface Roll { bonus: Sourced; mode: RollMode; modeSources: string[] }
+export interface RollFloor { min: number; on: "die" | "total"; label: string }
+export interface Roll { bonus: Sourced; mode: RollMode; modeSources: string[]; floor?: RollFloor[] }
 export type Proficiency = "none" | "half" | "proficient" | "expertise";
 
 export interface GrantedSpell {
@@ -29,7 +30,21 @@ export interface AttackOption {
   mastery?: { id: string; name: string; active: boolean; dc?: number };
   ammo?: { itemId: string; available: number };
   riders: string[]; // danni extra a parole (Attacco furtivo...)
+  extras: AttackExtra[]; // extra d'attacco applicabili (Colpo brutale...): somma i dadi al danno e segna l'uso
   notes: string[]; // promemoria: Svantaggio a gittata lunga, Ricarica, ecc.
+}
+
+export interface AttackExtra {
+  id: string; label: string; dice: string; bonus: number; type?: string; limit: string; cost?: string; // cost: risorsa di cui si spende 1 uso
+  used: boolean; // già usato (1 per turno / 1 per Ira)
+  text?: string;
+}
+
+// Azione di una risorsa (Seconda ripresa...): vedi l'op `resourceAction`
+export interface ResourceActionInfo {
+  id: string; featureId: string; label: string; resource: string; cost: number; variable: boolean; die?: number; bonus: number;
+  apply: "heal" | "tempHp" | "none"; restore?: { resource: string; amount: number | "all" }; text?: string;
+  remaining: number; // usi rimasti della risorsa che si spende
 }
 
 export interface LoadoutSummary { handsUsed: number; handsMax: number; body?: string; shield?: string; attuned: number; weight: number; capacity: number; problems: string[] }
@@ -77,6 +92,7 @@ export interface Derived {
   mods: Record<Ability, Sourced>;
   saves: Record<Ability, Roll & { proficient: boolean; autoFail: string[] }>;
   skills: Record<Skill, Roll & { ability: Ability; proficiency: Proficiency }>;
+  checks: Record<Ability, { mode: RollMode; modeSources: string[]; floor?: RollFloor[] }>; // prove di caratteristica pure
   initiative: Sourced;
   passivePerception: Sourced;
   hp: { max: Sourced; hitDice: { die: number; total: number }[]; hitDiceRemaining: number };
@@ -90,6 +106,7 @@ export interface Derived {
   // Slot per livello (indice 0 = 1°): totale, spesi, rimasti; Warlock: slot del patto a parte
   spellSlots: { casterLevel: number; slots: number[]; used: number[]; remaining: number[]; pact?: { count: number; level: number; used: number; remaining: number } };
   spellcasting: { classId: string; ability: Ability; dc: Sourced; attack: Sourced }[];
+  actions: ResourceActionInfo[]; // azioni delle risorse (cura, recuperi...)
   carryCapacity: number;
   proficiencies: { weapons: string[]; tools: string[]; armor: string[] };
   languages: string[];

@@ -300,7 +300,7 @@
     "auras": { "title": "Aure", "help": "L'effetto su di te è già nei numeri; qui c'è quello per gli alleati entro il raggio (l'aura si ferma se sei Incapacitato).", "radius": "{n} ft" },
     "newTurn": "Nuovo turno",
     "newTurnHelp": "Azzera gli extra «1 volta per turno». Non c'è un tracciamento automatico dei turni: lo premi tu.",
-    "extrasTitle": "Extra al colpo",
+    "extrasTitle": "Extra al colpo", "typeChoose": "Tipo di danno per", "mark": { "title": "Creatura marcata", "name": "Nome della creatura marcata", "against": "Questo attacco è contro {n}", "theMarked": "la creatura marcata" }, "forgoTitle": "Rinuncia a dadi per un effetto (al massimo {n})", "forgoDice": "{n} dadi", "typesBreakdown": "Tipi degli extra",
     "extraLimit": { "turn": "1 volta per turno", "none": "", "other": "1 volta per attivazione" },
     "extraUsed": "già usato",
     "slotFree": "Lancio gratuito",

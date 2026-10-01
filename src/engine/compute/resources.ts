@@ -56,5 +56,5 @@ export function computeActions(x: Ctx, resources: Derived["resources"]): Resourc
 // Modificatori degli incantesimi: testo con i numeri già calcolati (il livello dello slot si mette al lancio)
 export function computeSpellMods(x: Ctx): SpellModInfo[] {
   return x.active.flatMap(({ effect: e }) => (e.op === "spellModifier"
-    ? [{ label: e.label, text: fillText(e.text, e.values, x), ...(e.metamagic ? { metamagic: e.metamagic } : {}), cantrip: e.cantrip, ...(e.all ? { all: true } : {}), ...(e.school ? { school: e.school } : {}), ...(e.spells ? { spells: e.spells } : {}), ...(e.minLevel ? { minLevel: e.minLevel } : {}) }] : []));
+    ? [{ label: e.label, text: fillText(e.text, e.values, x), ...(e.metamagic ? { metamagic: e.metamagic } : {}), ...(e.damageType ? { damageType: e.damageType } : {}), cantrip: e.cantrip, ...(e.all ? { all: true } : {}), ...(e.school ? { school: e.school } : {}), ...(e.spells ? { spells: e.spells } : {}), ...(e.minLevel ? { minLevel: e.minLevel } : {}) }] : []));
 }

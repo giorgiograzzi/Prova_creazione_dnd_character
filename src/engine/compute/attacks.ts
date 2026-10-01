@@ -66,9 +66,9 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
     if (!offhand || x.mods[ability] < 0 || feats.has("two_weapon_fighting")) dmgParts.push({ label: `Mod ${AB_IT[ability]}`, value: x.mods[ability] });
     let crit = 20, dieFloor = 0;
     const extras: AttackExtra[] = [], autoDice: string[] = [];
-    const adv = [...cs.rolls.attack.adv], dis = [...cs.rolls.attack.dis];
+    const adv = [...cs.rolls.attack.adv], dis = [...cs.rolls.attack.dis], advMarked: string[] = [];
     for (const { effect: e, label } of c2.active) {
-      if (e.op === "attackAdvantage" && (e.attackType === "any" || e.attackType === kind)) (e.mode === "advantage" ? adv : dis).push(label);
+      if (e.op === "attackAdvantage" && (e.attackType === "any" || e.attackType === kind)) (e.vsMarked ? advMarked : e.mode === "advantage" ? adv : dis).push(label);
       if (e.op === "attackBonus" && (e.attackType === "any" || e.attackType === kind)) parts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "damageBonus" && (e.attackType === "any" || e.attackType === kind)) dmgParts.push({ label, value: evalValue(e.value, c2) });
       if (e.op === "critRange") crit = Math.min(crit, e.min);
@@ -77,12 +77,20 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
         const dice = e.die ? `${evalValue(e.count, c2)}d${e.die}` : "", bonus = e.bonus === undefined ? 0 : evalValue(e.bonus, c2);
         if (e.auto) { if (dice) autoDice.push(dice); if (bonus) dmgParts.push({ label: `${e.label} (${label})`, value: bonus }); continue; }
         extras.push({
-          id: e.riderId, label: e.label, dice, bonus, ...(e.damageType ? { type: e.damageType } : {}), limit: e.limit,
+          id: e.riderId, label: e.label, dice, bonus, ...(e.damageType ? { type: e.damageType } : {}), ...(e.damageTypes ? { types: e.damageTypes } : {}), ...(e.vsMarked ? { vsMarked: true } : {}), limit: e.limit,
           ...(e.cost ? { cost: e.cost, costAmount: e.costAmount } : {}),
           ...(e.slotSpell ? { slotSpell: e.slotSpell, baseLevel: rs.spells.get(e.slotSpell)?.level ?? 1, perSlotLevel: e.perSlotLevel } : {}),
           ...(e.pactSlot ? { pactSlot: true, baseLevel: 0, perSlotLevel: e.perSlotLevel } : {}), used: !!x.ch.state.once?.[e.riderId], ...(e.text ? { text: fillText(e.text, e.values, c2) } : {}),
         });
       }
+    }
+
+    // Effetti a cui si rinuncia ai dadi dell'extra (Colpo astuto): opzioni e quanti insieme
+    for (const x of extras) {
+      const opts = c2.active.flatMap(({ effect: e }) => (e.op === "forgoOption" && e.riderId === x.id ? [{ id: e.optionId, label: e.label, dice: e.dice, ...(e.text ? { text: fillText(e.text, e.values, c2) } : {}) }] : []));
+      if (!opts.length) continue;
+      x.forgo = opts;
+      x.forgoMax = Math.max(1, ...c2.active.flatMap(({ effect: e }) => (e.op === "forgoLimit" && e.riderId === x.id ? [e.max] : [])));
     }
 
     if (untrained && (ability === "str" || ability === "dex")) dis.push("Armatura senza addestramento");
@@ -126,7 +134,7 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
     const label = !w ? "Colpo senz'armi" : `${w.name.it}${thrown ? " (lanciata)" : ""}${offhand ? " (mano secondaria)" : hands === 2 && w.properties.includes("versatile") ? " (due mani)" : ""}`;
     return {
       id: wf?.entry.itemId ?? "unarmed", ...(w ? { weaponId: w.id } : {}), label, kind, thrown, offhand, hands: hands as 0 | 1 | 2,
-      ability, abilityWhy: why, proficient, toHit: sum(parts), ...mode,
+      ability, abilityWhy: why, proficient, toHit: sum(parts), ...mode, ...(advMarked.length ? { markedMode: combineMode([...adv, ...advMarked], dis) } : {}),
       damage: { dice, bonus, type, text: `${dice} ${sign(bonus.value)} ${dmgType}` },
       critRange: crit, ...(dieFloor ? { dieFloor } : {}), reach: w?.properties.includes("reach") ? 10 : 5, ...(range ? { range } : {}),
       ...(mastery ? { mastery } : {}), ...(ammo ? { ammo } : {}), riders, extras, notes,

@@ -75,7 +75,7 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 3: Paladino e Ranger 
       const c = on(mk("paladin", 3, "devotion"), "sacred_weapon");
       expect(c.state.resourcesUsed.channel_divinity).toBe(1);
       expect(sword(c).toHit.value - base).toBe(3);
-      expect(sword(on(mk("paladin", 3, "vengeance"), "vow_of_enmity")).mode).toBe("advantage");
+      expect(sword(on(mk("paladin", 3, "vengeance"), "vow_of_enmity")).markedMode?.mode).toBe("advantage"); // solo contro la creatura del Voto
       const g = D(on(mk("paladin", 3, "glory"), "peerless_athlete"));
       expect(g.skills.athletics.mode).toBe("advantage");
       expect(g.skills.acrobatics.mode).toBe("advantage");
@@ -102,10 +102,11 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 3: Paladino e Ranger 
       expect(ex(sword(conc(mk("ranger", 20), "hunters_mark")), "hunters_mark")).toMatchObject({ dice: "1d10" });
       expect(ex(sword(conc(mk("ranger", 5), "bless")), "hunters_mark")).toBeUndefined();
     });
-    it("Cacciatore preciso: Vantaggio mentre il Marchio è attivo, dal 17°", () => {
-      expect(sword(conc(mk("ranger", 17), "hunters_mark")).mode).toBe("advantage");
-      expect(sword(mk("ranger", 17)).mode).toBe("normal");
-      expect(sword(conc(mk("ranger", 16), "hunters_mark")).mode).toBe("normal");
+    it("Cacciatore preciso: Vantaggio contro la creatura marcata mentre il Marchio è attivo, dal 17°", () => {
+      expect(sword(conc(mk("ranger", 17), "hunters_mark")).markedMode?.mode).toBe("advantage");
+      expect(sword(conc(mk("ranger", 17), "hunters_mark")).mode).toBe("normal"); // contro le altre creature no
+      expect(sword(mk("ranger", 17)).markedMode).toBeUndefined();
+      expect(sword(conc(mk("ranger", 16), "hunters_mark")).markedMode).toBeUndefined();
     });
     it("Vagabondo: scalata e nuoto pari alla Velocità dal 6°; Instancabile dà PF temporanei 1d8 + Sag", () => {
       expect(D(mk("ranger", 6)).speed.climb.value).toBe(30);

@@ -8,6 +8,15 @@ const reminder = (riderId: string, label: string, text: string, when: string, li
 
 export const LOT4: Record<string, Patch> = Object.fromEntries([
   feat("savage_attacker", (f) => { f.effects.push(reminder("savage_attacker", "Attaccante selvaggio", "Colpendo con un'arma: tira due volte i dadi di danno dell'arma e usa uno dei due risultati.", "!unarmed")); }),
+  // Adepto elementale: per il tipo scelto, nota al lancio degli incantesimi che infliggono quel tipo (1 sui dadi conta 2; ignori la resistenza)
+  feat("elemental_adept", (f) => {
+    const choice = (f.choices ?? []).find((c: Record<string, any>) => c.id === "elemental_adept_type");
+    if (!choice) throw new Error("Scelta elemental_adept_type non trovata");
+    for (const o of choice.options as Record<string, any>[]) {
+      (o.effects ??= []).push({ op: "spellModifier", label: "Adepto elementale", cantrip: false, damageType: o.id,
+        text: "ignori la resistenza a questo tipo e sui dadi di danno di questo tipo gli 1 contano come 2" });
+    }
+  }),
   feat("charger", (f) => {
     f.effects.push(rider({ riderId: "charger", label: "Caricatore", count: 1, die: 8, limit: "turn", when: "attackType:melee",
       text: "Se ti sei mosso di almeno 10 ft in linea retta verso il bersaglio: +1d8 danni oppure lo spingi di 10 ft." }));

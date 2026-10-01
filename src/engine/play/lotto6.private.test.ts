@@ -53,7 +53,10 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 6: Stregone, Mago e W
     it("Draconica: Affinità elementale con resistenza e bonus Car; Ali di drago anche con 3 punti", () => {
       const c = mk("sorcerer", 6, "draconic", { decisions: { draconic_affinity: ["affinity_fire"] } });
       expect(D(c).resistances).toContain("fire");
-      expect(spellModNotes(D(c).spellMods, { id: "fireball", level: 3 }, 3)).toEqual(["Affinità elementale: se infligge danni da fuoco: +3 a un tiro di danno"]);
+      expect(spellModNotes(D(c).spellMods, R.spells.get("fireball")!, 3)).toEqual(["Affinità elementale: se infligge danni da fuoco: +3 a un tiro di danno"]);
+      // solo sugli incantesimi che infliggono quel tipo (prima compariva su tutti)
+      expect(spellModNotes(D(c).spellMods, R.spells.get("cone_of_cold")!, 5)).toEqual([]);
+      expect(spellModNotes(D(c).spellMods, R.spells.get("shield")!, 1)).toEqual([]);
       const out = mk("sorcerer", 14, "draconic", { state: { ...emptyCharacter("t").state, resourcesUsed: { dragon_wings: 1 } } });
       const r = setActive(out, R, D(out), "dragon_wings", true);
       expect(r.ok, r.errors.join()).toBe(true);

@@ -34,7 +34,7 @@ export const characterSchema = z.object({
     conditions: z.array(z.string()), exhaustion: int, inspiration: z.boolean(),
     conditionSources: z.record(z.string(), z.string()).optional(),
     mounted: z.boolean().optional(),
-    pactUsed: int.optional(), concentration: z.string().optional(),
+    pactUsed: int.optional(), concentration: z.string().optional(), markedTarget: z.string().max(80).optional(),
     active: z.record(z.string(), z.array(z.string())).optional(), // privilegi attivati (Ira...): id → scelte fatte all'attivazione
     once: z.record(z.string(), z.string()).optional(),
     extraSlots: z.record(z.string(), z.number().int().min(0)).optional(), // slot creati con i punti stregoneria: livello → numero (spariscono al Riposo Lungo) // extra d'attacco già usati: id → "turn" oppure l'id del privilegio attivo (1 per Ira)

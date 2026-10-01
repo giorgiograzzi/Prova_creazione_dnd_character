@@ -14,6 +14,9 @@ const perDie = (f: Json, col: (number | string)[], cls: string, make: (die: numb
   for (const [from, to, v] of ranges(col)) f.effects.push({ ...make(dieOf(v)), when: lvl(cls, from, to) });
 };
 
+// Un effetto di Colpo astuto: costa `dice` d6 dell'Attacco furtivo
+const forgo = (optionId: string, label: string, dice: number, extra: Json = {}): Json => ({ op: "forgoOption", riderId: "sneak_attack", optionId, label, dice, ...extra });
+
 export const LOT2: Record<string, Patch> = {
   // ── Ladro ───────────────────────────────────────────────────────────────
   // Attacco furtivo: dadi dalla colonna della tabella; arma Accurata o a distanza (due condizioni, il `when` non ha parentesi)
@@ -26,6 +29,25 @@ export const LOT2: Record<string, Patch> = {
         rider({ ...common, when: `weaponProperty:finesse && ${lvl("rogue", from, to)}` }),
         rider({ ...common, when: `attackType:ranged && !weaponProperty:finesse && ${lvl("rogue", from, to)}` }));
     }
+  },
+  // Colpo astuto: effetti comprati rinunciando a d6 dell'Attacco furtivo (CD 8 + Des + competenza); dal 11° due insieme, dal 14° i Colpi subdoli
+  "rogue/cunning_strike": (f) => {
+    const cd = (txt: string) => ({ text: `CD {0}: ${txt}`, values: ["8 + mod:dex + pb"] });
+    f.effects.push(
+      forgo("poison", "Veleno", 1, cd("TS Costituzione o Avvelenato per 1 minuto (serve la Borsa da avvelenatore).")),
+      forgo("trip", "Sbilanciare", 1, cd("TS Destrezza o Prono (Grande o più piccolo).")),
+      forgo("withdraw", "Ritirata", 1, { text: "Dopo l'attacco ti muovi di metà Velocità senza provocare attacchi di opportunità." }));
+  },
+  "rogue/improved_cunning_strike": (f) => { f.effects.push({ op: "forgoLimit", riderId: "sneak_attack", max: 2 }); },
+  "rogue/devious_strikes": (f) => {
+    const cd = (txt: string) => ({ text: `CD {0}: ${txt}`, values: ["8 + mod:dex + pb"] });
+    f.effects.push(
+      forgo("daze", "Stordire", 2, cd("TS Costituzione o nel suo prossimo turno può fare solo una tra movimento, azione o Azione Bonus.")),
+      forgo("knock_out", "Tramortire", 6, cd("TS Costituzione o Privo di sensi per 1 minuto.")),
+      forgo("obscure", "Accecare", 3, cd("TS Destrezza o Accecato fino alla fine del suo prossimo turno.")));
+  },
+  "thief/supreme_sneak": (f) => {
+    f.effects.push(forgo("hidden_sneak", "Attacco furtivo nascosto", 1, { text: "Se sei Invisibile per Nascondersi, l'attacco non termina la condizione se a fine turno sei dietro copertura tre quarti o totale." }));
   },
   "rogue/steady_aim": (f) => {
     f.activation = { label: T("Mira stabile"), duration: "fino alla fine del turno" };

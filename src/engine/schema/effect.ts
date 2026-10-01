@@ -41,7 +41,8 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("saveAdvantage", { abilities: z.array(ability).optional(), against: z.string().optional() }),
   // Vantaggio / Svantaggio da effetti (Attacco irruento, Istinto ferino, Ira): sugli attacchi, sulle prove (per abilità o per
   // caratteristica) e sull'Iniziativa. Vantaggio e Svantaggio si annullano come sempre (combineMode).
-  e("attackAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage"), attackType: z.enum(["melee", "ranged", "any"]).default("any") }),
+  // vsMarked: vale solo contro la creatura marcata (Cacciatore preciso, Voto di inimicizia): l'attacco lo dichiara nel tiro (`AttackOption.markedMode`)
+  e("attackAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage"), attackType: z.enum(["melee", "ranged", "any"]).default("any"), vsMarked: z.boolean().default(false) }),
   e("checkAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage"), skills: z.array(skill).optional(), abilities: z.array(ability).optional() }),
   e("initiativeAdvantage", { mode: z.enum(["advantage", "disadvantage"]).default("advantage") }),
   // Modificatori al d20: metà competenza alle prove senza competenza (Jolly, Atleta straordinario) e minimo al tiro
@@ -64,6 +65,8 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("attackRider", {
     riderId: id, label: z.string(), count: value.default(1), die: z.number().int().min(2).optional(), bonus: value.optional(), // senza `die` conta solo il bonus (Assassinare) o niente (Stretta stordente: solo costo e limite)
     damageType: z.string().optional(), // assente = come l'arma
+    vsMarked: z.boolean().default(false), // l'extra vale solo contro la creatura marcata (Marchio del cacciatore)
+    damageTypes: z.array(z.string()).min(2).optional(), // tipo di danno a scelta ogni volta che lo usi (Rivelazione celestiale: necrotico o radioso)
     attackType: z.enum(["melee", "ranged", "any"]).default("any"),
     limit: z.string().default("none"), cost: id.optional(), costAmount: z.number().int().min(1).default(1), auto: z.boolean().default(false),
     // Costo in slot (Punizione divina): `count`d`die` al livello dell'incantesimo, +`perSlotLevel` dadi per ogni livello di slot in più;
@@ -72,6 +75,10 @@ export const effectSchema = z.discriminatedUnion("op", [
     pactSlot: z.boolean().default(false), // costo: uno slot del Patto (Colpo occulto): 1d8 + 1d8 per livello dello slot
     text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(), // {0}, {1}... nel testo
   }),
+  // Effetti che si comprano rinunciando a dadi di un extra d'attacco (Colpo astuto del Ladro: rinunci a d6 dell'Attacco furtivo per un effetto).
+  // `forgoOption` = un effetto possibile (costo in dadi, testo con la CD); `forgoLimit` = quanti se ne possono applicare insieme (default 1).
+  e("forgoOption", { riderId: id, optionId: id, label: z.string(), dice: z.number().int().min(1), text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional() }),
+  e("forgoLimit", { riderId: id, max: z.number().int().min(1) }),
   // Azione di una risorsa (Seconda ripresa, Imposizione delle mani, Ira persistente...): spende usi di `resource`, tira dadi
   // (die per ogni uso speso, più `bonus` una volta), applica cure o PF temporanei e può restituire usi di un'altra risorsa.
   //   variable: spendi da 1 a tutti gli usi rimasti (Imposizione delle mani: ogni uso è 1 PF). Senza `die`, il totale è il numero di usi spesi.
@@ -97,6 +104,7 @@ export const effectSchema = z.discriminatedUnion("op", [
     cantrip: z.boolean().default(false), spells: z.array(id).optional(), minLevel: z.number().int().min(1).max(9).optional(),
     all: z.boolean().default(false), // vale per ogni incantesimo lanciato
     school: z.string().optional(), // con `all`: solo gli incantesimi di questa scuola (Invocazione potenziata: evocation)
+    damageType: z.string().optional(), // solo per gli incantesimi che nel riassunto infliggono danni di questo tipo (Adepto elementale, Affinità elementale)
     metamagic: id.optional(), // effetto di un'opzione di Metamagia: compare tra le note solo se il lancio la applica (id dell'opzione)
   }),
   // Incantesimi: CD e bonus di attacco in più, Vantaggio ai tiri per colpire con incantesimo (Stregoneria innata)

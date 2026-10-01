@@ -79,8 +79,8 @@ export const LOT3: Record<string, Patch> = {
   // ── Vendetta ────────────────────────────────────────────────────────────
   "vengeance/vow_of_enmity": (f) => {
     f.activation = { resource: "channel_divinity", duration: "1 minuto" };
-    f.effects.push({ op: "attackAdvantage", mode: "advantage", attackType: "any", when: active("vow_of_enmity") },
-      { op: "note", text: "Il Vantaggio vale solo contro la creatura del Voto (entro 30 ft)", when: active("vow_of_enmity") });
+    f.effects.push({ op: "attackAdvantage", mode: "advantage", attackType: "any", vsMarked: true, when: active("vow_of_enmity") },
+      { op: "note", text: "Il Vantaggio vale solo contro la creatura del Voto (entro 30 ft): segna «contro la creatura marcata» nel tiro", when: active("vow_of_enmity") });
   },
   // ── Antichi ─────────────────────────────────────────────────────────────
   "ancients/natures_wrath": (f) => {
@@ -95,12 +95,12 @@ export const LOT3: Record<string, Patch> = {
   // Marchio del cacciatore: d6 di forza a ogni colpo mentre ti concentri su di esso (d10 al 20°)
   "ranger/favored_enemy": (f) => {
     for (const [from, to, die] of [[1, 19, 6], [20, 20, 10]] as const) {
-      f.effects.push(rider({ riderId: "hunters_mark", label: "Marchio del cacciatore", count: 1, die, damageType: "force", limit: "none", when: `${MARK} && ${lvl("ranger", from, to)}`,
-        text: "Sul bersaglio marchiato." }));
+      f.effects.push(rider({ riderId: "hunters_mark", label: "Marchio del cacciatore", count: 1, die, damageType: "force", limit: "none", vsMarked: true, when: `${MARK} && ${lvl("ranger", from, to)}`,
+        text: "Solo contro la creatura marcata." }));
     }
   },
   "ranger/precise_hunter": (f) => {
-    f.effects.push({ op: "attackAdvantage", mode: "advantage", attackType: "any", when: MARK }, { op: "note", text: "Vantaggio solo contro la creatura marchiata", when: MARK });
+    f.effects.push({ op: "attackAdvantage", mode: "advantage", attackType: "any", vsMarked: true, when: MARK }, { op: "note", text: "Vantaggio solo contro la creatura marchiata (segna «contro la creatura marcata» nel tiro)", when: MARK });
   },
   "ranger/roving": (f) => { f.effects.push({ op: "setSpeed", mode: "climb", value: "speed" }, { op: "setSpeed", mode: "swim", value: "speed" }); },
   "ranger/tireless": (f) => {

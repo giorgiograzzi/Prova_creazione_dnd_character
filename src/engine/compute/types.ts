@@ -23,6 +23,7 @@ export interface AttackOption {
   ability: Ability; abilityWhy: string;
   proficient: boolean;
   toHit: Sourced; mode: RollMode; modeSources: string[];
+  markedMode?: { mode: RollMode; modeSources: string[] }; // modo del tiro se l'attacco è contro la creatura marcata (solo se un effetto vale solo contro di lei)
   damage: { dice: string; bonus: Sourced; type: string; text: string }; // text = "2d6 + 3 tagliente"
   critRange: number; // 20, oppure 19/18 (Campione)
   dieFloor?: number; // minimo di ogni dado di danno (Combattere con armi possenti: 3)
@@ -35,11 +36,13 @@ export interface AttackOption {
   notes: string[]; // promemoria: Svantaggio a gittata lunga, Ricarica, ecc.
 }
 
-export interface SpellModInfo { label: string; text: string; metamagic?: string; cantrip: boolean; all?: boolean; school?: string; spells?: string[]; minLevel?: number }
+export interface SpellModInfo { label: string; text: string; metamagic?: string; damageType?: string; cantrip: boolean; all?: boolean; school?: string; spells?: string[]; minLevel?: number }
 export interface AuraInfo { id: string; label: string; radius: number; text: string }
 
 export interface AttackExtra {
-  id: string; label: string; dice: string; bonus: number; type?: string; limit: string; cost?: string; costAmount?: number; // cost: risorsa di cui si spendono costAmount usi
+  id: string; label: string; dice: string; bonus: number; type?: string; types?: string[]; limit: string; cost?: string; costAmount?: number; // cost: risorsa di cui si spendono costAmount usi
+  vsMarked?: boolean; // vale solo contro la creatura marcata
+  forgo?: { id: string; label: string; dice: number; text?: string }[]; forgoMax?: number; // effetti a cui si può rinunciare ai dadi (Colpo astuto)
   used: boolean; // già usato (1 per turno / 1 per Ira)
   text?: string;
   slotSpell?: string; pactSlot?: boolean; baseLevel?: number; perSlotLevel?: number; // costo in slot: l'incantesimo, il suo livello e i dadi in più per livello di slot

@@ -28,3 +28,11 @@ export function extraDice(x: Pick<AttackExtra, "dice" | "baseLevel" | "perSlotLe
   const m = x.perSlotLevel === undefined ? null : /^(\d+)d(\d+)$/.exec(x.dice);
   return m ? `${Number(m[1]) + Math.max(0, slotLevel - (x.baseLevel ?? 1)) * (x.perSlotLevel ?? 1)}d${m[2]}` : x.dice;
 }
+
+// Dadi di un extra dopo aver rinunciato a `n` dadi per un effetto (Colpo astuto): "4d6" − 2 → "2d6"; tutti i dadi → ""
+export function forgoDice(dice: string, n: number): string {
+  const m = /^(\d+)d(\d+)$/.exec(dice);
+  if (!m || n <= 0) return dice;
+  const left = Number(m[1]) - n;
+  return left > 0 ? `${left}d${m[2]}` : "";
+}

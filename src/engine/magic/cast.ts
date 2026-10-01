@@ -85,13 +85,14 @@ export function castSpell(ch: Character, rs: Ruleset, d: Derived, spellId: strin
   if (sp.concentration) {
     const prev = ch.state.concentration;
     if (prev && prev !== sp.id) notes.unshift(`Termina la Concentrazione su ${rs.spells.get(prev)?.name.it ?? prev}`);
-    next = { ...next, state: { ...next.state, concentration: sp.id } };
+    const { markedTarget: _m, ...st } = next.state; void _m;
+    next = { ...next, state: { ...(prev && prev !== sp.id ? st : next.state), concentration: sp.id } }; // un'altra Concentrazione: la creatura marcata non vale più
   }
   return { ok: true, errors: [], character: next, notes, level };
 }
 
 export function endConcentration(ch: Character): Character {
-  const { concentration: _c, ...rest } = ch.state; void _c;
+  const { concentration: _c, markedTarget: _m, ...rest } = ch.state; void _c; void _m; // la creatura marcata finisce con la Concentrazione
   return { ...ch, state: rest };
 }
 

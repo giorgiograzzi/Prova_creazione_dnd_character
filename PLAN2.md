@@ -533,5 +533,5 @@ Il piano è completo (lotti 1-8). Il seguito è in `DATA_TODO.md`, sezione 0 «P
 1. ~~Manovre del Maestro di battaglia~~ — **fatto** (punto 1 di PLAN3, `scripts/lib/play-maneuvers.ts`): dati dal riepilogo 01, 20 manovre giocabili.
 2. Confronto dei **nomi italiani** di Metamagie e invocazioni con il manuale.
 3. ~~Limiti della magia del Warlock e del Mago~~ — **fatto** (punto 2 di PLAN3): invocazioni ripetibili, prerequisiti, Distintivi e Padronanza dal libro, Metamagie al lancio, costo in slot.
-4. Piccole lacune degli altri lotti (tipi di danno scelti all'uso, Adepto elementale, Colpi astuti con dadi rinunciati).
+4. ~~Piccole lacune degli altri lotti~~ — **fatto** (punto 3 di PLAN3): tipi di danno all'uso, Adepto elementale, Colpi astuti con dadi rinunciati, creatura marcata.
 5. Gli altri file delle regole sono già in `docs/rules/` (non tracciati) e i dati si rigenerano con `npm run extract:data`.

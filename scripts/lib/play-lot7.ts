@@ -18,13 +18,21 @@ export const LOT7: Record<string, Patch> = {
   },
   // Rivelazione celestiale: mentre è attiva, 1 volta per turno danni extra pari al bonus competenza (necrotici o radiosi)
   "aasimar/celestial_revelation": (f) => {
-    f.effects.push(rider({ riderId: "celestial_revelation", label: "Rivelazione celestiale", count: 0, bonus: "pb", limit: "turn", text: "Danni necrotici o radiosi (a tua scelta) a un bersaglio colpito da attacco o incantesimo.", when: active("celestial_revelation") }));
+    f.effects.push(rider({ riderId: "celestial_revelation", label: "Rivelazione celestiale", count: 0, bonus: "pb", limit: "turn", damageTypes: ["necrotic", "radiant"], text: "A un bersaglio colpito da attacco o incantesimo: scegli il tipo di danno ogni volta.", when: active("celestial_revelation") }));
   },
-  // Arma del soffio: al posto di un attacco; dadi per livello del personaggio, CD con la Costituzione
-  "dragonborn/breath_weapon": (f) => {
-    const text = "Al posto di un attacco: cono 15 ft o linea 30 ft (larga 5 ft), a scelta. TS Destrezza (CD {0}): danni del tipo dell'ascendenza, metà se riesce.";
-    for (const [from, to, n] of [[1, 4, 1], [5, 10, 2], [11, 16, 3], [17, 20, 4]] as const)
-      f.effects.push(action({ actionId: "breath_weapon", label: "Arma del soffio", resource: "breath_weapon", die: 10, count: n, text, values: [CD_CON], when: `level>=${from} && level<=${to}` }));
+  // Arma del soffio: al posto di un attacco; dadi per livello del personaggio (1 + un dado ai livelli 5, 11 e 17), CD con la Costituzione.
+  // Il tipo di danno è quello dell'ascendenza scelta: l'azione sta nell'opzione, così il testo dice il tipo.
+  "dragonborn/breath_weapon": (f, sp) => {
+    f.effects = f.effects.filter((e: Json) => !(e.op === "resourceAction" && e.actionId === "breath_weapon"));
+    const choice = (sp.choices ?? []).find((c: Json) => c.id === "draconic_ancestry");
+    if (!choice) throw new Error("Scelta draconic_ancestry non trovata");
+    for (const o of choice.options as Json[]) {
+      const type = (o.effects ?? []).find((e: Json) => e.op === "resistance")?.types?.[0];
+      const name = String(o.description ?? "").split(": ").pop()!.toLowerCase();
+      if (!type) throw new Error(`Ascendenza ${o.id} senza tipo di danno`);
+      (o.effects ??= []).push(action({ actionId: "breath_weapon", label: `Arma del soffio (${name})`, resource: "breath_weapon", die: 10, count: "1 + floor((level + 1) / 6)", values: [CD_CON],
+        text: `Al posto di un attacco: cono 15 ft o linea 30 ft (larga 5 ft), a scelta. TS Destrezza (CD {0}): danni da ${name}, metà se riesce.` }));
+    }
   },
   // Percezione tellurica: stato attivabile con il suo uso (azione bonus, 10 minuti)
   "dwarf/stonecunning": (f) => {

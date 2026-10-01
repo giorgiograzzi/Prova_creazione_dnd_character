@@ -30,7 +30,8 @@ describe.skipIf(!existsSync(`${DIR}/species.json`))("Lotto 7: specie con i dati 
     expect(runAction(r.character, D(r.character), "healing_hands").ok).toBe(false); // 1 uso per Riposo Lungo
     expect(extras(c).map((e) => e.id)).not.toContain("celestial_revelation");
     const rev = on(c, "celestial_revelation", ["celestial_wings"]);
-    expect(extras(rev).find((e) => e.id === "celestial_revelation")).toMatchObject({ limit: "turn" });
+    // il tipo di danno si sceglie a ogni colpo: necrotico o radioso
+    expect(extras(rev).find((e) => e.id === "celestial_revelation")).toMatchObject({ limit: "turn", bonus: 3, types: ["necrotic", "radiant"] });
   });
 
   it("Dragonide: Arma del soffio 1d10 (2d10 al 5°, 3d10 all'11°, 4d10 al 17°), CD con la Costituzione, competenza usi", () => {
@@ -42,6 +43,16 @@ describe.skipIf(!existsSync(`${DIR}/species.json`))("Lotto 7: specie con i dati 
     expect((act(c, "breath_weapon") as { text: string }).text).toMatch(/CD 14\)/); // 8 + Cos 3 + competenza 3
     expect(D(c).resources.breath_weapon!.max.value).toBe(3);
     expect(D(c).resistances).toContain("fire");
+  });
+  it("Arma del soffio: il tipo di danno è quello dell'ascendenza scelta (testo e resistenza), senza ascendenza non c'è azione", () => {
+    for (const [anc, type, word] of [["red", "fire", "fuoco"], ["blue", "lightning", "fulmine"], ["black", "acid", "acido"], ["white", "cold", "freddo"], ["green", "poison", "veleno"]] as const) {
+      const c = mk("dragonborn", 5, { decisions: { draconic_ancestry: [anc] } });
+      const a = act(c, "breath_weapon") as { text: string; label: string };
+      expect(a.label, anc).toMatch(new RegExp(`\\(${word}\\)`));
+      expect(a.text, anc).toMatch(new RegExp(`danni da ${word}`));
+      expect(D(c).resistances, anc).toContain(type);
+    }
+    expect(act(mk("dragonborn", 5), "breath_weapon")).toBeUndefined();
   });
 
   it("Nano: Percezione tellurica si attiva spendendo un uso", () => {

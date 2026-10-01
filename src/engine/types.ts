@@ -50,6 +50,7 @@ export interface Character {
     mounted?: boolean; // in sella (Lancia da cavaliere)
     pactUsed?: number; // slot del Patto (Warlock) spesi
     concentration?: string; // id dell'incantesimo di cui si mantiene la Concentrazione
+    markedTarget?: string; // nome della creatura marcata (Marchio del cacciatore, Voto di inimicizia), scritto dal giocatore
     active?: Record<string, string[]>; // privilegi attivati (Ira, Forma selvatica...): id → scelte fatte all'attivazione
     extraSlots?: Record<string, number>; // slot creati con i punti stregoneria (spariscono al Riposo Lungo)
     once?: Record<string, string>; // extra d'attacco già usati: id → "turn" oppure id del privilegio attivo (1 per Ira)

@@ -118,7 +118,7 @@ export const LOT6: Record<string, Patch> = {
   "draconic/elemental_affinity": (f) => {
     f.choices.push({ id: "draconic_affinity", label: T("Tipo di danno dell'ascendenza"), count: 1, distinct: true,
       options: [["acid", "Acido"], ["cold", "Freddo"], ["fire", "Fuoco"], ["lightning", "Fulmine"], ["poison", "Veleno"]].map(([t, n]) => opt(`affinity_${t}`, n!, `Resistenza al danno ${n!.toLowerCase()} e + Car a un tiro di danno degli incantesimi di quel tipo.`, {},
-        { op: "resistance", types: [t] }, spellMod("Affinità elementale", `se infligge danni da ${n!.toLowerCase()}: +{0} a un tiro di danno`, { all: true, values: ["mod:cha"] }))) });
+        { op: "resistance", types: [t] }, spellMod("Affinità elementale", `se infligge danni da ${n!.toLowerCase()}: +{0} a un tiro di danno`, { damageType: t, values: ["mod:cha"] }))) });
   },
   "draconic/dragon_wings": (f) => { f.activation = { ...(f.activation ?? {}), alt: { resource: SP, cost: 3 } }; },
   // ── Magia meccanica ─────────────────────────────────────────────────────

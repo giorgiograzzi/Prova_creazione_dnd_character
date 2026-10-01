@@ -87,3 +87,15 @@ describe("lanci a volontà", () => {
     expect(r2.character.state.slotsUsed).toEqual({});
   });
 });
+
+describe("condizione della scelta (when): vale anche per gli effetti delle opzioni scelte", () => {
+  it("Arcanum mistico: l'incantesimo di 7° vale solo dal 13° livello", () => {
+    const r = testRuleset();
+    const w = r.classes.get("wizard")!;
+    (w as { caster: string }).caster = "full";
+    w.features.push(F({ id: "arc", name: { it: "Arcanum" }, choices: [{ id: "arc_7", label: { it: "7°" }, count: 1, distinct: true, source: "freespells", when: "classLevel:wizard>=13", filter: { level: 3 } }] }));
+    const c = (level: number) => testCharacter({ classes: [{ classId: "wizard", level, hpRolls: [] }], decisions: { arc_7: ["bolt"] } });
+    expect(computeCharacter(c(12), r).grantedSpells.map((g) => g.spell)).not.toContain("bolt");
+    expect(computeCharacter(c(13), r).grantedSpells.map((g) => g.spell)).toContain("bolt");
+  });
+});

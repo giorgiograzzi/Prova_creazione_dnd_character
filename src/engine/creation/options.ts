@@ -83,8 +83,6 @@ export function optionStates(slot: Slot, ch: Character, rs: Ruleset, selected: s
           const bookPicks = ch.decisions[`${slot.classId}_spellbook`];
           if (bookPicks !== undefined || rs.classes.get(slot.classId)?.features.some((f) => f.choices.some((k) => k.id === `${slot.classId}_spellbook`))) cands = cands.filter((s) => (bookPicks ?? []).includes(s.id));
         }
-        // Mago: Incantesimi distintivi e Padronanza si scelgono dal libro
-        if ((kind === "signaturespells" || kind === "masteryspells") && slot.classId) cands = cands.filter((s) => (ch.decisions[`${slot.classId}_spellbook`] ?? []).includes(s.id));
         const max = kind === "spells" && slot.classId ? maxSpellLevel(ch, rs, slot.classId) : 9;
         list = cands.map((s) => (s.level > max ? off(opt(s.id, s.name.it), max ? `Nessuno slot di ${s.level}° livello` : "Nessuno slot") : opt(s.id, s.name.it)));
         break;

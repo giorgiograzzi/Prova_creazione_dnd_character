@@ -38,6 +38,7 @@ import { LOT2 } from "./play-lot2";
 import { LOT3 } from "./play-lot3";
 import { LOT4 } from "./play-lot4";
 import { LOT5 } from "./play-lot5";
+import { LOT6 } from "./play-lot6";
 const T = (it: string) => ({ it });
 const active = (id: string) => `active:${id}`;
 
@@ -75,7 +76,7 @@ const BASE: Record<string, Patch> = {
 
 // Modifiche curate dei privilegi: stati attivabili (base) + effetti, extra d'attacco e azioni dei lotti di PLAN2
 // (se un privilegio è in entrambi, si applicano uno dopo l'altro)
-const LOTS = [BASE, LOT1, LOT2, LOT3, LOT4, LOT5];
+const LOTS = [BASE, LOT1, LOT2, LOT3, LOT4, LOT5, LOT6];
 export const ACTIVATIONS: Record<string, Patch> = Object.fromEntries(
   [...new Set(LOTS.flatMap((l) => Object.keys(l)))].map((k) => [k, ((f, o, p) => { for (const l of LOTS) l[k]?.(f, o, p); }) as Patch]),
 );

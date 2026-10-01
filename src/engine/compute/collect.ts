@@ -116,17 +116,19 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
   const addChoice = (c: Choice, o: Owner) => {
     const key = o.prefix + c.id;
     const picked = o.picks(key) ?? [];
+    // la condizione della scelta (Arcanum mistico dal 13° livello...) vale anche per i suoi effetti, che si valutano dopo
+    const gate = (e: Effect): Effect => (c.when ? ({ ...e, when: e.when ? `${c.when} && ${e.when}` : c.when } as Effect) : e);
     if (c.options) {
       for (const opt of c.options) {
         if (!picked.includes(opt.id)) continue;
         out.features.add(opt.id); // l'opzione scelta conta come posseduta (prerequisiti: hasFeature:pact_of_the_blade)
         if (opt.cost !== undefined) out.options.push({ id: opt.id, name: opt.name.it, ...(opt.description ? { description: opt.description } : {}), cost: opt.cost, choiceId: c.id });
-        opt.effects.forEach((e) => add(e, o));
+        opt.effects.forEach((e) => add(gate(e), o));
       }
     } else if (c.source) {
       if (c.source === "weaponMastery") picked.forEach((w) => out.masteries.add(w));
       if (c.source.startsWith("languages")) picked.forEach((l) => out.languages.add(l));
-      sourceEffects(c, picked, key).forEach((e) => add(e, o));
+      sourceEffects(c, picked, key).forEach((e) => add(gate(e), o));
     }
   };
   const addFeat = (id: string, instance: Record<string, string[]> | undefined, base: Picks, prefix = "") => {

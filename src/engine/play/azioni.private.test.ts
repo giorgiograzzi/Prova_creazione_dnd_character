@@ -43,7 +43,10 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Controllo a tappeto di azio
         if (a.variable || a.remaining < a.cost || (a.apply === "none" && !a.restore)) continue;
         n++;
         const start = hurt(c);
-        const r = runAction(start, D(start), a.id, undefined, () => 0.999);
+        // azioni a costo in slot: si paga con uno slot adatto (del Patto se serve, altrimenti il primo livello abbastanza alto)
+        const sd = D(start);
+        const via = a.slot ? (a.slot.pactOnly || !sd.spellSlots.slots.some((s, i) => s > 0 && i + 1 >= a.slot!.minLevel) ? { kind: "pact" as const } : { kind: "slot" as const, level: Math.max(a.slot.minLevel, 1) }) : undefined;
+        const r = runAction(start, sd, a.id, undefined, () => 0.999, via);
         if (!r.ok) { bad.push(`${name}: ${a.id} non parte (${r.errors.join()})`); continue; }
         if (a.apply === "tempHp" && r.character.state.tempHp <= 0) bad.push(`${name}: ${a.id} non dà PF temporanei`);
         if (a.apply === "heal" && r.character.state.hp <= 1) bad.push(`${name}: ${a.id} non cura`);

@@ -32,13 +32,14 @@ export function optionStates(slot: Slot, ch: Character, rs: Ruleset, selected: s
   const c = slot.choice;
   const prefix = slot.key.slice(0, slot.key.length - c.id.length);
   const scoped = Object.fromEntries(Object.entries(ch.decisions).filter(([k]) => k.startsWith(prefix)).map(([k, v]) => [k.slice(prefix.length), v]));
-  const cond = (src: string) => evalCondition(parseCondition(src), { ...ctx, armorTraining: profs.armor });
+  // `others` = le altre opzioni già scelte nello stesso elenco: contano come possedute (Colpo occulto richiede il Patto della lama scelto insieme)
+  const cond = (src: string, others: string[] = []) => evalCondition(parseCondition(src), { ...ctx, armorTraining: profs.armor, ...(others.length ? { features: new Set([...ctx.features, ...others]) } : {}) });
   let list: OptionState[];
 
   if (c.options) {
     list = c.options.map((o) => {
       let st = opt(o.id, o.name.it, { ...(o.description ? { description: o.description } : {}), ...(o.cost !== undefined ? { cost: o.cost } : {}) });
-      if (o.requires && !cond(o.requires)) st = off(st, `Richiede ${describeCondition(o.requires, rs)}`);
+      if (o.requires && !cond(o.requires, selected.filter((s) => s !== o.id))) st = off(st, `Richiede ${describeCondition(o.requires, rs)}`);
       for (const e of o.effects) {
         if (e.op === "grantSkillProficiency" && !e.upgradeToExpertise && !e.expertise && e.skills.every((s) => profs.skills.has(s))) st = off(st, "Già competente");
         if (e.op === "grantSaveProficiency" && e.abilities.every((a) => profs.saves.has(a))) st = off(st, "Già competente nel tiro salvezza");
@@ -78,8 +79,8 @@ export function optionStates(slot: Slot, ch: Character, rs: Ruleset, selected: s
       }
       case "cantrips": case "spells": case "freespells": case "alwaysspells": case "signaturespells": case "masteryspells": {
         let cands: Spell[] = spellChoiceCandidates(rs, c, scoped);
-        // Mago: gli incantesimi preparati si scelgono dal libro
-        if (kind === "spells" && slot.classId && /_prepared$/.test(c.id)) {
+        // Mago: gli incantesimi preparati, quelli distintivi e la Padronanza si scelgono dal libro
+        if (slot.classId && ((kind === "spells" && /_prepared$/.test(c.id)) || kind === "signaturespells" || kind === "masteryspells")) {
           const bookPicks = ch.decisions[`${slot.classId}_spellbook`];
           if (bookPicks !== undefined || rs.classes.get(slot.classId)?.features.some((f) => f.choices.some((k) => k.id === `${slot.classId}_spellbook`))) cands = cands.filter((s) => (bookPicks ?? []).includes(s.id));
         }

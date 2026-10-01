@@ -309,13 +309,13 @@ describe.skipIf(!has)("dati privati (step 4)", () => {
       const plain = computeCharacter(mk([cls("sorcerer", 3, { subclassId: "wild_magic" })], b), R).hp.max.value;
       expect(computeCharacter(mk([cls("sorcerer", 3, { subclassId: "draconic" })], b), R).hp.max.value - plain).toBe(3);
     });
-    it("Warlock: slot del patto separati (3 slot di 5° al 11°), 28 invocazioni con prerequisiti", () => {
+    it("Warlock: slot del patto separati (3 slot di 5° al 11°), 25 invocazioni e 13 coppie ripetibili, con prerequisiti", () => {
       const w = R.classes.get("warlock")!;
       expect(w.caster).toBe("pact");
       expect(w.spellSlots).toBeUndefined();
       expect(w.pactSlots![10]).toEqual({ count: 3, level: 5 });
       const inv = w.choices.find((c) => c.id === "warlock_invocations")!;
-      expect(inv.options).toHaveLength(28);
+      expect(inv.options).toHaveLength(38);
       const blade = inv.options!.find((o) => o.id === "devouring_blade")!;
       expect(blade.requires).toBe("classLevel:warlock>=12 && hasFeature:thirsting_blade");
       // scegliere un'invocazione la rende "posseduta" per i prerequisiti di quelle successive

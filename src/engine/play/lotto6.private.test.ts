@@ -99,9 +99,9 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 6: Stregone, Mago e W
 
   describe("Warlock", () => {
     const inv = (ids: string[], level = 11, over: Partial<Character> = {}) => mk("warlock", level, undefined, { decisions: { warlock_invocations: ids }, ...over });
-    it("le 28 invocazioni ci sono, con requisiti di livello e di Patto", () => {
+    it("le 25 invocazioni singole e le 13 coppie (invocazione ripetibile, trucchetto) ci sono, con requisiti di livello e di Patto", () => {
       const o = R.classes.get("warlock")!.choices.find((x) => x.id === "warlock_invocations")!.options!;
-      expect(o).toHaveLength(28);
+      expect(o).toHaveLength(25 + 13);
       expect(o.find((x) => x.id === "eldritch_smite")!.requires).toBe("classLevel:warlock>=5 && hasFeature:pact_of_the_blade");
       expect(o.find((x) => x.id === "armor_of_shadows")!.requires).toBeUndefined();
     });
@@ -113,10 +113,12 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 6: Stregone, Mago e W
       expect(r.ok, r.errors.join()).toBe(true);
     });
     it("Deflagrazione agonizzante, Lancia occulta e Deflagrazione repulsiva compaiono nei trucchetti", () => {
-      const c = inv(["agonizing_blast", "eldritch_spear", "repelling_blast"]);
+      const c = inv(["agonizing_blast_eldritch_blast", "eldritch_spear_eldritch_blast", "repelling_blast_eldritch_blast"]);
       const notes = spellModNotes(D(c).spellMods, { id: "eldritch_blast", level: 0 }, 0);
-      expect(notes).toEqual(expect.arrayContaining(["Deflagrazione agonizzante: con il trucchetto scelto: +3 ai danni", "Lancia occulta: con il trucchetto scelto: gittata +330 ft"]));
+      expect(notes).toEqual(expect.arrayContaining(["Deflagrazione agonizzante: con Deflagrazione occulta: +3 ai danni", "Lancia occulta: con Deflagrazione occulta: gittata +330 ft"]));
       expect(notes.join()).toMatch(/spingi di 10 ft/);
+      // il bonus vale solo per il trucchetto scelto
+      expect(spellModNotes(D(c).spellMods, { id: "poison_spray", level: 0 }, 0)).toEqual([]);
     });
     it("Patto della lama: Lama assetata e divoratrice danno attacchi extra; Colpo occulto costa uno slot del Patto (1d8 + 1d8 per livello)", () => {
       expect(D(inv(["pact_of_the_blade"], 5)).attacksPerAction).toBe(1);

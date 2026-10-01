@@ -82,6 +82,9 @@ export const effectSchema = z.discriminatedUnion("op", [
     apply: z.enum(["heal", "tempHp", "none"]).default("none"),
     restore: z.object({ resource: id, amount: z.union([z.number().int().min(1), z.literal("all"), z.string().refine(isValidFormula, "formula non valida")]) }).optional(), // amount: numero, "all" o formula (Ripristino stregonesco: metà livello)
     text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(),
+    // Costo alternativo in slot («1 volta per Riposo Lungo o spendendo uno slot»): l'azione spende uno slot di livello `minLevel` o più, di qualsiasi
+    // classe (anche del Patto: gli slot si condividono tra le classi), oppure solo del Patto con `pactOnly`. Non tocca il contatore del privilegio.
+    slot: z.object({ minLevel: z.number().int().min(1).max(9).default(1), pactOnly: z.boolean().default(false) }).optional(),
     onActivate: id.optional(), // id del privilegio attivabile (Ira, Forma selvatica): attivandolo l'azione parte da sola (solo se gratuita), per esempio i PF temporanei
   }),
   // Dadi di danno con un minimo (Combattere con armi possenti: 1 e 2 contano 3): vale per tutti i dadi di danno dell'attacco
@@ -94,6 +97,7 @@ export const effectSchema = z.discriminatedUnion("op", [
     cantrip: z.boolean().default(false), spells: z.array(id).optional(), minLevel: z.number().int().min(1).max(9).optional(),
     all: z.boolean().default(false), // vale per ogni incantesimo lanciato
     school: z.string().optional(), // con `all`: solo gli incantesimi di questa scuola (Invocazione potenziata: evocation)
+    metamagic: id.optional(), // effetto di un'opzione di Metamagia: compare tra le note solo se il lancio la applica (id dell'opzione)
   }),
   // Incantesimi: CD e bonus di attacco in più, Vantaggio ai tiri per colpire con incantesimo (Stregoneria innata)
   e("spellBonus", { dc: value.optional(), attack: value.optional(), advantage: z.boolean().default(false) }),

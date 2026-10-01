@@ -68,6 +68,7 @@ export function checkReferences(rs: Ruleset): string[] {
     for (const a of atoms(parseCondition(src))) {
       if (a.t === "hasFeature" && !featureIds.has(a.value)) errs.push(`${where}: hasFeature:${a.value} non corrisponde a nessun privilegio`);
       if (a.t === "hasFeat" && rs.feats.size && !rs.feats.has(a.value)) errs.push(`${where}: hasFeat:${a.value} non corrisponde a nessun talento`);
+      if (a.t === "hasSpell" && rs.spells.size && !rs.spells.has(a.value)) errs.push(`${where}: hasSpell:${a.value} non corrisponde a nessun incantesimo`);
     }
   };
   for (const h of holders) {

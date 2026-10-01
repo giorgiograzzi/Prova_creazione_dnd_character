@@ -47,7 +47,7 @@ export function computeActions(x: Ctx, resources: Derived["resources"]): Resourc
       id: e.actionId, featureId, label: e.label, ...(e.resource ? { resource: e.resource } : {}), cost: e.cost, variable: e.variable, ...(e.die ? { die: e.die, count: evalValue(e.count ?? 1, x) } : {}),
       bonus: e.bonus === undefined ? 0 : evalValue(e.bonus, x), apply: e.apply,
       ...(e.restore ? { restore: { resource: e.restore.resource, amount: e.restore.amount === "all" ? "all" as const : evalValue(e.restore.amount, x) } } : {}),
-      ...(e.onActivate ? { onActivate: e.onActivate } : {}), ...(e.text ? { text: fillText(e.text, e.values, x) } : {}), remaining: e.resource ? resources[e.resource]?.remaining ?? 0 : 0,
+      ...(e.slot ? { slot: e.slot } : {}), ...(e.onActivate ? { onActivate: e.onActivate } : {}), ...(e.text ? { text: fillText(e.text, e.values, x) } : {}), remaining: e.resource ? resources[e.resource]?.remaining ?? 0 : 0,
     });
   }
   return out;
@@ -56,5 +56,5 @@ export function computeActions(x: Ctx, resources: Derived["resources"]): Resourc
 // Modificatori degli incantesimi: testo con i numeri già calcolati (il livello dello slot si mette al lancio)
 export function computeSpellMods(x: Ctx): SpellModInfo[] {
   return x.active.flatMap(({ effect: e }) => (e.op === "spellModifier"
-    ? [{ label: e.label, text: fillText(e.text, e.values, x), cantrip: e.cantrip, ...(e.all ? { all: true } : {}), ...(e.school ? { school: e.school } : {}), ...(e.spells ? { spells: e.spells } : {}), ...(e.minLevel ? { minLevel: e.minLevel } : {}) }] : []));
+    ? [{ label: e.label, text: fillText(e.text, e.values, x), ...(e.metamagic ? { metamagic: e.metamagic } : {}), cantrip: e.cantrip, ...(e.all ? { all: true } : {}), ...(e.school ? { school: e.school } : {}), ...(e.spells ? { spells: e.spells } : {}), ...(e.minLevel ? { minLevel: e.minLevel } : {}) }] : []));
 }

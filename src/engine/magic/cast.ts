@@ -1,7 +1,9 @@
 import type { Derived } from "../compute";
+import { SORCERY_POINTS, spendPoints } from "../play/sorcery";
 import { toggleSlot, useResource } from "../play/state";
 import type { Ruleset } from "../ruleset";
 import type { Character } from "../types";
+import { checkMetamagic } from "./metamagic";
 import { spellModNotes } from "./modifiers";
 import { spellbook } from "./spellbook";
 
@@ -13,7 +15,8 @@ import { spellbook } from "./spellbook";
 export type CastVia = { kind: "slot"; level: number } | { kind: "pact" } | { kind: "free"; resourceId: string } | { kind: "ritual" } | { kind: "cantrip" };
 export interface CastResult { ok: boolean; errors: string[]; character: Character; notes: string[]; level: number }
 
-export function castSpell(ch: Character, rs: Ruleset, d: Derived, spellId: string, via: CastVia): CastResult {
+// `opts.metamagic` = opzioni di Metamagia applicate al lancio (Stregone): spendono punti stregoneria e i loro effetti compaiono nelle note.
+export function castSpell(ch: Character, rs: Ruleset, d: Derived, spellId: string, via: CastVia, opts: { metamagic?: string[] } = {}): CastResult {
   const fail = (e: string): CastResult => ({ ok: false, errors: [e], character: ch, notes: [], level: 0 });
   const entry = spellbook(ch, rs, d).find((e) => e.id === spellId);
   if (!entry) return fail("Incantesimo non nel tuo elenco");
@@ -22,6 +25,10 @@ export function castSpell(ch: Character, rs: Ruleset, d: Derived, spellId: strin
   if (d.conditions.dead) return fail("Il personaggio è morto");
   const notes: string[] = [];
   let next = ch, level = sp.level;
+  const mm = opts.metamagic ?? [];
+  const meta = mm.length ? checkMetamagic(d, sp, mm, via.kind === "ritual") : undefined;
+  if (meta && !meta.ok) return fail(meta.errors[0]!);
+  if (meta && (d.resources[SORCERY_POINTS]?.remaining ?? 0) < meta.cost) return fail("Punti stregoneria insufficienti");
 
   switch (via.kind) {
     case "cantrip":
@@ -64,7 +71,13 @@ export function castSpell(ch: Character, rs: Ruleset, d: Derived, spellId: strin
       break;
   }
 
-  notes.push(...spellModNotes(d.spellMods, sp, level));
+  if (meta) {
+    const spent = spendPoints(next, d, meta.cost);
+    if (!spent.ok) return fail(spent.errors[0]!); // già controllato sopra: solo per sicurezza
+    next = spent.character;
+    notes.push(`Metamagia: ${meta.cost === 1 ? "speso 1 punto" : `spesi ${meta.cost} punti`} stregoneria`, ...meta.warnings);
+  }
+  notes.push(...spellModNotes(d.spellMods, sp, level, mm));
   if (level > sp.level && sp.higherLevels) notes.push(`Livello superiore (${level}°): ${sp.higherLevels}`);
   if (sp.components.m && (sp.components.materialCost || sp.components.material)) {
     notes.push(`Materiale: ${sp.components.material ?? "componente"}${sp.components.materialCost ? ` (${sp.components.materialCost} mo, va posseduto davvero)` : ""}${sp.components.materialConsumed ? " — si consuma col lancio" : ""}`);

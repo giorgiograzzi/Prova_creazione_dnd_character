@@ -20,7 +20,7 @@ File in `src/engine/schema/`:
 
 ### Condizioni
 Stringhe con `&&`, `||`, `!`. Atomi: `wearingArmor:none|light|medium|heavy|any`, `shield`,
-`equipped:<id>`, `weaponProperty:<prop>`, `usingWeapon:<id>` (l'arma dell'attacco è proprio questa: bonus di un'arma magica), `attackType:melee|ranged`, `hasFeature:<id>`, `hasFeat:<id>`,
+`equipped:<id>`, `weaponProperty:<prop>`, `usingWeapon:<id>` (l'arma dell'attacco è proprio questa: bonus di un'arma magica), `attackType:melee|ranged`, `hasFeature:<id>`, `hasFeat:<id>`, `hasSpell:<id>`,
 `unarmed` (colpo senz'armi), `damageType:<tipo>` (tipo di danno dell'arma; a mani nude contundente), `concentrating:<incantesimo>`, `level>=N`, `classLevel:<classe>>=N`, `ability:<car>>=N` (operatori `>= <= == > <`).
 Esempio: `wearingArmor:none && !shield`. Non ci sono parentesi: `A || B && C` vale `A || (B && C)`, per mescolare servono effetti separati.
 
@@ -46,6 +46,7 @@ Corrispondono alle operazioni del file "Modificatori" §6. Ogni effetto ha `when
 - Specie (Lotto 7): `rerollOnes` (ritiro di un 1 sul d20; `Derived.d20Reroll` per attacchi e Iniziativa, `RollFloor.on: "reroll"` nelle prove e nei TS). Le azioni di una scelta di specie si legano alla loro risorsa
 - Rifiniture (Lotto 8): `resourceAction.onActivate` (id del privilegio: attivandolo l'azione gratuita parte da sola e l'attivazione restituisce `notes`), `Character.companions` (compagni a mano: `addCompanion`, `updateCompanion`, `hurtCompanion`, `removeCompanion`)
 - Manovre (punto 1 di PLAN3): ogni opzione di `battle_master_maneuvers` porta i suoi effetti (`attackRider` con `cost: superiority_dice` o `resourceAction`), uno per fascia di livello del dado (`scripts/lib/play-maneuvers.ts`). Le azioni di una scelta si legano al privilegio che definisce la risorsa (`computeActions`: così la scheda le mostra sotto «Superiorità in combattimento»)
+- Limiti della magia (punto 2 di PLAN3): condizione `hasSpell:<id>`; `requires` conta le altre opzioni scelte nello stesso elenco; invocazioni ripetibili = un'opzione per trucchetto (`<invocazione>_<trucchetto>`); `signaturespells`/`masteryspells` pescano dal libro (`<classe>_spellbook`); `spellModifier.metamagic` (effetto mostrato solo se il lancio applica l'opzione) e `castSpell(..., { metamagic })` con `checkMetamagic`; `resourceAction.slot` (`minLevel`, `pactOnly`: costo in slot al posto dell'uso) e `runAction(..., via)`
 - Aure (Lotto 3): `aura` (raggio e testo per gli alleati, mostrati in Stato; con lo stesso `auraId` vale il raggio maggiore). Costo in slot degli extra: `attackRider` con `slotSpell` (+`perSlotLevel` dadi per livello: Punizione divina)
 - Formule: oltre a `pb`, `level`, `classLevel:<classe>`, `mod:<car>`, `score:<car>`, la variabile `speed` (Velocità base della specie)
 

@@ -351,7 +351,7 @@
     "warnings": "Avvisi",
     "name": "Nome",
     "features": {
-      "actions": { "result": "Totale {n}{d} {a}", "heal": "PF recuperati", "tempHp": "PF temporanei", "done": "Fatto", "amount": "Usi da spendere per" },
+      "actions": { "result": "Totale {n}{d} {a}", "heal": "PF recuperati", "tempHp": "PF temporanei", "done": "Fatto", "amount": "Usi da spendere per", "slotFor": "Slot da spendere per", "slotLevel": "Slot {n}° ({r})", "slotPact": "Slot del Patto {n}° ({r})", "noSlot": "Nessuno slot adatto" },
       "title": "Privilegi e tratti",
       "search": "Cerca…",
       "all": "Tutti",
@@ -481,7 +481,7 @@
     "castPact": "Slot del Patto {n}° ({r})",
     "castFree": "Gratis ({r}/{m})",
     "atWill": "a volontà",
-    "sorcery": { "title": "Punti stregoneria", "points": "Punti: {r}/{m}", "cost": "{n} PS", "use": "Usa", "used": "{n}: spesi {c} punti. Applica l'effetto al lancio.", "makeLevel": "Slot da creare", "makeOption": "Crea slot di {n}° ({c} punti)", "make": "Crea slot", "made": "Creato uno slot di {n}° livello (sparisce al Riposo Lungo).", "backLevel": "Slot da convertire", "backOption": "Slot di {n}° ({r} rimasti)", "back": "Slot → punti", "converted": "Slot di {n}° convertito in punti.", "noSlots": "nessuno slot libero" },
+    "sorcery": { "metaTitle": "Metamagia su questo lancio", "metaHelp": "Una sola opzione per incantesimo. Potenziato e cercatore si usano dopo il tiro, dal pannello Punti stregoneria.", "metaCost": "Costo: {n} punti", "title": "Punti stregoneria", "points": "Punti: {r}/{m}", "cost": "{n} PS", "use": "Usa", "used": "{n}: spesi {c} punti. Applica l'effetto al lancio.", "makeLevel": "Slot da creare", "makeOption": "Crea slot di {n}° ({c} punti)", "make": "Crea slot", "made": "Creato uno slot di {n}° livello (sparisce al Riposo Lungo).", "backLevel": "Slot da convertire", "backOption": "Slot di {n}° ({r} rimasti)", "back": "Slot → punti", "converted": "Slot di {n}° convertito in punti.", "noSlots": "nessuno slot libero" },
     "castRitual": "Rituale (+10 minuti, senza slot)",
     "cantCast": "Nessun modo per lanciarlo ora.",
     "school": {

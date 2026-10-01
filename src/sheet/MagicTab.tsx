@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { allQuestions } from "../engine/creation";
 import {
-  PREPARATION, castSpell, concentrationBroken, endConcentration, magicalCunning, recoverSlots, recoveryLimit, spellbook, type CastVia, type SpellEntry,
+  COMBINABLE, METAMAGIC_CHOICE, PREPARATION, castSpell, concentrationBroken, endConcentration, magicalCunning, recoverSlots, recoveryLimit, spellbook, type CastVia, type SpellEntry,
 } from "../engine/magic";
 import { toggleSlot } from "../engine/play";
 import it from "../i18n/it.json";
@@ -131,9 +131,13 @@ function resolutionText(e: SpellEntry): string {
 function SpellDialog({ entry, ch, rs, d, update, onClose }: TabProps & { entry: SpellEntry; onClose: () => void }) {
   const sp = entry.spell;
   const [msg, setMsg] = useState<{ ok: boolean; lines: string[] } | null>(null);
+  const [meta, setMeta] = useState<string[]>([]);
+  // Metamagia applicabile al lancio (Potenziato e cercatore si usano dopo il tiro)
+  const metaOpts = d.chosenOptions.filter((o) => o.choiceId === METAMAGIC_CHOICE && !COMBINABLE.has(o.id));
+  const metaCost = metaOpts.filter((o) => meta.includes(o.id)).reduce((n, o) => n + o.cost, 0);
   const run = (via: CastVia) => {
-    const r = castSpell(ch, rs, d, entry.id, via);
-    if (r.ok) update(() => r.character);
+    const r = castSpell(ch, rs, d, entry.id, via, { metamagic: meta });
+    if (r.ok) { update(() => r.character); setMeta([]); }
     setMsg({ ok: r.ok, lines: r.ok ? [`${sp.name.it}${r.level ? ` (${r.level}°)` : ""}: lanciato.`, ...r.notes] : r.errors });
   };
   const c = sp.components;
@@ -163,6 +167,15 @@ function SpellDialog({ entry, ch, rs, d, update, onClose }: TabProps & { entry: 
       <p>{sp.summary}</p>
       {sp.higherLevels && <p className="xp-muted"><b>{t.higher}:</b> {sp.higherLevels}</p>}
       <p className="xp-muted">{entry.sources.map((s) => `${s.label} (${t.statusTags[s.kind]})`).join(" · ")}</p>
+      {metaOpts.length > 0 && (
+        <fieldset className="xp-fieldset"><legend>{it.magic.sorcery.metaTitle}</legend>
+          <p className="xp-muted">{it.magic.sorcery.metaHelp}</p>
+          {metaOpts.map((o) => (
+            <label key={o.id} className="xp-check"><input type="checkbox" checked={meta.includes(o.id)} onChange={(e) => setMeta(e.target.checked ? [...meta, o.id] : meta.filter((x) => x !== o.id))} /><span>{o.name} ({fmt(it.magic.sorcery.cost, { n: o.cost })})</span></label>
+          ))}
+          {metaCost > 0 && <p className="xp-muted">{fmt(it.magic.sorcery.metaCost, { n: metaCost })}</p>}
+        </fieldset>
+      )}
       {msg && <div className={msg.ok ? "xp-banner" : "xp-error"} role={msg.ok ? "status" : "alert"}>{msg.lines.map((l) => <div key={l}>{l}</div>)}</div>}
       <div className="pl-row">
         {opts.length === 0 && <span className="xp-muted">{t.cantCast}</span>}

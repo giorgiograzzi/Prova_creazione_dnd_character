@@ -120,7 +120,15 @@ export function autoComplete(ch: Character, rs: Ruleset, opts: { scores?: Scores
       if (!r.ok) throw new Error(`autoComplete: ${q.key}: ${r.errors.join("; ")}`);
       cur = r.character; continue;
     }
-    const ids = q.options.filter((o) => o.enabled).map((o) => o.id).slice(0, q.count);
+    let ids = q.options.filter((o) => o.enabled).map((o) => o.id);
+    // libro del Mago: si riempie un livello alla volta (come farebbe chi gioca), così ci sono incantesimi anche dei livelli alti (distintivi, Padronanza)
+    if (q.key.endsWith("_spellbook")) {
+      const byLevel = new Map<number, string[]>();
+      for (const id of ids) { const lv = rs.spells.get(id)?.level ?? 0; byLevel.set(lv, [...(byLevel.get(lv) ?? []), id]); }
+      const lists = [...byLevel.entries()].sort((a, b) => a[0] - b[0]).map(([, l]) => l);
+      ids = Array.from({ length: Math.max(0, ...lists.map((l) => l.length)) }, (_, i) => lists.flatMap((l) => (l[i] ? [l[i]!] : []))).flat();
+    }
+    ids = ids.slice(0, q.count);
     const r = previewDecision(cur, rs, q.key, ids);
     if (!r.ok) throw new Error(`autoComplete: ${q.key}: ${r.errors.join("; ")}`);
     cur = r.character;

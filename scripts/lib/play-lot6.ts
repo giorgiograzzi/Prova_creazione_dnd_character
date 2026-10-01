@@ -28,12 +28,25 @@ const METAMAGIC: [string, string, number, string][] = [
   ["twinned_spell", "Incantesimo gemello", 1, "Conta come uno slot di un livello più alto per bersagliare una creatura in più (negli incantesimi che lo permettono)."],
 ];
 
+// Effetto al lancio di ogni opzione, con i numeri del personaggio ({0} = formula). Compare nelle note solo se il lancio applica l'opzione.
+const CHA1 = "max(1, mod:cha)";
+const META_FX: Record<string, [string, string?]> = {
+  careful_spell: ["fino a {0} creature superano il TS in automatico e non subiscono nemmeno metà danni", CHA1],
+  distant_spell: ["gittata raddoppiata; a contatto diventa 30 ft"],
+  empowered_spell: ["dopo il tiro dei danni ritiri fino a {0} dadi e usi i nuovi risultati (anche con un'altra Metamagia)", CHA1],
+  extended_spell: ["durata raddoppiata (massimo 24 ore); se serve Concentrazione, Vantaggio ai TS per mantenerla"],
+  heightened_spell: ["un bersaglio ha Svantaggio ai TS contro l'incantesimo"],
+  quickened_spell: ["tempo di lancio: Azione Bonus; non vale se hai già lanciato un incantesimo di 1°+ in questo turno, e dopo non ne lanci altri di 1°+"],
+  seeking_spell: ["se manchi con il tiro per colpire, ritiri il d20 e usi il nuovo risultato (anche con un'altra Metamagia)"],
+  subtle_spell: ["senza componenti verbali, somatiche né materiali (restano quelli consumati o con un costo)"],
+  transmuted_spell: ["cambia il tipo di danno tra acido, freddo, fuoco, fulmine, veleno e tuono"],
+  twinned_spell: ["livello effettivo {L+1} per bersagliare una creatura in più (solo incantesimi che lo permettono)"],
+};
+
 // Invocazioni: [id, nome, riassunto, requisito (condizione), effetti]
 const PACT = (id: string) => `hasFeature:${id}`;
 const L = (n: number) => `classLevel:warlock>=${n}`;
 const INVOCATIONS: [string, string, string, string | undefined, Json[]][] = [
-  ["agonizing_blast", "Deflagrazione agonizzante", "Scegli un trucchetto da Warlock che infligge danni: aggiungi Car ai suoi danni. Ripetibile con trucchetti diversi.", L(2),
-    [spellMod("Deflagrazione agonizzante", "con il trucchetto scelto: +{0} ai danni", { cantrip: true, values: ["mod:cha"] })]],
   ["armor_of_shadows", "Armatura d'ombra", "Lanci Armatura magica su di te senza slot.", undefined, [atWill("mage_armor")]],
   ["ascendant_step", "Passo ascendente", "Lanci Levitazione su di te senza slot.", L(5), [atWill("levitate")]],
   ["devils_sight", "Vista del diavolo", "Vedi normalmente nella luce fioca e nell'oscurità, anche magica, entro 120 ft.", L(2), [{ op: "sense", kind: "darkvision", range: 120 }]],
@@ -43,8 +56,6 @@ const INVOCATIONS: [string, string, string, string | undefined, Json[]][] = [
   ["eldritch_smite", "Colpo occulto", "Una volta per turno, colpendo con l'arma del patto puoi spendere uno slot del Patto: +1d8 di forza più 1d8 per livello dello slot, e Prono se il bersaglio è Enorme o più piccolo.", `${L(5)} && ${PACT("pact_of_the_blade")}`,
     [rider({ riderId: "eldritch_smite", label: "Colpo occulto", count: 1, die: 8, damageType: "force", limit: "turn", pactSlot: true, perSlotLevel: 1, when: "attackType:melee",
       text: "Con l'arma del patto; se il bersaglio è Enorme o più piccolo può cadere Prono." })]],
-  ["eldritch_spear", "Lancia occulta", "Scegli un trucchetto da Warlock che infligge danni, con gittata di almeno 10 ft: la gittata aumenta di 30 ft per livello da Warlock. Ripetibile.", L(2),
-    [spellMod("Lancia occulta", "con il trucchetto scelto: gittata +{0} ft", { cantrip: true, values: ["30 * classLevel:warlock"] })]],
   ["fiendish_vigor", "Vigore immondo", "Lanci Vita falsa su di te senza slot, con il risultato massimo dei PF temporanei.", L(2), [atWill("false_life")]],
   ["gaze_of_two_minds", "Sguardo delle due menti", "Azione Bonus: percepisci attraverso i sensi di una creatura consenziente toccata, fino alla fine del tuo prossimo turno (si mantiene con altre Azioni Bonus).", L(5), []],
   ["gift_of_the_depths", "Dono degli abissi", "Respiri sott'acqua e hai Velocità di nuotare pari alla Velocità; lanci Respirare sott'acqua una volta per Riposo Lungo.", L(5),
@@ -62,13 +73,32 @@ const INVOCATIONS: [string, string, string, string | undefined, Json[]][] = [
   ["pact_of_the_blade", "Patto della lama", "Azione Bonus: evochi un'arma del patto (o leghi un'arma magica): competenza, focus, Car per attacco e danni, danni necrotici, psichici o radiosi a scelta.", undefined, []],
   ["pact_of_the_chain", "Patto della catena", "Impari Trova famiglio (lo lanci senza slot) con forme speciali; un tuo attacco può lasciarlo attaccare con la sua Reazione.", undefined, [atWill("find_familiar")]],
   ["pact_of_the_tome", "Patto del tomo", "Un Libro delle ombre con 3 trucchetti e 2 rituali di 1° livello, da qualsiasi lista, preparati finché hai il libro.", undefined, []],
-  ["repelling_blast", "Deflagrazione repulsiva", "Con un trucchetto scelto che richiede un tiro per colpire, spingi di 10 ft una creatura Grande o più piccola che colpisci. Ripetibile.", L(2),
-    [spellMod("Deflagrazione repulsiva", "con il trucchetto scelto: se colpisci una creatura Grande o più piccola, la spingi di 10 ft", { cantrip: true })]],
   ["thirsting_blade", "Lama assetata", "Attacco extra: attacchi due volte con l'arma del patto quando fai l'azione di Attacco.", `${L(5)} && ${PACT("pact_of_the_blade")}`, []],
   ["visions_of_distant_realms", "Visioni di reami lontani", "Lanci Occhio arcano senza slot.", L(9), [atWill("arcane_eye")]],
   ["whispers_of_the_grave", "Sussurri della tomba", "Lanci Parlare con i morti senza slot.", L(7), [atWill("speak_with_dead")]],
   ["witch_sight", "Vista della strega", "Hai Vista del vero entro 30 ft.", L(15), [{ op: "sense", kind: "truesight", range: 30 }]],
 ];
+
+// Invocazioni ripetibili: si scelgono con un trucchetto da Warlock a ciascuna, e due volte lo stesso trucchetto non si può. Ogni coppia
+// (invocazione, trucchetto) è un'opzione a sé con il prerequisito «conosci quel trucchetto»; il bonus vale solo per quel trucchetto.
+// Elenchi dai riassunti degli incantesimi (04): trucchetti da Warlock che infliggono danni, con gittata da 10 ft in su, con tiro per colpire.
+const CANTRIPS: Record<string, string> = {
+  eldritch_blast: "Deflagrazione occulta", chill_touch: "Tocco gelido", mind_sliver: "Scheggia mentale",
+  poison_spray: "Spruzzo velenoso", thunderclap: "Rombo di tuono", toll_the_dead: "Rintocco funebre",
+};
+const DAMAGING = Object.keys(CANTRIPS);
+const FAMILIES: { id: string; name: string; summary: string; cantrips: string[]; text: string; values?: string[] }[] = [
+  { id: "agonizing_blast", name: "Deflagrazione agonizzante", cantrips: DAMAGING, text: "+{0} ai danni", values: ["mod:cha"],
+    summary: "Aggiungi Car ai danni del trucchetto da Warlock scelto che infligge danni. Ripetibile con trucchetti diversi." },
+  { id: "eldritch_spear", name: "Lancia occulta", cantrips: ["eldritch_blast", "mind_sliver", "poison_spray", "toll_the_dead"], text: "gittata +{0} ft", values: ["30 * classLevel:warlock"],
+    summary: "La gittata del trucchetto scelto (danni, gittata da 10 ft) aumenta di 30 ft per livello da Warlock. Ripetibile con trucchetti diversi." },
+  { id: "repelling_blast", name: "Deflagrazione repulsiva", cantrips: ["chill_touch", "eldritch_blast", "poison_spray"], text: "se colpisci una creatura Grande o più piccola, la spingi di 10 ft",
+    summary: "Con il trucchetto scelto (tiro per colpire) spingi di 10 ft una creatura Grande o più piccola che colpisci. Ripetibile con trucchetti diversi." },
+];
+const familyOptions = (): Json[] => FAMILIES.flatMap((f) => f.cantrips.map((c) => ({
+  id: `${f.id}_${c}`, name: T(`${f.name} · ${CANTRIPS[c]}`), description: f.summary, requires: `${L(2)} && hasSpell:${c}`,
+  effects: [spellMod(f.name, `con ${CANTRIPS[c]}: ${f.text}`, { spells: [c], ...(f.values ? { values: f.values } : {}) })],
+})));
 
 export const LOT6: Record<string, Patch> = {
   // ── Stregone ────────────────────────────────────────────────────────────
@@ -77,7 +107,8 @@ export const LOT6: Record<string, Patch> = {
     f.effects.push({ op: "spellBonus", dc: 1, advantage: true, when: active("innate_sorcery") });
   },
   "sorcerer/metamagic": (_f, cls) => {
-    choiceOf(cls, "sorcerer_metamagic").options = METAMAGIC.map(([id, name, cost, d]) => ({ id, name: T(name), description: d, cost, effects: [] }));
+    choiceOf(cls, "sorcerer_metamagic").options = METAMAGIC.map(([id, name, cost, d]) => ({ id, name: T(name), description: d, cost,
+      effects: [spellMod(name, META_FX[id]![0], { metamagic: id, ...(META_FX[id]![1] ? { values: [META_FX[id]![1]] } : {}) })] }));
   },
   "sorcerer/sorcerous_restoration": (f) => {
     f.effects.push(action({ actionId: "sorcerous_restoration", label: "Ripristina punti stregoneria", resource: "sorcerous_restoration", restore: { resource: SP, amount: "floor(classLevel:sorcerer / 2)" },
@@ -135,7 +166,7 @@ export const LOT6: Record<string, Patch> = {
   "evoker/empowered_evocation": (f) => { f.effects.push(spellMod("Invocazione potenziata", "+{0} a un tiro di danno", { all: true, school: "evocation", values: ["mod:int"] })); },
   // ── Warlock ─────────────────────────────────────────────────────────────
   "warlock/eldritch_invocations": (_f, cls) => {
-    choiceOf(cls, "warlock_invocations").options = INVOCATIONS.map(([id, name, d, req, fx]) => ({ id, name: T(name), description: d, ...(req ? { requires: req } : {}), effects: fx }));
+    choiceOf(cls, "warlock_invocations").options = [...INVOCATIONS.map(([id, name, d, req, fx]) => ({ id, name: T(name), description: d, ...(req ? { requires: req } : {}), effects: fx })), ...familyOptions()];
   },
   "warlock/mystic_arcanum": (f) => {
     for (const [lv, spell] of [[11, 6], [13, 7], [15, 8], [17, 9]] as const) {

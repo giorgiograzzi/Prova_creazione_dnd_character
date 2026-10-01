@@ -14,6 +14,7 @@ export interface CondCtx {
   otherWeapon?: boolean; // nell'altra mano c'è un'altra arma
   armorTraining?: Set<string>; // addestramento in armature (prerequisiti dei talenti)
   features: Set<string>;
+  spells?: Set<string>; // incantesimi e trucchetti conosciuti o concessi (hasSpell)
   feats: Set<string>;
   concentration?: string; // incantesimo di cui si mantiene la Concentrazione
   activeStates?: Record<string, string[]>; // privilegi attivati (state.active): id → scelte fatte all'attivazione
@@ -43,6 +44,7 @@ export function evalCondition(c: Condition, x: CondCtx): boolean {
     case "attackType": return x.weapon?.kind === c.value;
     case "hasFeature": return x.features.has(c.value);
     case "hasFeat": return x.feats.has(c.value);
+    case "hasSpell": return !!x.spells?.has(c.value);
     case "active": return !!x.activeStates?.[c.value];
     case "concentrating": return x.concentration === c.value;
     case "attackAbility": return x.attackAbility === c.value;

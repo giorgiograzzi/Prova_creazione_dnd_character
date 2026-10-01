@@ -85,10 +85,14 @@ export function previewDecision(ch: Character, rs: Ruleset, key: string, picked:
   if (q.disabled) return fail(ch, q.disabledReason ?? "Scelta alternativa già coperta");
   if (picked.length > q.count) return fail(ch, `Puoi scegliere al massimo ${q.count} opzioni`);
   if (new Set(picked).size !== picked.length) return fail(ch, "Opzioni ripetute");
-  const errors = picked.flatMap((id) => {
-    const o = q.options.find((x) => x.id === id);
+  const problems = (qq: Question) => picked.flatMap((id) => {
+    const o = qq.options.find((x) => x.id === id);
     return !o ? [`Opzione sconosciuta: ${id}`] : o.enabled ? [] : [`${o.name}: ${o.disabledReason ?? "non disponibile"}`];
   });
+  // un'opzione può dipendere da un'altra scelta nello stesso elenco (Colpo occulto + Patto della lama): se la selezione attuale la blocca,
+  // o se tra le scelte ci sono opzioni con prerequisiti, si rivaluta con quella proposta (costoso: solo quando serve)
+  let errors = problems(q);
+  if (errors.length || q.choice?.options?.some((o) => o.requires && picked.includes(o.id))) { const proposed = allQuestions(setKey(ch, key, picked), rs).find((x) => x.key === key); if (proposed) errors = problems(proposed); }
   if (errors.length) return fail(ch, ...errors);
   let next = setKey(ch, key, picked);
   const extra: Removed[] = [];

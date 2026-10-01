@@ -26,6 +26,7 @@ export function describeCondition(src: string | Condition, rs: Ruleset): string 
     case "ability": return c.cmp === ">=" ? `${AB[c.key ?? ""]} ${c.n}+` : `${AB[c.key ?? ""]} ${CMP[c.cmp]} ${c.n}`;
     case "hasFeature": return `privilegio ${name(rs, c.value)}`;
     case "hasFeat": return `talento ${name(rs, c.value)}`;
+    case "hasSpell": return `incantesimo ${rs.spells.get(c.value)?.name.it ?? c.value}`;
     case "trained": return `addestramento nelle armature ${ARMOR[c.value]}`;
     case "wearingArmor": return c.value === "none" ? "senza armatura" : c.value === "any" ? "con un'armatura" : `armatura ${ARMOR[c.value]}`;
     case "shield": return "con uno scudo";

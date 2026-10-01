@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { metamagicText } from "../engine/magic";
 import { createSlot, SLOT_COST, slotToPoints, spendPoints, SORCERY_POINTS } from "../engine/play";
 import it from "../i18n/it.json";
 import { fmt } from "../ui/format";
@@ -29,7 +30,7 @@ export function SorceryPanel({ d, update }: Pick<TabProps, "d" | "update">) {
         <ul className="pl-list">
           {d.chosenOptions.map((o) => (
             <li key={o.id}><div className="pl-cond" style={{ cursor: "default" }}>
-              <span className="nm">{o.name}{o.description && <><br /><span className="pl-sub">{o.description}</span></>}</span>
+              <span className="nm">{o.name}{(metamagicText(d.spellMods, o.id) ?? o.description) && <><br /><span className="pl-sub">{metamagicText(d.spellMods, o.id) ?? o.description}</span></>}</span>
               <span className="val">{fmt(t.cost, { n: o.cost })}</span>
               <Button disabled={pts.remaining < o.cost} aria-label={`${t.use} ${o.name}`} onClick={() => run((c) => spendPoints(c, d, o.cost), fmt(t.used, { n: o.name, c: o.cost }))}>{t.use}</Button>
             </div></li>

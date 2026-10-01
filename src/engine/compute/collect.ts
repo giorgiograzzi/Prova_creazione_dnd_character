@@ -19,6 +19,7 @@ export interface Collected {
   entries: Entry[];
   features: Set<string>;
   feats: Set<string>;
+  spells: Set<string>; // incantesimi conosciuti o concessi da qualsiasi fonte (condizione hasSpell)
   languages: Set<string>; // linguaggi (Comune + scelte + Druidico, Gergo dei ladri)
   masteries: Set<string>; // armi di cui si usa la proprietà di maestria (scelte `weaponMastery`)
   info: Omit<FeatureInfo, "active" | "picked">[]; // elenco dei privilegi (senza lo stato di attivazione)
@@ -77,7 +78,7 @@ function sourceEffects(c: Choice, picked: string[], key: string): Effect[] {
 // Le scelte di un talento acquisito (Character.feats[i].choices) hanno la precedenza sulle
 // decisioni generali: così un talento ripetibile (Resiliente, Iniziato alla magia) ha scelte per ogni acquisizione.
 export function collectEffects(ch: Character, rs: Ruleset): Collected {
-  const out: Collected = { entries: [], features: new Set(), feats: new Set(), masteries: new Set(), languages: new Set(["common"]), info: [], options: [] };
+  const out: Collected = { entries: [], features: new Set(), feats: new Set(), spells: new Set(), masteries: new Set(), languages: new Set(["common"]), info: [], options: [] };
   const activeStates = ch.state.active ?? {};
   const seenFeats = new Set<string>();
   const general: Picks = (id) => ch.decisions[id];
@@ -90,6 +91,7 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
     }
     out.entries.push({ effect, label: o.label, ...(o.classId ? { classId: o.classId } : {}), ...(o.featureId ? { featureId: o.featureId } : {}) });
     if (effect.op === "grantFeature") out.features.add(effect.feature);
+    if (effect.op === "grantSpell") out.spells.add(effect.spell);
     if (effect.op === "grantFeat") addFeat(effect.feat, undefined, general, effect.via ? `${effect.via}/` : "");
   };
   const addHolder = (h: Holder, o: Owner) => {

@@ -274,14 +274,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .xp-dialog .wz-opt[aria-disabled="true"] { background: var(--dos-bg); }
 .xp-dialog .wz-opt[aria-disabled="true"] .nm { color: var(--dos-shadow); }
 
-/* barra delle sezioni della scheda (al posto della tab bar): "indietro" + 6 sezioni, solo icone su una riga */
-.xp-sections { display: flex; background: var(--xp-face-dark); border-top: 2px solid var(--xp-border); padding-bottom: var(--safe-b); }
-.xp-sections button { flex: 1; min-width: 0; min-height: 56px; display: grid; place-items: center; padding: 0; background: transparent; border: 0; border-right: 1px solid #a9a591; cursor: pointer; color: var(--xp-text); }
+/* barra delle sezioni della scheda (al posto della tab bar): "indietro" + 7 sezioni, solo icone; sugli schermi stretti scorre in orizzontale e "indietro" resta fisso a sinistra */
+.xp-sections { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; background: var(--xp-face-dark); border-top: 2px solid var(--xp-border); padding-bottom: var(--safe-b); }
+.xp-sections::-webkit-scrollbar { display: none; }
+.xp-sections button { flex: 1 0 56px; min-width: 56px; min-height: 56px; display: grid; place-items: center; padding: 0; background: transparent; border: 0; border-right: 1px solid #a9a591; cursor: pointer; color: var(--xp-text); }
 .xp-sections button:last-child { border-right: 0; }
 .xp-sections .lbl { display: none; }
 .xp-sections svg { width: 28px; height: 28px; }
 .xp-sections button[aria-current="page"] { background: var(--xp-face); box-shadow: inset 0 4px 0 var(--xp-accent); }
-.xp-sections .back { background: var(--xp-select); color: var(--xp-select-text); }
+.xp-sections .back { position: sticky; left: 0; z-index: 1; background: var(--xp-select); color: var(--xp-select-text); }
 
 /* filtri a pulsanti dentro i popup */
 .xp-dialog .pl-tabs button { background: var(--dos-bg); color: var(--dos-text); border: 2px solid var(--dos-text); border-radius: 0; font-family: inherit; }
@@ -313,6 +314,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pwa-toast { position: fixed; z-index: 900; left: 12px; right: 12px; bottom: calc(var(--tap) + var(--safe-b) + 16px); max-width: 420px; margin: 0 auto;
   padding: 10px 12px 2px; background: var(--xp-face); color: var(--xp-text, #000); border: 2px solid var(--xp-border); border-radius: 6px; box-shadow: 3px 3px 0 rgba(0,0,0,.35); }
 .pwa-toast p { margin: 0 0 8px; }
+
+/* scheda in una colonna: le parti sono separate da una linea */
+.pl-sec + .pl-sec { margin-top: 24px; padding-top: 16px; border-top: 3px double var(--xp-border); }
 
 /* ===== Form factor =====
    telefono: < 720px (colonna unica, barra in basso)

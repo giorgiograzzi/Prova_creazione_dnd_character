@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { icons, type IconName } from "./icons";
 import "./xp.css";
@@ -57,8 +57,17 @@ export function TabBar({ tabs, current, onSelect }: { tabs: TabDef[]; current: s
 // Solo icone per risparmiare spazio (il nome è in aria-label e title)
 export function SectionBar({ items, current, onSelect, onBack, backLabel }: { items: { id: string; label: string; icon: IconName }[]; current: string; onSelect: (id: string) => void; onBack: () => void; backLabel: string }) {
   const Back = icons.back;
+  const bar = useRef<HTMLElement>(null);
+  // la barra scorre: la sezione attiva resta sempre in vista
+  useEffect(() => {
+    const el = bar.current, cur = el?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!el || !cur) return;
+    const back = el.querySelector<HTMLElement>(".back")?.offsetWidth ?? 0;
+    if (cur.offsetLeft - back < el.scrollLeft) el.scrollLeft = cur.offsetLeft - back;
+    else if (cur.offsetLeft + cur.offsetWidth > el.scrollLeft + el.clientWidth) el.scrollLeft = cur.offsetLeft + cur.offsetWidth - el.clientWidth;
+  }, [current]);
   return (
-    <nav className="xp-sections" aria-label="Sezioni della scheda">
+    <nav ref={bar} className="xp-sections" aria-label="Sezioni della scheda">
       <button type="button" className="back" aria-label={backLabel} title={backLabel} onClick={onBack}><Back /><span className="lbl" aria-hidden="true">{backLabel}</span></button>
       {items.map((s) => {
         const Icon = icons[s.icon];
@@ -72,11 +81,29 @@ export function SectionBar({ items, current, onSelect, onBack, backLabel }: { it
 // `titleAction` (opzionale) prende il posto del pulsante "_" nella barra: un interruttore con simbolo, es. Homebrew / Manuale
 export function Dialog({ title, children, onClose, titleAction }: { title: string; children: ReactNode; onClose: () => void; titleAction?: { label: string; icon: IconName; pressed: boolean; onClick: () => void } }) {
   const ActionIcon = titleAction ? icons[titleAction.icon] : null;
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  const id = useRef(Math.random().toString(36).slice(2)).current;
+  const alive = useRef(false);
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeRef.current(); };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, []);
+  // "Indietro" del telefono chiude il popup: ha una voce nella history, tolta alla chiusura (se non l'ha già tolta l'indietro stesso)
+  useEffect(() => {
+    alive.current = true;
+    const mine = () => (history.state as { dlg?: string } | null)?.dlg === id;
+    if (!mine()) history.pushState({ ...history.state, dlg: id }, "");
+    const onPop = () => { if (!mine()) closeRef.current(); };
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      alive.current = false;
+      // rinviato: nello sviluppo (StrictMode) l'effetto riparte subito e la voce va tenuta
+      setTimeout(() => { if (!alive.current && mine()) history.back(); }, 0);
+    };
+  }, [id]);
   // in un portale sul body: sopra intestazione e barra in basso, qualunque sia il contenitore da cui si apre
   return createPortal(
     <div className="xp-overlay" onClick={onClose}>

@@ -37,9 +37,12 @@ export function computeResources(x: Ctx): Derived["resources"] {
 // Azioni delle risorse (Seconda ripresa...): una per ogni effetto `resourceAction` attivo, con il bonus già calcolato
 export function computeActions(x: Ctx, resources: Derived["resources"]): ResourceActionInfo[] {
   const out: ResourceActionInfo[] = [];
+  // le opzioni scelte (specie, manovre) non hanno un privilegio proprio: l'azione si lega al privilegio che definisce la risorsa
+  const ownerOf = new Map<string, string>();
+  for (const { effect: e, featureId: fid } of x.active) if (e.op === "resource" && fid && !ownerOf.has(e.resourceId)) ownerOf.set(e.resourceId, fid);
   for (const { effect: e, featureId: fid } of x.active) {
     if (e.op !== "resourceAction") continue;
-    const featureId = fid ?? e.resource ?? e.actionId; // le scelte di specie non hanno un tratto: l'azione si lega alla sua risorsa
+    const featureId = fid ?? (e.resource && ownerOf.get(e.resource)) ?? e.resource ?? e.actionId;
     out.push({
       id: e.actionId, featureId, label: e.label, ...(e.resource ? { resource: e.resource } : {}), cost: e.cost, variable: e.variable, ...(e.die ? { die: e.die, count: evalValue(e.count ?? 1, x) } : {}),
       bonus: e.bonus === undefined ? 0 : evalValue(e.bonus, x), apply: e.apply,

@@ -122,13 +122,7 @@ export const LOT1: Record<string, Patch> = {
     f.effects.push({ op: "initiativeAdvantage", mode: "advantage" }, { op: "checkAdvantage", mode: "advantage", skills: ["athletics"] });
   },
   // ── Maestro di battaglia ────────────────────────────────────────────────
-  // Dado di superiorità per livello (d8, d10 dal 10°, d12 dal 18°: colonna della tabella); le manovre restano da estrarre
-  "battle_master/combat_superiority": (f, sub) => {
-    for (const [from, to, v] of ranges(sub.table?.dado_superiorita ?? [])) {
-      f.effects.push(action({ actionId: "maneuver", label: "Usa una manovra", resource: "superiority_dice", die: Number(String(v).replace("d", "")),
-        text: "Aggiungi il dado secondo la manovra scelta", when: lvl("fighter", from, to) }));
-    }
-  },
+  // Manovre (azioni e dadi extra per livello): vedi play-maneuvers.ts
   "battle_master/know_your_enemy": (f) => {
     f.effects.push(action({ actionId: "know_your_enemy_die", label: "Ripristina spendendo un dado", resource: "superiority_dice", restore: { resource: "know_your_enemy", amount: 1 } }));
   },

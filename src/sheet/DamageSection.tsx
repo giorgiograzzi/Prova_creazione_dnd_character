@@ -15,6 +15,8 @@ const t = it.play;
 interface SlotChoice { key: string; label: string; level: number; via: CastVia }
 function slotChoices(x: AttackExtra, d: TabProps["d"]): SlotChoice[] {
   const base = x.baseLevel ?? 1, out: SlotChoice[] = [];
+  const pact = d.spellSlots.pact;
+  if (x.pactSlot) return pact && pact.remaining > 0 ? [{ key: "pact", label: fmt(t.slotPact, { n: pact.level }), level: pact.level, via: { kind: "pact" } }] : []; // solo lo slot del Patto
   const free = d.resources[`spell:${x.slotSpell}`];
   if (free && free.remaining > 0) out.push({ key: "free", label: t.slotFree, level: base, via: { kind: "free", resourceId: `spell:${x.slotSpell}` } });
   d.spellSlots.remaining.forEach((n, i) => { if (n > 0 && i + 1 >= base) out.push({ key: `slot${i + 1}`, label: fmt(t.slotLevel, { n: i + 1 }), level: i + 1, via: { kind: "slot", level: i + 1 } }); });
@@ -31,12 +33,12 @@ export function DamageSection({ a, rs, ch, update, derived }: { a: AttackOption;
   const [msg, setMsg] = useState<string[]>([]);
   const canUse = !!update && !!derived && !!ch;
   const choiceOf = (x: AttackExtra): SlotChoice | undefined => {
-    if (!x.slotSpell || !derived) return undefined;
+    if (!(x.slotSpell || x.pactSlot) || !derived) return undefined;
     const all = slotChoices(x, derived);
     return all.find((c) => c.key === slotKey[x.id]) ?? all[0];
   };
-  const chosen = a.extras.filter((x) => picked.includes(x.id) && !x.used && (!x.slotSpell || choiceOf(x)));
-  const diceOf = (x: AttackExtra) => (x.slotSpell ? extraDice(x, choiceOf(x)?.level ?? x.baseLevel ?? 1) : x.dice);
+  const chosen = a.extras.filter((x) => picked.includes(x.id) && !x.used && (!(x.slotSpell || x.pactSlot) || choiceOf(x)));
+  const diceOf = (x: AttackExtra) => (x.slotSpell || x.pactSlot ? extraDice(x, choiceOf(x)?.level ?? x.baseLevel ?? 1) : x.dice);
   const dice = [a.damage.dice, ...chosen.map(diceOf)].filter(Boolean).join("+");
   const bonus = a.damage.bonus.value + chosen.reduce((n, x) => n + x.bonus, 0);
   const spend = () => {
@@ -46,12 +48,14 @@ export function DamageSection({ a, rs, ch, update, derived }: { a: AttackOption;
     update!((c) => chosen.reduce((cur, x) => {
       let next = cur;
       const ch0 = choiceOf(x);
-      if (x.slotSpell && ch0) {
+      if (x.pactSlot && ch0) {
+        next = { ...next, state: { ...next.state, pactUsed: (next.state.pactUsed ?? 0) + 1 } }; // lo slot del Patto non lancia un incantesimo: si spende e basta
+      } else if (x.slotSpell && ch0) {
         const r = castSpell(next, rs, derived!, x.slotSpell, ch0.via);
         if (!r.ok) { errs.push(...r.errors); return cur; }
         next = r.character; notes = [...notes, ...r.notes];
       }
-      const r = applyExtra(next, derived!, x.slotSpell ? { ...x, cost: undefined } : x);
+      const r = applyExtra(next, derived!, x.slotSpell || x.pactSlot ? { ...x, cost: undefined } : x);
       if (!r.ok) errs.push(...r.errors);
       return r.character;
     }, c));
@@ -65,8 +69,8 @@ export function DamageSection({ a, rs, ch, update, derived }: { a: AttackOption;
       {a.extras.length > 0 && (
         <fieldset className="xp-fieldset"><legend>{t.extrasTitle}</legend>
           {a.extras.map((x) => {
-            const slots = x.slotSpell && derived ? slotChoices(x, derived) : [];
-            const noSlot = !!x.slotSpell && slots.length === 0;
+            const slots = (x.slotSpell || x.pactSlot) && derived ? slotChoices(x, derived) : [];
+            const noSlot = !!(x.slotSpell || x.pactSlot) && slots.length === 0;
             return (
               <div key={x.id}>
                 <label className="xp-check"><input type="checkbox" disabled={x.used || !canUse || noSlot} checked={picked.includes(x.id) && !x.used}

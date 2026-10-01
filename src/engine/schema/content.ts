@@ -29,6 +29,8 @@ export const activationSchema = z.object({
   resource: id.optional(), // risorsa di cui si consumano `cost` usi
   cost: z.number().int().min(1).default(1), // usi consumati (Difesa superiore: 3 punti disciplina)
   requires: condition.optional(), // per poterlo attivare (Ira: non con armatura pesante)
+  // Costo alternativo quando gli usi sono finiti (Ali di drago: 3 punti stregoneria): se `when` vale e la risorsa basta
+  alt: z.object({ resource: id, cost: z.number().int().min(1), when: condition.optional() }).optional(),
   label: text.optional(), // nome della scelta all'attivazione ("Aspetto")
   options: z.array(optionSchema).optional(), // scelta all'attivazione: se ci sono, se ne sceglie una
   duration: z.string().optional(), // solo testo ("1 minuto")

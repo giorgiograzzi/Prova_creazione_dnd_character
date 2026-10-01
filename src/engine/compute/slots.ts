@@ -25,6 +25,12 @@ export function computeSlots(ch: Character, rs: Ruleset): Derived["spellSlots"] 
   let slots: number[] = [];
   if (sources.length === 1) slots = sources[0]!.own ?? [];
   else if (sources.length > 1) slots = rs.slotTables.get("full_caster")?.slots[Math.min(20, casterLevel) - 1] ?? [];
+  // slot creati con i punti stregoneria: si aggiungono al totale del loro livello (max 5°) e spariscono al Riposo Lungo
+  const extra = ch.state.extraSlots ?? {};
+  if (Object.keys(extra).length) {
+    const len = Math.max(slots.length, ...Object.keys(extra).map(Number));
+    slots = Array.from({ length: len }, (_, i) => (slots[i] ?? 0) + (extra[String(i + 1)] ?? 0));
+  }
   const used = slots.map((_, i) => Math.min(ch.state.slotsUsed[i + 1] ?? 0, slots[i]!));
   return { casterLevel, slots, used, remaining: slots.map((n, i) => n - used[i]!), ...(pact && pact.count > 0 ? { pact: { ...pact, used: Math.min(ch.state.pactUsed ?? 0, pact.count), remaining: pact.count - Math.min(ch.state.pactUsed ?? 0, pact.count) } } : {}) };
 }

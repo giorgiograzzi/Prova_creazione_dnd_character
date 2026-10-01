@@ -67,17 +67,18 @@ export const effectSchema = z.discriminatedUnion("op", [
     // Costo in slot (Punizione divina): `count`d`die` al livello dell'incantesimo, +`perSlotLevel` dadi per ogni livello di slot in più;
     // lo slot si sceglie nel tiro del danno e si spende lanciando l'incantesimo (o con il suo lancio gratuito)
     slotSpell: id.optional(), perSlotLevel: z.number().int().min(1).default(1),
+    pactSlot: z.boolean().default(false), // costo: uno slot del Patto (Colpo occulto): 1d8 + 1d8 per livello dello slot
     text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(), // {0}, {1}... nel testo
   }),
   // Azione di una risorsa (Seconda ripresa, Imposizione delle mani, Ira persistente...): spende usi di `resource`, tira dadi
   // (die per ogni uso speso, più `bonus` una volta), applica cure o PF temporanei e può restituire usi di un'altra risorsa.
   //   variable: spendi da 1 a tutti gli usi rimasti (Imposizione delle mani: ogni uso è 1 PF). Senza `die`, il totale è il numero di usi spesi.
   e("resourceAction", {
-    actionId: id, label: z.string(), resource: id, cost: z.number().int().min(0).default(1), variable: z.boolean().default(false),
+    actionId: id, label: z.string(), resource: id.optional(), cost: z.number().int().min(0).default(1), variable: z.boolean().default(false), // senza `resource` l'azione è gratuita (promemoria con numeri)
     die: z.number().int().min(2).optional(), count: value.default(1), // dadi per ogni uso speso (numero o formula)
     bonus: value.optional(),
     apply: z.enum(["heal", "tempHp", "none"]).default("none"),
-    restore: z.object({ resource: id, amount: z.union([z.number().int().min(1), z.literal("all")]) }).optional(),
+    restore: z.object({ resource: id, amount: z.union([z.number().int().min(1), z.literal("all"), z.string().refine(isValidFormula, "formula non valida")]) }).optional(), // amount: numero, "all" o formula (Ripristino stregonesco: metà livello)
     text: z.string().optional(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(),
   }),
   // Dadi di danno con un minimo (Combattere con armi possenti: 1 e 2 contano 3): vale per tutti i dadi di danno dell'attacco
@@ -88,7 +89,11 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("spellModifier", {
     label: z.string(), text: z.string(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional(),
     cantrip: z.boolean().default(false), spells: z.array(id).optional(), minLevel: z.number().int().min(1).max(9).optional(),
+    all: z.boolean().default(false), // vale per ogni incantesimo lanciato
+    school: z.string().optional(), // con `all`: solo gli incantesimi di questa scuola (Invocazione potenziata: evocation)
   }),
+  // Incantesimi: CD e bonus di attacco in più, Vantaggio ai tiri per colpire con incantesimo (Stregoneria innata)
+  e("spellBonus", { dc: value.optional(), attack: value.optional(), advantage: z.boolean().default(false) }),
   // Aura che dà un vantaggio anche agli alleati vicini (Aura di protezione, di coraggio...): sulla scheda l'effetto su di te
   // vale come sempre (altri effetti); qui si dichiara raggio e testo, mostrati in Stato per dirlo al tavolo. Con lo stesso `auraId` vale il raggio maggiore.
   e("aura", { auraId: id, label: z.string(), radius: value, text: z.string(), values: z.array(z.string().refine(isValidFormula, "formula non valida")).optional() }),
@@ -100,7 +105,7 @@ export const effectSchema = z.discriminatedUnion("op", [
   e("grantSpell", {
     spell: id, mode: z.enum(["cantrip", "alwaysPrepared", "known"]), ability: ability.optional(),
     abilityFrom: id.optional(), // id di una scelta (options di caratteristiche) che fissa la caratteristica da incantatore
-    freeCast: z.object({ uses: value, recharge }).optional(),
+    freeCast: z.object({ uses: value, recharge, unlimited: z.boolean().optional() }).optional(), // unlimited: a volontà, senza slot né usi (Padronanza degli incantesimi, invocazioni)
   }),
   e("grantFeature", { feature: id }),
   e("grantFeat", { feat: id, via: z.string().optional() }), // via: id della scelta che lo concede (le sue scelte interne hanno chiave "<via>/<scelta>")

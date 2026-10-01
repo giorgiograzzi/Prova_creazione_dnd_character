@@ -2,7 +2,7 @@ import { SKILLS, type Choice, type Effect } from "../schema";
 import type { Character } from "../types";
 import type { Ruleset } from "../ruleset";
 import { lookupItem, needsAttunement } from "../equipment/loadout";
-import type { FeatureInfo } from "./types";
+import type { ChosenOption, FeatureInfo } from "./types";
 
 // Un effetto con la sua provenienza ("da dove viene")
 export interface Entry {
@@ -12,7 +12,7 @@ export interface Entry {
   featureId?: string; // privilegio, tratto o talento che contiene l'effetto (azioni di risorsa)
 }
 
-type ActivationDef = { resource?: string; cost?: number; requires?: string; label?: { it: string }; duration?: string; options?: { id: string; name: { it: string }; description?: string; effects: Effect[] }[] };
+type ActivationDef = { resource?: string; cost?: number; alt?: { resource: string; cost: number; when?: string }; requires?: string; label?: { it: string }; duration?: string; options?: { id: string; name: { it: string }; description?: string; effects: Effect[] }[] };
 type PlayFields = { usage?: { uses: number | string | { table: number[] }; recharge: "short_rest" | "long_rest" | "dawn" | "none"; partialShortRest?: number }; activation?: ActivationDef; needsReview?: boolean };
 
 export interface Collected {
@@ -22,6 +22,7 @@ export interface Collected {
   languages: Set<string>; // linguaggi (Comune + scelte + Druidico, Gergo dei ladri)
   masteries: Set<string>; // armi di cui si usa la proprietà di maestria (scelte `weaponMastery`)
   info: Omit<FeatureInfo, "active" | "picked">[]; // elenco dei privilegi (senza lo stato di attivazione)
+  options: ChosenOption[]; // opzioni scelte con un costo (Metamagia)
 }
 
 const SKILL_IDS = new Set<string>(SKILLS);
@@ -35,12 +36,13 @@ const withAbility = (c: Choice, spell: Effect & { op: "grantSpell" }): Effect =>
   ({ ...spell, ...(c.ability ? { ability: c.ability } : {}), ...(c.abilityFrom ? { abilityFrom: c.abilityFrom } : {}) });
 
 // Convenzione per le scelte "source": gli id scelti diventano effetti standard.
-//   skills / expertise / skillsTools / tools:* / weapons:* / cantrips:* / spells:* / freespells / alwaysspells / resistance / feats:*
+//   skills / expertise / skillsTools / tools:* / weapons:* / cantrips:* / spells:* / freespells / signaturespells / masteryspells / alwaysspells / resistance / feats:*
 // Le altre (languages, weaponMastery...) non hanno effetti sul calcolo.
 function sourceEffects(c: Choice, picked: string[], key: string): Effect[] {
   const kind = c.source!.split(":")[0];
-  const spell = (s: string, mode: "cantrip" | "known" | "alwaysPrepared", free?: boolean) =>
-    withAbility(c, { op: "grantSpell", spell: s, mode, ...(free ? { freeCast: { uses: 1, recharge: "long_rest" as const } } : {}) });
+  // free: 1 lancio gratuito per Riposo Lungo (default dei "freespells"), per Riposo Breve o Lungo (Incantesimi distintivi), a volontà (Padronanza)
+  const spell = (s: string, mode: "cantrip" | "known" | "alwaysPrepared", free?: "long" | "short" | "atwill") =>
+    withAbility(c, { op: "grantSpell", spell: s, mode, ...(free === "long" ? { freeCast: { uses: 1, recharge: "long_rest" as const } } : free === "short" ? { freeCast: { uses: 1, recharge: "short_rest" as const } } : free === "atwill" ? { freeCast: { uses: 1, recharge: "none" as const, unlimited: true } } : {}) });
   switch (kind) {
     case "skills": return [{ op: "grantSkillProficiency", skills: picked as never, expertise: false, upgradeToExpertise: false }];
     case "expertise": return [{ op: "grantSkillProficiency", skills: picked as never, expertise: true, upgradeToExpertise: false }];
@@ -58,7 +60,10 @@ function sourceEffects(c: Choice, picked: string[], key: string): Effect[] {
       ];
     }
     // incantesimo sempre preparato, lanciabile 1 volta per Riposo Lungo senza slot
-    case "freespells": return picked.map((s) => spell(s, "alwaysPrepared", true));
+    case "freespells": return picked.map((s) => spell(s, "alwaysPrepared", "long"));
+    // Incantesimi distintivi del Mago: sempre preparati, 1 lancio gratuito per Riposo Breve o Lungo; Padronanza degli incantesimi: a volontà
+    case "signaturespells": return picked.map((s) => spell(s, "alwaysPrepared", "short"));
+    case "masteryspells": return picked.map((s) => spell(s, "alwaysPrepared", "atwill"));
     // incantesimo sempre preparato (senza lancio gratuito)
     case "alwaysspells": return picked.map((s) => spell(s, "alwaysPrepared"));
     case "resistance": return [{ op: "resistance", types: picked }];
@@ -72,7 +77,7 @@ function sourceEffects(c: Choice, picked: string[], key: string): Effect[] {
 // Le scelte di un talento acquisito (Character.feats[i].choices) hanno la precedenza sulle
 // decisioni generali: così un talento ripetibile (Resiliente, Iniziato alla magia) ha scelte per ogni acquisizione.
 export function collectEffects(ch: Character, rs: Ruleset): Collected {
-  const out: Collected = { entries: [], features: new Set(), feats: new Set(), masteries: new Set(), languages: new Set(["common"]), info: [] };
+  const out: Collected = { entries: [], features: new Set(), feats: new Set(), masteries: new Set(), languages: new Set(["common"]), info: [], options: [] };
   const activeStates = ch.state.active ?? {};
   const seenFeats = new Set<string>();
   const general: Picks = (id) => ch.decisions[id];
@@ -101,7 +106,7 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
     out.info.push({
       id: h.id, name: h.name.it, description: h.description, kind, source, level, ...(resourceId ? { resourceId } : {}),
       ...(h.activation ? { activation: {
-        ...(h.activation.resource ? { resource: h.activation.resource, cost: h.activation.cost ?? 1 } : {}), ...(h.activation.requires ? { requires: h.activation.requires } : {}),
+        ...(h.activation.resource ? { resource: h.activation.resource, cost: h.activation.cost ?? 1 } : {}), ...(h.activation.alt ? { alt: h.activation.alt } : {}), ...(h.activation.requires ? { requires: h.activation.requires } : {}),
         ...(h.activation.label ? { label: h.activation.label.it } : {}), ...(h.activation.duration ? { duration: h.activation.duration } : {}),
         options: (h.activation.options ?? []).map((x) => ({ id: x.id, name: x.name.it, ...(x.description ? { description: x.description } : {}) })),
       } } : {}),
@@ -115,6 +120,7 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
       for (const opt of c.options) {
         if (!picked.includes(opt.id)) continue;
         out.features.add(opt.id); // l'opzione scelta conta come posseduta (prerequisiti: hasFeature:pact_of_the_blade)
+        if (opt.cost !== undefined) out.options.push({ id: opt.id, name: opt.name.it, ...(opt.description ? { description: opt.description } : {}), cost: opt.cost, choiceId: c.id });
         opt.effects.forEach((e) => add(e, o));
       }
     } else if (c.source) {

@@ -79,7 +79,8 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
         extras.push({
           id: e.riderId, label: e.label, dice, bonus, ...(e.damageType ? { type: e.damageType } : {}), limit: e.limit,
           ...(e.cost ? { cost: e.cost, costAmount: e.costAmount } : {}),
-          ...(e.slotSpell ? { slotSpell: e.slotSpell, baseLevel: rs.spells.get(e.slotSpell)?.level ?? 1, perSlotLevel: e.perSlotLevel } : {}), used: !!x.ch.state.once?.[e.riderId], ...(e.text ? { text: fillText(e.text, e.values, c2) } : {}),
+          ...(e.slotSpell ? { slotSpell: e.slotSpell, baseLevel: rs.spells.get(e.slotSpell)?.level ?? 1, perSlotLevel: e.perSlotLevel } : {}),
+          ...(e.pactSlot ? { pactSlot: true, baseLevel: 0, perSlotLevel: e.perSlotLevel } : {}), used: !!x.ch.state.once?.[e.riderId], ...(e.text ? { text: fillText(e.text, e.values, c2) } : {}),
         });
       }
     }
@@ -146,6 +147,8 @@ export function computeAttacks(x: Ctx, profs: Profs, cs: ConditionState, untrain
 export function attacksPerAction(x: Ctx): number {
   const f = x.collected.features;
   let n = f.has("three_extra_attacks") ? 4 : f.has("two_extra_attacks") ? 3 : f.has("extra_attack") ? 2 : 1;
+  // Lama assetata e Lama divoratrice (Warlock): attacco extra con l'arma del patto
+  n = Math.max(n, f.has("devouring_blade") ? 3 : f.has("thirsting_blade") ? 2 : 1);
   const col = x.rs.classes.get("fighter")?.table.attacchi;
   const lv = x.classLevels.fighter;
   if (col && lv) n = Math.max(n, Number(col[lv - 1]));

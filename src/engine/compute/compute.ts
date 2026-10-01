@@ -60,10 +60,18 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     const ability = cdef?.spellAbility ?? (sdef?.caster === "third" ? sdef.spellAbility : undefined);
     if (!ability) return [];
     const m = x.mods[ability];
+    // Stregoneria innata e simili: CD e attacco in più, Vantaggio ai tiri per colpire con incantesimo
+    const dcParts = [{ label: "Base", value: 8 }, { label: `Mod ${ability}`, value: m }, { label: "Competenza", value: x.pb }];
+    const atkParts = [{ label: `Mod ${ability}`, value: m }, { label: "Competenza", value: x.pb }];
+    const adv: string[] = [];
+    for (const { effect: e, label } of x.active) {
+      if (e.op !== "spellBonus") continue;
+      if (e.dc !== undefined) dcParts.push({ label, value: evalValue(e.dc, x) });
+      if (e.attack !== undefined) atkParts.push({ label, value: evalValue(e.attack, x) });
+      if (e.advantage) adv.push(label);
+    }
     return [{
-      classId: c.classId, ability,
-      dc: sum([{ label: "Base", value: 8 }, { label: `Mod ${ability}`, value: m }, { label: "Competenza", value: x.pb }]),
-      attack: sum([{ label: `Mod ${ability}`, value: m }, { label: "Competenza", value: x.pb }]),
+      classId: c.classId, ability, dc: sum(dcParts), attack: sum(atkParts), ...combineMode(adv, []).mode === "advantage" ? { attackMode: "advantage" as const, attackModeSources: adv } : { attackMode: "normal" as const, attackModeSources: [] },
     }];
   });
 
@@ -78,7 +86,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
     speed: { ...speed, walk: withOverride(speed.walk, o["speed.walk"]) },
     senses: computeSenses(x),
     resistances: cs.resistAll.length ? [...new Set([...computeResistances(x), "all"])].sort() : computeResistances(x),
-    resources, auras, spellMods: computeSpellMods(x), actions: computeActions(x, resources),
+    resources, auras, spellMods: computeSpellMods(x), chosenOptions: x.collected.options, actions: computeActions(x, resources),
     spellcasting,
     grantedSpells: computeGrantedSpells(x),
     spellSlots: computeSlots(ch, rs),

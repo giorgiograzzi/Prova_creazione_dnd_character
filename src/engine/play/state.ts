@@ -73,8 +73,13 @@ export function setActive(ch: Character, rs: Ruleset, d: Pick<Derived, "featureL
   if (a.resource) {
     const r = d.resources[a.resource];
     const n = a.cost ?? 1;
-    if (!r || r.remaining < n) return fail("Nessun uso rimasto");
-    next = useResource(ch, a.resource, r.max.value, n);
+    if (r && r.remaining >= n) next = useResource(ch, a.resource, r.max.value, n);
+    else {
+      // costo alternativo a usi finiti (Ali di drago: 3 punti stregoneria), se vale la sua condizione
+      const alt = a.alt, ar = alt ? d.resources[alt.resource] : undefined;
+      if (!alt || !ar || ar.remaining < alt.cost || (alt.when && !holds(alt.when, buildCtx(ch, rs)))) return fail("Nessun uso rimasto");
+      next = useResource(ch, alt.resource, ar.max.value, alt.cost);
+    }
   }
   return { ok: true, errors: [], character: clearOnce(set(next, { active: { ...(next.state.active ?? {}), [id]: a.options.length ? picks : [] } }), id) };
 }

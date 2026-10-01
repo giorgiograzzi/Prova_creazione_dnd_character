@@ -51,6 +51,7 @@ export function castSpell(ch: Character, rs: Ruleset, d: Derived, spellId: strin
     case "free": {
       const src = entry.sources.find((s) => s.free?.resourceId === via.resourceId);
       if (!src?.free) return fail("Lancio gratuito non disponibile");
+      if (src.free.unlimited) { notes.push("A volontà: al livello più basso dell'incantesimo, senza slot"); break; }
       if (src.free.remaining <= 0) return fail("Nessun lancio gratuito rimasto");
       next = useResource(ch, via.resourceId, src.free.max, 1);
       notes.push("Lancio gratuito: al livello più basso dell'incantesimo, con la caratteristica di quella fonte");

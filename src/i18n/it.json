@@ -459,6 +459,8 @@
     "castSlot": "Slot {n}° ({r})",
     "castPact": "Slot del Patto {n}° ({r})",
     "castFree": "Gratis ({r}/{m})",
+    "atWill": "a volontà",
+    "sorcery": { "title": "Punti stregoneria", "points": "Punti: {r}/{m}", "cost": "{n} PS", "use": "Usa", "used": "{n}: spesi {c} punti. Applica l'effetto al lancio.", "makeLevel": "Slot da creare", "makeOption": "Crea slot di {n}° ({c} punti)", "make": "Crea slot", "made": "Creato uno slot di {n}° livello (sparisce al Riposo Lungo).", "backLevel": "Slot da convertire", "backOption": "Slot di {n}° ({r} rimasti)", "back": "Slot → punti", "converted": "Slot di {n}° convertito in punti.", "noSlots": "nessuno slot libero" },
     "castRitual": "Rituale (+10 minuti, senza slot)",
     "cantCast": "Nessun modo per lanciarlo ora.",
     "school": {

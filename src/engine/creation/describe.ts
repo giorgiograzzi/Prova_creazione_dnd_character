@@ -30,6 +30,7 @@ export function describeCondition(src: string | Condition, rs: Ruleset): string 
     case "wearingArmor": return c.value === "none" ? "senza armatura" : c.value === "any" ? "con un'armatura" : `armatura ${ARMOR[c.value]}`;
     case "shield": return "con uno scudo";
     case "twoHanded": return "arma a due mani";
+    case "unarmed": return "colpo senz'armi";
     case "otherWeapon": return "con un'altra arma in mano";
     case "equipped": return `equipaggiato: ${c.value}`;
     case "usingWeapon": return `con ${name(rs, c.value)}`;

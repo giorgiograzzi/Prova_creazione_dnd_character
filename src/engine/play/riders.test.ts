@@ -22,6 +22,10 @@ const rs = (() => {
     F({ id: "smite", name: { it: "Colpo costoso" }, effects: [
       { op: "resource", resourceId: "ki", uses: 2, recharge: "short_rest" },
       { op: "attackRider", riderId: "smite", label: "Colpo costoso", count: 1, die: 8, bonus: "mod:str", damageType: "radiant", limit: "none", cost: "ki", attackType: "melee", auto: false }] }),
+    // senza dadi, costo di 3 usi, testo con numeri calcolati, solo a mani nude
+    F({ id: "palm", name: { it: "Palmo" }, effects: [
+      { op: "resource", resourceId: "focus", uses: 5, recharge: "short_rest" },
+      { op: "attackRider", riderId: "palm", label: "Palmo", count: 0, limit: "none", cost: "focus", costAmount: 3, attackType: "any", auto: false, when: "unarmed", values: ["8 + mod:str + pb", "classLevel:barbarian"], text: "CD {0}, livello {1}" }] }),
     // sempre attivo
     F({ id: "radiant_strikes", name: { it: "Colpi radianti" }, effects: [
       { op: "attackRider", riderId: "radiant_strikes", label: "Colpi radianti", count: 1, die: 8, limit: "none", attackType: "melee", auto: true, when: "attackAbility:str" }] }),
@@ -93,6 +97,23 @@ describe("costo in risorsa", () => {
     c = applyExtra(c, d(c), x).character;
     c = applyExtra(c, d(c), x).character;
     expect(c.state.resourcesUsed.ki).toBe(2);
+    expect(applyExtra(c, d(c), x)).toMatchObject({ ok: false, errors: ["Nessun uso rimasto"] });
+  });
+});
+
+describe("extra senza dadi, costo multiplo, testo con numeri, colpo senz'armi", () => {
+  it("il testo ha i numeri calcolati e l'extra senza dadi ha solo costo e limite", () => {
+    const c = barb([]);
+    const unarmed = d(c).attacks.find((a) => a.id === "unarmed")!;
+    const x = unarmed.extras.find((e) => e.id === "palm")!;
+    expect(x).toMatchObject({ dice: "", bonus: 0, cost: "focus", costAmount: 3, text: "CD 14, livello 9" }); // 8 + For 2 + competenza 4
+    expect(sword(c).extras.find((e) => e.id === "palm")).toBeUndefined(); // `unarmed`: solo senz'armi
+  });
+  it("spende 3 usi alla volta e si ferma quando non bastano", () => {
+    let c = barb([]);
+    const x = d(c).attacks.find((a) => a.id === "unarmed")!.extras.find((e) => e.id === "palm")!;
+    c = applyExtra(c, d(c), x).character;
+    expect(c.state.resourcesUsed.focus).toBe(3);
     expect(applyExtra(c, d(c), x)).toMatchObject({ ok: false, errors: ["Nessun uso rimasto"] });
   });
 });

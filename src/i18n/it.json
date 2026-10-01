@@ -301,6 +301,7 @@
     "extraLimit": { "turn": "1 volta per turno", "none": "", "other": "1 volta per attivazione" },
     "extraUsed": "già usato",
     "extraCost": "costa 1 uso di {r}",
+    "extraCostN": "costa {n} usi di {r}",
     "extraRoll": "Danno con gli extra",
     "hit": "Colpisci con {t}",
     "critHit": "Critico! Dadi del danno raddoppiati.",

@@ -19,7 +19,7 @@ export function runAction(ch: Character, d: Pick<Derived, "actions" | "resources
   let next = units > 0 && r ? useResource(ch, a.resource, r.max.value, units) : ch;
   let rolls: number[] = [], total = units;
   if (a.die) {
-    const roll = rollExpr(`${Math.max(1, units)}d${a.die}`, rng);
+    const roll = rollExpr(`${Math.max(1, units) * (a.count ?? 1)}d${a.die}`, rng);
     rolls = roll?.rolls ?? []; total = rolls.reduce((s, v) => s + v, 0);
   }
   total += a.bonus;

@@ -2,7 +2,7 @@
 // Grammatica: or := and ('||' and)* ; and := not ('&&' not)* ; not := '!'? atom
 //   wearingArmor:none|light|medium|heavy|any   shield   equipped:<id|categoria>
 //   trained:light|medium|heavy|shield (addestramento nelle armature)
-//   twoHanded (l'arma è impugnata a due mani)   otherWeapon (nell'altra mano c'è un'altra arma)
+//   unarmed (colpo senz'armi)   twoHanded (l'arma è impugnata a due mani)   otherWeapon (nell'altra mano c'è un'altra arma)
 //   usingWeapon:<id> (l'arma dell'attacco è proprio questa: bonus di un'arma magica)
 //   weaponProperty:<prop>   attackType:melee|ranged   hasFeature:<id>   hasFeat:<id>
 //   active:<id> (privilegio attivato: Ira...)   attackAbility:<car> (caratteristica usata dall'attacco)
@@ -16,6 +16,7 @@ export type Condition =
   | { t: "wearingArmor"; value: "none" | "light" | "medium" | "heavy" | "any" }
   | { t: "shield" }
   | { t: "twoHanded" }
+  | { t: "unarmed" }
   | { t: "otherWeapon" }
   | { t: "trained"; value: "light" | "medium" | "heavy" | "shield" }
   | { t: "equipped"; value: string }
@@ -33,6 +34,7 @@ function atom(s: string): Condition {
   const bad = () => new Error(`Condizione non valida: "${s}"`);
   if (s === "shield") return { t: "shield" };
   if (s === "twoHanded") return { t: "twoHanded" };
+  if (s === "unarmed") return { t: "unarmed" };
   if (s === "otherWeapon") return { t: "otherWeapon" };
   let m = /^level(>=|<=|==|>|<)(\d+)$/.exec(s);
   if (m) return { t: "level", cmp: m[1] as Cmp, n: Number(m[2]) };
@@ -53,7 +55,17 @@ function atom(s: string): Condition {
   throw bad();
 }
 
+// Le condizioni si rileggono a ogni calcolo della scheda: il risultato (immutabile) si tiene in memoria
+const parsedConditions = new Map<string, Condition>();
 export function parseCondition(src: string): Condition {
+  const hit = parsedConditions.get(src);
+  if (hit) return hit;
+  const c = parseConditionUncached(src);
+  parsedConditions.set(src, c);
+  return c;
+}
+
+function parseConditionUncached(src: string): Condition {
   const or = src.split("||").map((p) => {
     const and = p.split("&&").map((a) => {
       const s = a.trim();

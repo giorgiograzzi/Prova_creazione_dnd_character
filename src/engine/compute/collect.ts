@@ -12,7 +12,7 @@ export interface Entry {
   featureId?: string; // privilegio, tratto o talento che contiene l'effetto (azioni di risorsa)
 }
 
-type ActivationDef = { resource?: string; requires?: string; label?: { it: string }; duration?: string; options?: { id: string; name: { it: string }; description?: string; effects: Effect[] }[] };
+type ActivationDef = { resource?: string; cost?: number; requires?: string; label?: { it: string }; duration?: string; options?: { id: string; name: { it: string }; description?: string; effects: Effect[] }[] };
 type PlayFields = { usage?: { uses: number | string | { table: number[] }; recharge: "short_rest" | "long_rest" | "dawn" | "none"; partialShortRest?: number }; activation?: ActivationDef; needsReview?: boolean };
 
 export interface Collected {
@@ -101,7 +101,7 @@ export function collectEffects(ch: Character, rs: Ruleset): Collected {
     out.info.push({
       id: h.id, name: h.name.it, description: h.description, kind, source, level, ...(resourceId ? { resourceId } : {}),
       ...(h.activation ? { activation: {
-        ...(h.activation.resource ? { resource: h.activation.resource } : {}), ...(h.activation.requires ? { requires: h.activation.requires } : {}),
+        ...(h.activation.resource ? { resource: h.activation.resource, cost: h.activation.cost ?? 1 } : {}), ...(h.activation.requires ? { requires: h.activation.requires } : {}),
         ...(h.activation.label ? { label: h.activation.label.it } : {}), ...(h.activation.duration ? { duration: h.activation.duration } : {}),
         options: (h.activation.options ?? []).map((x) => ({ id: x.id, name: x.name.it, ...(x.description ? { description: x.description } : {}) })),
       } } : {}),

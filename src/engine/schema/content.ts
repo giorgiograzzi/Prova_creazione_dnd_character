@@ -26,7 +26,8 @@ export const usageSchema = z.object({
 // Privilegio che si attiva (Ira, Forma selvatica...): finché è attivo valgono gli effetti con `when: "active:<id>"` e quelli
 // dell'opzione scelta all'attivazione (salvata in Character.state.active). Attivare consuma un uso di `resource`.
 export const activationSchema = z.object({
-  resource: id.optional(), // risorsa di cui si consuma 1 uso
+  resource: id.optional(), // risorsa di cui si consumano `cost` usi
+  cost: z.number().int().min(1).default(1), // usi consumati (Difesa superiore: 3 punti disciplina)
   requires: condition.optional(), // per poterlo attivare (Ira: non con armatura pesante)
   label: text.optional(), // nome della scelta all'attivazione ("Aspetto")
   options: z.array(optionSchema).optional(), // scelta all'attivazione: se ci sono, se ne sceglie una

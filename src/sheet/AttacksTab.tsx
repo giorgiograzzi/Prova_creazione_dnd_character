@@ -51,7 +51,7 @@ function DamageSection({ a, rs, update, derived }: { a: AttackOption; rs: TabPro
   const [picked, setPicked] = useState<string[]>([]);
   const [msg, setMsg] = useState("");
   const chosen = a.extras.filter((x) => picked.includes(x.id) && !x.used);
-  const dice = [a.damage.dice, ...chosen.map((x) => x.dice)].join("+");
+  const dice = [a.damage.dice, ...chosen.map((x) => x.dice)].filter(Boolean).join("+");
   const bonus = a.damage.bonus.value + chosen.reduce((n, x) => n + x.bonus, 0);
   const spend = () => {
     if (!update || !derived || !chosen.length) return;
@@ -68,8 +68,8 @@ function DamageSection({ a, rs, update, derived }: { a: AttackOption; rs: TabPro
           {a.extras.map((x) => (
             <label key={x.id} className="xp-check"><input type="checkbox" disabled={x.used || !update} checked={picked.includes(x.id) && !x.used}
               onChange={(e) => setPicked(e.target.checked ? [...picked, x.id] : picked.filter((p) => p !== x.id))} />
-              <span>{x.label}: +{x.dice}{x.bonus ? ` ${sign(x.bonus)}` : ""}{x.type ? ` ${rs.damageTypes.get(x.type)?.name.it ?? x.type}` : ""}
-                {x.limit !== "none" ? ` · ${x.limit === "turn" ? t.extraLimit.turn : t.extraLimit.other}` : ""}{x.cost ? ` · ${fmt(t.extraCost, { r: x.cost })}` : ""}{x.used ? ` · ${t.extraUsed}` : ""}</span>
+              <span>{x.label}{x.dice || x.bonus ? ":" : ""}{x.dice ? ` +${x.dice}` : ""}{x.bonus ? ` ${sign(x.bonus)}` : ""}{x.type ? ` ${rs.damageTypes.get(x.type)?.name.it ?? x.type}` : ""}
+                {x.limit !== "none" ? ` · ${x.limit === "turn" ? t.extraLimit.turn : t.extraLimit.other}` : ""}{x.cost ? ` · ${fmt((x.costAmount ?? 1) > 1 ? t.extraCostN : t.extraCost, { r: (derived?.resources[x.cost]?.max.sources[0]?.label ?? x.cost).split(": ").pop() ?? x.cost, n: x.costAmount ?? 1 })}` : ""}{x.used ? ` · ${t.extraUsed}` : ""}</span>
               {x.text && <span className="pl-sub" style={{ display: "block" }}>{x.text}</span>}
             </label>
           ))}

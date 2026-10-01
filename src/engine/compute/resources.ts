@@ -1,4 +1,5 @@
 import { evalValue } from "./formula-eval";
+import { fillText } from "./text";
 import type { Ctx } from "./context";
 import type { Derived, ResourceActionInfo } from "./types";
 
@@ -38,9 +39,9 @@ export function computeActions(x: Ctx, resources: Derived["resources"]): Resourc
   for (const { effect: e, featureId } of x.active) {
     if (e.op !== "resourceAction" || !featureId) continue;
     out.push({
-      id: e.actionId, featureId, label: e.label, resource: e.resource, cost: e.cost, variable: e.variable, ...(e.die ? { die: e.die } : {}),
+      id: e.actionId, featureId, label: e.label, resource: e.resource, cost: e.cost, variable: e.variable, ...(e.die ? { die: e.die, count: e.count } : {}),
       bonus: e.bonus === undefined ? 0 : evalValue(e.bonus, x), apply: e.apply, ...(e.restore ? { restore: e.restore } : {}),
-      ...(e.text ? { text: e.text } : {}), remaining: resources[e.resource]?.remaining ?? 0,
+      ...(e.text ? { text: fillText(e.text, e.values, x) } : {}), remaining: resources[e.resource]?.remaining ?? 0,
     });
   }
   return out;

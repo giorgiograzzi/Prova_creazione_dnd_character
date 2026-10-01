@@ -32,6 +32,7 @@ export function evalCondition(c: Condition, x: CondCtx): boolean {
       return c.value === "none" ? !x.bodyArmor : c.value === "any" ? !!x.bodyArmor : x.bodyArmor?.category === c.value;
     case "shield": return !!x.shield;
     case "twoHanded": return !!x.twoHanded;
+    case "unarmed": return !x.weapon && x.attackAbility !== undefined; // solo nel contesto di un attacco senz'armi
     case "otherWeapon": return !!x.otherWeapon;
     case "trained": return !!x.armorTraining?.has(c.value);
     case "equipped": return x.equipped.has(c.value);

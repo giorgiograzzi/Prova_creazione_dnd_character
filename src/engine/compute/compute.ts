@@ -14,6 +14,7 @@ import { attacksPerAction, computeAttacks } from "./attacks";
 import { analyzeLoadout } from "../equipment/loadout";
 import { combineMode, computeRolls, untrainedArmor } from "./rolls";
 import { sum, withOverride } from "./sourced";
+import { fillText } from "./text";
 import { computeResistances, computeSenses, computeSpeed } from "./speed";
 import type { Derived } from "./types";
 
@@ -28,7 +29,7 @@ export function computeCharacter(ch: Character, rs: Ruleset): Derived {
   // Vantaggio all'Iniziativa dagli effetti (Istinto ferino) e promemoria (`note`)
   for (const { effect: e, label } of x.active) {
     if (e.op === "initiativeAdvantage") (e.mode === "advantage" ? cs.rolls.initiative.adv : cs.rolls.initiative.dis).push(label);
-    if (e.op === "note") notes.push(`${e.text} — ${label}`);
+    if (e.op === "note") notes.push(`${fillText(e.text, e.values, x)} — ${label}`);
   }
   cs.initiativeMode = combineMode(cs.rolls.initiative.adv, cs.rolls.initiative.dis);
   const { saves, skills, checks } = computeRolls(x, profs, notes, cs);

@@ -35,14 +35,14 @@ export interface AttackOption {
 }
 
 export interface AttackExtra {
-  id: string; label: string; dice: string; bonus: number; type?: string; limit: string; cost?: string; // cost: risorsa di cui si spende 1 uso
+  id: string; label: string; dice: string; bonus: number; type?: string; limit: string; cost?: string; costAmount?: number; // cost: risorsa di cui si spendono costAmount usi
   used: boolean; // già usato (1 per turno / 1 per Ira)
   text?: string;
 }
 
 // Azione di una risorsa (Seconda ripresa...): vedi l'op `resourceAction`
 export interface ResourceActionInfo {
-  id: string; featureId: string; label: string; resource: string; cost: number; variable: boolean; die?: number; bonus: number;
+  id: string; featureId: string; label: string; resource: string; cost: number; variable: boolean; die?: number; count?: number; bonus: number;
   apply: "heal" | "tempHp" | "none"; restore?: { resource: string; amount: number | "all" }; text?: string;
   remaining: number; // usi rimasti della risorsa che si spende
 }
@@ -56,7 +56,7 @@ export interface FeatureInfo {
   source: string; // chi lo dà: "Barbaro", "Aasimar", "Iniziato alla magia"
   level: number; // livello di sblocco (0 = talento)
   resourceId?: string; // contatore degli usi (in Derived.resources)
-  activation?: { resource?: string; requires?: string; label?: string; duration?: string; options: { id: string; name: string; description?: string }[] };
+  activation?: { resource?: string; cost?: number; requires?: string; label?: string; duration?: string; options: { id: string; name: string; description?: string }[] };
   active: boolean;
   picked: string[]; // scelta fatta all'attivazione
   needsReview: boolean;

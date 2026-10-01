@@ -137,14 +137,63 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 1: Barbaro e Guerrier
     expect(d.skills.acrobatics.mode).toBe("normal");
     expect(d.attacks.find((a) => a.weaponId === "greataxe")!.critRange).toBe(19);
   });
-  it("Maestro di battaglia: dado di superiorità per livello (d8, d10 al 10°, d12 al 18°) e recupero di Conosci il nemico", () => {
-    const act = (lv: number) => D(mk("fighter", lv, "battle_master")).actions.filter((a) => a.id === "maneuver");
-    expect(act(3)).toMatchObject([{ die: 8, resource: "superiority_dice" }]);
-    expect(act(10)).toMatchObject([{ die: 10 }]);
-    expect(act(18)).toMatchObject([{ die: 12 }]);
+  it("Maestro di battaglia: Conosci il nemico si recupera spendendo un dado di superiorità", () => {
     const c = mk("fighter", 7, "battle_master", { state: { ...emptyCharacter("t").state, resourcesUsed: { know_your_enemy: 1 } } });
     const r = runAction(c, D(c), "know_your_enemy_die");
     expect(r.character.state.resourcesUsed).toEqual({ superiority_dice: 1 });
+  });
+  describe("Maestro di battaglia: manovre (punto 1 di PLAN3)", () => {
+    const ALL = ["ambush", "bait_and_switch", "commanders_strike", "commanding_presence", "disarming_attack", "distracting_strike", "evasive_footwork", "feinting_attack", "goading_attack", "lunging_attack",
+      "maneuvering_attack", "menacing_attack", "parry", "precision_attack", "pushing_attack", "rally", "riposte", "sweeping_attack", "tactical_assessment", "trip_attack"];
+    const bm = (lv: number, picks: string[]) => mk("fighter", lv, "battle_master", { decisions: { battle_master_maneuvers: picks } });
+    const manActs = (c: Character) => D(c).actions.filter((a) => ALL.includes(a.id));
+    it("compaiono solo le manovre scelte, con il dado per livello (d8, d10 al 10°, d12 al 18°)", () => {
+      expect(manActs(bm(3, [])).length).toBe(0);
+      const c = bm(3, ["trip_attack", "parry", "precision_attack"]);
+      expect(manActs(c).map((a) => a.id).sort()).toEqual(["parry", "precision_attack"]); // Attacco sbilanciante è un dado sull'attacco
+      expect(axe(c).extras.map((e) => e.id)).toEqual(["trip_attack"]);
+      for (const [lv, die] of [[3, 8], [9, 8], [10, 10], [17, 10], [18, 12]] as const) {
+        expect(manActs(bm(lv, ["precision_attack"])), `livello ${lv}`).toMatchObject([{ die, resource: "superiority_dice", cost: 1 }]);
+        expect(axe(bm(lv, ["trip_attack"])).extras[0], `livello ${lv}`).toMatchObject({ dice: `1d${die}`, cost: "superiority_dice", limit: "none" });
+      }
+    });
+    it("le 20 manovre hanno ciascuna un effetto giocabile (dado sull'attacco o azione)", () => {
+      const c = bm(10, ALL);
+      const ids = new Set([...manActs(c).map((a) => a.id), ...axe(c).extras.map((e) => e.id)]);
+      expect([...ids].sort()).toEqual([...ALL].sort());
+    });
+    it("le azioni delle manovre stanno sotto il privilegio Superiorità in combattimento (così la scheda le mostra)", () => {
+      const c = bm(7, ["parry", "rally", "precision_attack"]);
+      expect(manActs(c).map((a) => a.featureId)).toEqual(["combat_superiority", "combat_superiority", "combat_superiority"]);
+    });
+    it("l'attacco con manovra spende un dado e mostra la CD (8 + competenza + mod più alto tra For e Des)", () => {
+      const c = bm(5, ["pushing_attack"]); // For 16 (+3), competenza +3 al 5° → CD 14
+      const x = axe(c).extras[0]!;
+      expect(x.text).toBe("CD 14 (TS Forza): se fallisce (Grande o più piccolo) è spinto fino a 15 ft.");
+      const r = applyExtra(c, D(c), x);
+      expect(r.ok).toBe(true);
+      expect(D(r.character).resources.superiority_dice!.remaining).toBe(3);
+    });
+    it("Parata: dado + mod For o Des (il più alto); Adunata: dado + metà livello da Guerriero; spendono un dado", () => {
+      const c = bm(7, ["parry", "rally"]);
+      const parry = D(c).actions.find((a) => a.id === "parry")!, rally = D(c).actions.find((a) => a.id === "rally")!;
+      expect(parry).toMatchObject({ bonus: 3, die: 8 });
+      expect(rally).toMatchObject({ bonus: 3, die: 8 }); // floor(7 / 2)
+      const r = runAction(c, D(c), "parry", undefined, () => 0.5);
+      expect(r.ok).toBe(true);
+      expect(r.total).toBe(5 + 3); // d8 con rng 0.5 → 5
+      expect(D(r.character).resources.superiority_dice!.remaining).toBe(4); // 5 dadi al 7°
+    });
+    it("a 0 dadi rimasti la manovra non parte", () => {
+      const c = { ...bm(3, ["parry"]), state: { ...emptyCharacter("t").state, resourcesUsed: { superiority_dice: 4 } } };
+      expect(runAction(c, D(c), "parry").ok).toBe(false);
+    });
+    it("Implacabile (15°): d8 gratis senza spendere dadi", () => {
+      const c = bm(15, ["parry"]);
+      const r = runAction(c, D(c), "relentless_die");
+      expect(r.ok).toBe(true);
+      expect(r.character.state.resourcesUsed).toEqual({});
+    });
   });
   it("Guerriero psionico: Colpo psionico con il dado per livello + Int e costo in dadi; Mente protetta dà resistenza psichica", () => {
     for (const [lv, die] of [[3, 6], [5, 8], [11, 10], [17, 12]] as const) {

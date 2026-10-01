@@ -66,7 +66,7 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Sottoclasse: Battle Master**
 
-- **✔ fatto (lotti 1-7)**: Combat Superiority (3°) — dadi per livello e azione «Usa una manovra»; le manovre vere sono da estrarre; Know Your Enemy (7°) — 1 volta per Riposo Lungo o spendendo un dado; Improved Combat Superiority (10°) — dado d10 dalla tabella; Relentless (15°) — 1d8 al posto di un dado di superiorità; Ultimate Combat Superiority (18°) — dado d12 dalla tabella
+- **✔ fatto (lotti 1-7)**: Combat Superiority (3°) — dadi per livello; le 20 manovre sono giocabili dal punto 1 di PLAN3; Know Your Enemy (7°) — 1 volta per Riposo Lungo o spendendo un dado; Improved Combat Superiority (10°) — dado d10 dalla tabella; Relentless (15°) — 1d8 al posto di un dado di superiorità; Ultimate Combat Superiority (18°) — dado d12 dalla tabella
 - **F** già fatto: Student of War (3°)
 
 **Sottoclasse: Champion**
@@ -469,7 +469,7 @@ Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove se
 - **Entra**: Barbaro (Attacco irruento, Istinto ferino, Colpo brutale e migliorato, Furia persistente, Potenza indomabile) e sottoclassi Berserker, Cuore selvaggio (scelte), Albero del mondo, Zelota; Guerriero (Seconda ripresa, Azione impetuosa, Indomito, Mente tattica), Campione, Maestro di battaglia (dadi, manovre), Cavaliere mistico, Guerriero psionico.
 - **Richiede il motore**: M3, M2, M1 (base), M5 (Furia senza mente), M11 (Seconda ripresa, dadi), M12 (Potenza indomabile, Atleta straordinario).
 - **Come lo verifico**: test del mini ruleset (Attacco irruento dà Vantaggio solo con stato acceso; Colpo brutale somma 1d10 e scala il limite; Seconda ripresa scala gli usi); test privati sui dati veri; prova in gioco con un Barbaro di livello 9 e un Maestro di battaglia: i numeri cambiano solo con lo stato attivo, gli usi scalano, i riposi ricaricano.
-- **Dati da estrarre prima**: manovre del Maestro di battaglia (non ancora: l'azione «Usa una manovra» spende il dado giusto per livello, la manovra resta testo).
+- **Dati da estrarre prima**: manovre del Maestro di battaglia — ora fatte (punto 1 di PLAN3): erano già nel riepilogo 01, giocabili con dado per livello, CD e costo.
 - **Esito**: vedi `DATA_TODO.md` (voci fatte e voci rimaste solo testo con il motivo). Correzione sul censimento: Atleta straordinario del Campione nei tuoi riepiloghi dà Vantaggio a Iniziativa e Atletica (non la metà competenza): fatto così. Provato nel browser con un Berserker di 9° e un Maestro di battaglia di 5°.
 
 ### Lotto 2 — Ladro e Monaco ✅ chiuso
@@ -530,7 +530,7 @@ Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove se
 
 Il piano è completo (lotti 1-8). Il seguito è in `DATA_TODO.md`, sezione 0 «Prossimi passi»:
 
-1. Estrazione delle **manovre** del Maestro di battaglia (stesso prompt delle Metamagie, cambia la prima riga).
+1. ~~Manovre del Maestro di battaglia~~ — **fatto** (punto 1 di PLAN3, `scripts/lib/play-maneuvers.ts`): dati dal riepilogo 01, 20 manovre giocabili.
 2. Confronto dei **nomi italiani** di Metamagie e invocazioni con il manuale.
 3. Limiti della magia del Warlock e del Mago (invocazioni ripetibili, prerequisiti, Distintivi nel libro).
 4. Piccole lacune degli altri lotti (tipi di danno scelti all'uso, Adepto elementale, Colpi astuti con dadi rinunciati).

@@ -1,31 +1,4 @@
-# PLAN2.md — Privilegi giocabili (classi, sottoclassi, talenti, specie)
-
-Stato: **piano approvato; lotti 1-6 chiusi** (Barbaro, Guerriero, Ladro, Monaco, Paladino, Ranger, talenti, Chierico, Druido, Bardo, Stregone, Mago, Warlock), Lotto 7 in attesa di ok. Continua lo step 14b di `PLAN.md`: oggi molti privilegi si leggono ma non cambiano i numeri; qui si decide cosa far diventare giocabile, in che ordine e con quali funzioni nuove del motore.
-
-## 0. Fonti e limiti (leggere prima)
-
-- Il censimento nasce da due estrazioni fatte sul **Manuale del giocatore 2024 in inglese** (OCR), tenute in `data/private/raw/` (non tracciato): 412 privilegi di classe/sottoclasse, 55 tratti di specie (più 10 varianti di colore del Dragonide), 75 talenti. Il riepilogo italiano `01_Dati_Gioco` non c'era ancora quando ho scritto il censimento: è arrivato dopo, e **dal Lotto 1 i numeri vengono dai tuoi riepiloghi italiani** (via `data/private/`), non dal manuale inglese.
-- Conseguenze: i nomi nel censimento sono quelli inglesi (gli id veri, come `barbarian/rage`, si agganciano lotto per lotto con `extract:data`); l'OCR ha errori sui dadi. **Ogni numero citato nelle note è un promemoria e va riletto sul `01`** prima di finire nei dati (regola 1): dove il testo non lo dà, `needsReview: true` e voce in `DATA_TODO.md`.
-- In questo file non c'è testo del manuale: solo nomi, livelli e classificazione.
-- I campi delle estrazioni (`effetto_meccanico`, `dipende_da`…) sono dedotti da parole chiave: le etichette sotto sono state riviste a mano, ma restano un punto di partenza.
-- **Dati che non sono nelle estrazioni e vanno estratti a parte** (senza, i lotti relativi non partono): invocazioni del Warlock, opzioni di Metamagia, manovre del Maestro di battaglia, opzioni di Preda del cacciatore e Stili di combattimento (questi ultimi sono già talenti), elenchi dei compagni (Signore delle bestie, Forma selvatica).
-
-## 1. Etichette
-
-- **✔** — fatto in uno dei lotti già chiusi (con i test).
-- **F** — già modellato in `scripts/lib/*-rules.ts` (da riverificare con `extract:data`, non con l'occhio).
-- **A** — basta un effetto, un contatore o un'attivazione con le funzioni che già ci sono (`resource`, `activation`, `when: active:<id>`, `grantSpell.freeCast`, `critRange`, `setSpeed`…).
-- **B Mn** — serve prima la funzione nuova **Mn** del §3.
-- **C** — resta solo testo, con il motivo: reazione, scelta del Master, effetto sull'avversario, dipende dalla situazione o dal movimento nel turno.
-
-Totali (classi e sottoclassi, 412 voci) dopo il Lotto 6: ✔ 143 · F 130 · A 13 · B 17 · C 109.
-Specie (55 voci): F 34 · A 4 · B 7 · C 10. Talenti (75) dopo il Lotto 4: ✔ 14 · F 41 · B 0 · C 20.
-Voci B rimaste per funzione (classi, specie e talenti): M11 11 · M1 7 · M10 3 · M2 1 · M3 1 · M12 1.
-Le «A» sono dove basta un contatore: molte hanno già il contatore da `deriveUsage` (49 in tutto), il resto è testo.
-
 ## 2. Censimento
-
-Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 ### BARBARO
 
@@ -325,13 +298,14 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 - **✔ fatto (lotti 1-6)**: Warping Implosion (18°) — teletrasporto area: 1 volta per Riposo Lungo
 - **F** già fatto: Psychic Defenses (6°)
-- **C**: Psionic Spells (3°) — incantesimi sempre preparati scritti solo a parole; Telepathic Speech (3°) — comunicazione telepatica; Psionic Sorcery (6°) — lancio con punti al posto dello slot: si usa «Crea slot»/Metamagia, la sostituzione è a tavolo; Revelation in Flesh (14°) — trasformazioni a scelta
+- **B**: Psionic Sorcery (6°) → **M6** (lancio con punti al posto dello slot)
+- **C**: Psionic Spells (3°) — incantesimi sempre preparati scritti solo a parole; Telepathic Speech (3°) — comunicazione telepatica; Revelation in Flesh (14°) — trasformazioni a scelta
 
 **Sottoclasse: Clockwork Sorcery**
 
 - **✔ fatto (lotti 1-6)**: Bastion of Law (6°) — spesa punti, dadi di protezione; Trance of Order (14°) — stato attivabile 1 minuto; Clockwork Cavalcade (18°) — area: effetti a scelta
 - **F** già fatto: Clockwork Spells (3°)
-- **C**: Restore Balance (3°) — reazione che annulla Vantaggio/Svantaggio: decisione a tavolo
+- **A**: Restore Balance (3°) — usi = mod Car; reazione
 
 **Sottoclasse: Draconic Sorcery**
 
@@ -342,7 +316,8 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 **Sottoclasse: Wild Magic Sorcery**
 
 - **✔ fatto (lotti 1-6)**: Bend Luck (6°) — reazione con punti
-- **C**: Wild Magic Surge (3°) — tabella casuale: tiro d100 (testo); Tides of Chaos (3°) — Vantaggio a un tiro e ricarica con l'Ondata: decisione a tavolo; Controlled Chaos (14°) — scelta tra due tiri sulla tabella; Tamed Surge (18°) — scelta dell'effetto sulla tabella
+- **A**: Tides of Chaos (3°) — 1 uso, si ricarica con un'Ondata; il Vantaggio è testo
+- **C**: Wild Magic Surge (3°) — tabella casuale: tiro d100 (testo); Controlled Chaos (14°) — scelta tra due tiri sulla tabella; Tamed Surge (18°) — scelta dell'effetto sulla tabella
 
 ### WARLOCK
 
@@ -350,30 +325,33 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 - **✔ fatto (lotti 1-6)**: Eldritch Invocations (1°) — scelte e effetti (elenco da estrarre); Mystic Arcanum (11°) — un incantesimo per livello 6-9, 1 volta per Riposo Lungo
 - **F** già fatto: Pact Magic (1°), Warlock Subclass (3°), Epic Boon (19°)
-- **C**: Magical Cunning (2°) — recupero di metà degli slot del Patto: usa «Riposo» a mano; Contact Patron (9°) — lancio gratuito Contattare un altro piano; Eldritch Master (20°) — recupera tutti gli slot: decisione d'uso (1 minuto di preghiera)
+- **A**: Magical Cunning (2°) — 1 volta per Riposo Lungo: recupero metà slot
+- **C**: Contact Patron (9°) — lancio gratuito Contattare un altro piano; Eldritch Master (20°) — recupera tutti gli slot: decisione d'uso (1 minuto di preghiera)
 
 **Sottoclasse: Archfey Patron**
 
 - **✔ fatto (lotti 1-6)**: Beguiling Defenses (10°) — reazione, immunità Affascinato (M5)
 - **F** già fatto: Archfey Spells (3°)
-- **C**: Steps of the Fey (3°) — Passo velato con effetti a scelta: testo; Misty Escape (6°) — reazione; Bewitching Magic (14°) — Passo velato dopo un incantesimo
+- **A**: Steps of the Fey (3°) — usi = mod Car; Passo velato
+- **C**: Misty Escape (6°) — reazione; Bewitching Magic (14°) — Passo velato dopo un incantesimo
 
 **Sottoclasse: Celestial Patron**
 
 - **✔ fatto (lotti 1-6)**: Healing Light (3°) — dado pool (1 + livello); Radiant Soul (6°) — resistenza radiosa, +mod Car ai danni: B M8; Celestial Resilience (10°) — PF temporanei dopo un Riposo
 - **F** già fatto: Celestial Spells (3°)
-- **C**: Searing Vengeance (14°) — reazione: testo
+- **C**: Searing Vengeance (14°) — reazione
 
 **Sottoclasse: Fiend Patron**
 
 - **✔ fatto (lotti 1-6)**: Dark One's Blessing (3°) — PF temporanei quando porti a 0 PF: livello + mod Car; Dark One's Own Luck (6°) — usi = mod Car: +1d10 a una prova; Fiendish Resilience (10°) — resistenza a un tipo a scelta dopo Riposo
 - **F** già fatto: Fiend Spells (3°)
-- **C**: Hurl Through Hell (14°) — danni psichici e condizione sull'avversario: testo
+- **A**: Hurl Through Hell (14°) — 1 volta per Riposo Lungo
 
 **Sottoclasse: Great Old One Patron**
 
 - **F** già fatto: Great Old One Spells (3°), Eldritch Hex (10°), Thought Shield (10°)
-- **C**: Awakened Mind (3°) — telepatia 30 ft; Psychic Spells (3°) — cambio del tipo di danno degli incantesimi; Clairvoyant Combatant (6°) — Vantaggio e Svantaggio sul bersaglio: situazione; Create Thrall (14°) — cattura di una creatura: decisione del Master
+- **A**: Clairvoyant Combatant (6°) — 1 volta per Riposo Breve o Lungo
+- **C**: Awakened Mind (3°) — telepatia 30 ft; Psychic Spells (3°) — cambio del tipo di danno degli incantesimi; Create Thrall (14°) — cattura di una creatura: decisione del Master
 
 ### MAGO
 
@@ -381,28 +359,32 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 - **✔ fatto (lotti 1-6)**: Spell Mastery (18°) — un 1° e un 2° livello a volontà; Signature Spells (20°) — due incantesimi 3° livello, 1 lancio gratuito per Riposo
 - **F** già fatto: Spellcasting (1°), Arcane Recovery (1°), Scholar (2°), Wizard Subclass (3°), Ability Score Improvement (4°), Epic Boon (19°)
-- **C**: Ritual Adept (1°) — rituali dal libro: regola già applicata nella Magie; Memorize Spell (5°) — cambio di un incantesimo preparato a Riposo Breve: dal tab Magie
+- **B**: Memorize Spell (5°) → **M7** (cambio di un incantesimo preparato a Riposo Breve)
+- **C**: Ritual Adept (1°) — rituali dal libro: regola già applicata nella Magie
 
 **Sottoclasse: Abjurer**
 
 - **✔ fatto (lotti 1-6)**: Arcane Ward (3°) — PF dello scudo = 2 × livello + mod Int: pool da spendere
 - **F** già fatto: Spell Breaker (10°)
-- **C**: Abjuration Savant (3°) — copia nel libro a costo ridotto; Projected Ward (6°) — reazione: assorbe danni all'alleato (usa la Barriera arcana a mano); Spell Resistance (14°) — Vantaggio ai TS contro incantesimi e resistenza
+- **C**: Abjuration Savant (3°) — copia nel libro a costo ridotto; Projected Ward (6°) — reazione; Spell Resistance (14°) — Vantaggio ai TS contro incantesimi e resistenza
 
 **Sottoclasse: Diviner**
 
 - **✔ fatto (lotti 1-6)**: Portent (3°) — 2 dadi d20 (3 al 14°) da tirare a ogni Riposo Lungo e usare; Greater Portent (14°) — un dado in più
-- **C**: Divination Savant (3°) — copia nel libro a costo ridotto; Expert Divination (6°) — recupero slot dopo divinazione; The Third Eye (10°) — scelta del senso a ogni uso: testo
+- **A**: The Third Eye (10°) — 1 volta per Riposo Breve o Lungo; scelta del senso
+- **C**: Divination Savant (3°) — copia nel libro a costo ridotto; Expert Divination (6°) — recupero slot dopo divinazione
 
 **Sottoclasse: Evoker**
 
 - **✔ fatto (lotti 1-6)**: Potent Cantrip (3°) — danni dimezzati sul TS riuscito ai trucchetti; Empowered Evocation (10°) — + mod Int ai danni degli incantesimi di Evocazione
-- **C**: Evocation Savant (3°) — copia nel libro a costo ridotto; Sculpt Spells (6°) — alleati in area: scelta a tiro; Overchannel (14°) — danno massimo con l'1 per Riposo: la scelta del lancio è a tavolo
+- **B**: Overchannel (14°) → **M8** (danno massimo: modificatore del lancio)
+- **C**: Evocation Savant (3°) — copia nel libro a costo ridotto; Sculpt Spells (6°) — alleati in area: scelta a tiro
 
 **Sottoclasse: Illusionist**
 
 - **F** già fatto: Phantasmal Creatures (6°)
-- **C**: Illusion Savant (3°) — copia nel libro a costo ridotto; Improved Illusions (3°) — trucchetto Illusione minore: scelta; Illusory Self (10°) — reazione che fa mancare un attacco: testo; Illusory Reality (14°) — oggetto reale 1 minuto: decisione del Master
+- **A**: Illusory Self (10°) — 1 volta per Riposo Breve o Lungo; reazione
+- **C**: Illusion Savant (3°) — copia nel libro a costo ridotto; Improved Illusions (3°) — trucchetto Illusione minore: scelta; Illusory Reality (14°) — oggetto reale 1 minuto: decisione del Master
 
 ### SPECIE
 
@@ -455,92 +437,3 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 - **✔ fatto (lotti 1-6)**: Savage Attacker — rilancio del danno 1 volta per turno (extra senza dadi); Athlete — scalata = Velocità; Charger — +1d8, 1 volta per turno; Crusher — promemoria per i danni contundenti; Grappler — promemoria a mani nude; Great Weapon Master — danni extra = competenza con armi Pesanti; Heavy Armor Master — promemoria con la riduzione; Piercer — promemoria per i danni perforanti; Shield Master — Colpo di scudo con la CD; Slasher — promemoria per i danni taglienti; Great Weapon Fighting — minimo 3 sui dadi di danno; Interception — promemoria con la riduzione; Boon of Combat Prowess — promemoria 1 volta per turno; Boon of Recovery — riserva di 10 dadi che curano
 - **F** già fatto: Alert, Crafter, Lucky, Magic Initiate, Musician, Skilled, Tavern Brawler, Tough, Ability Score Improvement, Chef, Elemental Adept, Fey-Touched, Heavily Armored, Keen Mind, Lightly Armored, Martial Weapon Training, Medium Armor Master, Moderately Armored, Observant, Poisoner, Resilient, Ritual Caster, Shadow-Touched, Skill Expert, Skulker, Speedy, Telekinetic, Telepathic, Weapon Master, Archery, Blind Fighting, Defense, Dueling, Thrown Weapon Fighting, Two-Weapon Fighting, Unarmed Fighting, Boon of Energy Resistance, Boon of Fortitude, Boon of Skill, Boon of Speed, Boon of Truesight
 - **C**: Healer — usa il Kit da guaritore e i Dadi Vita di un'altra creatura: oggetti e decisioni a tavolo; Actor — imitazione e Vantaggio in Inganno/Intrattenere: situazionale; Crossbow Expert — regole di attacco a distanza e ricarica; Defensive Duelist — reazione; Dual Wielder — regola delle armi; Durable — recupero con Dadi Vita: regola di Dado Vita; Inspiring Leader — usa la caratteristica scelta con l'aumento del talento, non ricavabile dalla scheda; Mage Slayer — reazione; Mounted Combatant — situazione; Polearm Master — reazione e attacco bonus; Sentinel — reazione; Sharpshooter — gittata e copertura: situazione; Spell Sniper — gittata e copertura; War Caster — reazione e concentrazione; Protection — reazione; Boon of Dimensional Travel — teletrasporto; Boon of Fate — reazione sul tiro altrui; Boon of Irresistible Offense — ignora resistenze: effetto sull'avversario; Boon of Spell Recall — recupero slot a decisione; Boon of the Night Spirit — invisibilità a condizione
-
-## 3. Funzioni nuove del motore
-
-**Fatte nei lotti 1-6**: M1 (extra d'attacco), M2 («Nuovo turno»), M3 (Vantaggio da effetti), M4 (aure sugli alleati, Lotto 3), M5 (immunità alle condizioni), M11 (azioni di risorsa), M12 (minimo del tiro; la metà competenza resta solo per il Factotum e simili) più due piccole aggiunte: `note` (promemoria che compare tra le note) e la variabile di formula `speed` (volare pari alla Velocità). Restano solo M10 (compagni) e le voci B elencate sotto. Il Lotto 6 ha fatto M6 (punti stregoneria, slot creati, costo alternativo), M7 (lanci a volontà e Incantesimi distintivi), M9 (scelte con costo: Metamagia e Invocazioni) e ha esteso M1 (extra a costo di slot del Patto), `freeCast` (a volontà, uno per Riposo Breve o Lungo), `spellBonus` (CD, attacco e Vantaggio sugli incantesimi), `rollFloor`, il gating degli effetti con la `when` della scelta (Arcanum e invocazioni con prerequisito di livello). Il Lotto 2 ha aggiunto: testi con numeri calcolati (`values`: «CD {0}»), extra d'attacco senza dadi o con costo multiplo, `count` dadi per uso nelle azioni, costo variabile nelle attivazioni (`activation.cost`) e la condizione `unarmed`. Il Lotto 3 ha aggiunto: la condizione `concentrating:<incantesimo>` (Marchio del cacciatore attivo mentre ti concentri su di esso), il costo in slot degli extra d'attacco (Punizione divina: scelta dello slot nel tiro del danno) e le aure con l'elenco in Stato. Il Lotto 4 ha aggiunto: `damageDieFloor` (minimo dei dadi di danno: Combattere con armi possenti; il tiro lo applica), la condizione `damageType:<tipo>` (tipo di danno dell'arma, contundente a mani nude) e la lettura dei talenti come privilegi con extra d'attacco automatici (Maestro delle armi possenti somma la competenza da solo). Il Lotto 5 ha aggiunto: `spellModifier` (M8: note del lancio con i numeri e il livello dello slot, filtro esplicito per trucchetti o elenco di incantesimi), dadi da formula nelle azioni, `acFormula.ignoresArmor` (CA di Forme del circolo in Forma selvatica) e la ricarica più frequente a parità di usi (Fonte di ispirazione).
-
-Ogni funzione arriva con i suoi test (mini ruleset in `compute/testkit.ts`) **prima** dei privilegi che la usano. Il motore resta in `src/engine`, senza UI; i testi in `src/i18n/it.json`.
-
-- **M1 — Extra d'attacco (`attackRider`)**: danno o effetto in più legato al colpo, con costo (nessuno / uso di risorsa / slot / dado) e limite opzionale. Esempi: Punizione divina, Colpo brutale, Attacco furtivo e Colpo astuto, Colpi benedetti, Furia del Berserker, Preda del cacciatore, Stretta del Monaco. *Proposta*: nuova `op` con `dice`, `cost`, `limit: "turn" | "rage" | none`, `when` come le altre. Nella scheda degli Attacchi compare una riga "Extra disponibili" con un pulsante **Applica** che somma i dadi al tiro del danno e scala il costo; quelli senza costo e sempre attivi (Colpi radianti) si sommano da soli.
-- **M2 — Turni e "1 volta per turno"**: oggi non si tracciano i turni. *Proposta*: `state.turn` con un pulsante **Nuovo turno** nello Stato; azzera i limiti `turn` (M1) e i promemoria "1 per turno" (Attaccante selvaggio, Perforante); il limite `rage` si azzera all'attivazione dell'Ira. Non parte nessun timer: è un segnaposto scelto dal giocatore.
-- **M3 — Vantaggio e Svantaggio da effetti**: nuove `op` `attackAdvantage`, `checkAdvantage` (per abilità o per abilità di caratteristica), `initiativeAdvantage`, tutte con `when`. Usate con gli stati attivabili senza risorsa (l'attivazione già permette `resource` facoltativo): Attacco irruento, Mira costante, Voto di inimicizia, Istinto ferino. Il "Vantaggio contro di te" resta promemoria testuale.
-- **M4 — Aure**: nuovo campo `aura { radius, appliesTo: "self" | "allies" }` sulla `op` (Aura di protezione, di coraggio, di devozione, di difesa). Sulla scheda l'effetto vale su di sé come oggi; in **Stato** un riquadro "Aure attive" mostra raggio e valore calcolato per gli alleati (es. bonus ai TS), così il giocatore lo dice al tavolo. Niente calcolo sui compagni di gruppo.
-- **M5 — Immunità alle condizioni**: nuova `op` `conditionImmunity { conditions }`, collegata alla funzione che oggi applica già l'immunità (Pietrificato → Avvelenato, `compute/conditions.ts`). Serve a Coraggio, Ira senza mente, Protezione della natura, Difese ammalianti, Difese psichiche.
-- **M6 — Punti stregoneria e Metamagia**: risorsa `sorcery_points` a tabella (livello), azioni **Converti** slot ↔ punti e **Ripristino stregonesco**, stato attivabile Stregoneria innata (più CD e Vantaggio agli attacchi con incantesimo), scelta delle Metamagie (opzioni da estrarre) con costo in punti, spesa dalla finestra di lancio (le Metamagie restano testo, si scala solo il costo).
-- **M7 — Scelte di incantesimi con ricarica particolare**: Arcani firma (due incantesimi di 3° livello, un lancio gratuito ciascuno), Arcanum mistico (uno per livello 6-9, una volta per Riposo Lungo), Maestria degli incantesimi (un 1° e un 2° livello a volontà: `freeCast.uses: "unlimited"`), Memorizzare (cambio di un preparato a Riposo Breve). *Proposta*: `Choice` con filtro di livello/classe e sorgente speciale, `grantSpell` da `$choiceId`, `freeCast` illimitato.
-- **M8 — Modificatori di incantesimo**: nuova `op` `spellModifier { filter, damageBonus, healBonus, dcBonus, dieStep }` con filtro (trucchetti, scuola, tipo di danno, id incantesimo). Colpi benedetti e Incantesimo potente del Chierico, Potente trucchetto e Evocazione potenziata del Mago, Affinità elementale, Anima radiosa; le **invocazioni** (Deflagrazione agonizzante) la riusano. La finestra di lancio mostra il bonus come riga e lo somma al tiro.
-- **M9 — Invocazioni del Warlock**: sono opzioni di una `Choice` a più voci (elenco da estrarre), ciascuna con i suoi effetti (`spellModifier` M8, `sense`, `grantSpell` illimitato, `acFormula`…) e i prerequisiti (livello, Patto). Quelle senza numeri restano testo.
-- **M10 — Compagni**: Signore delle bestie, Trova famiglio/destriero, Forma selvatica. *Proposta*: riquadro **Compagno** semplice (PF, CA, velocità, attacco con il bonus competenza del padrone) con dati scritti a mano dal giocatore; nessuna automazione. Ultimo lotto, priorità bassa.
-- **M11 — Azioni di risorsa ed eventi di attivazione**: un contatore può avere un pulsante con costo variabile, dado da tirare, cura da applicare e recuperi speciali. Esempi: Seconda ripresa (tira 1d10 + livello e cura), Mani che curano, Imposizione delle mani (riserva di PF spesa a scelta), dadi di Superiorità/Energia psionica (dado per livello, tiro), Ispirazione bardica, Ira persistente (recupero all'Iniziativa), conversioni ("recupera spendendo un uso di un'altra risorsa"), PF temporanei all'attivazione (Vitalità dell'albero). *Proposta*: `resource.die` (stringa o tabella), `resource.actions[]` con `cost`, `roll`, `apply: "heal" | "tempHp" | "note"` e `regainOn: "initiative"`.
-- **M12 — Modificatori al tiro del d20 e dei dadi**: `rollFloor` (minimo al tiro: Talento affidabile, Potenza indomabile), `halfProficiency` (Jolly, Atleta straordinario), `rerollOnes` (Fortunato dell'Halfling, Guaritore), `damageDieFloor` (Combattere con armi possenti). Nei tiri compaiono come nota "x ha effetto" e applicano il minimo.
-- **M13 — CA e difese particolari**: limite di Des alla CA con l'armatura media (Maestro delle armature medie), riduzione fissa del danno (Maestro delle armature pesanti) come `damageReduction` mostrata in Stato.
-
-## 4. Lotti (ordine di priorità)
-
-Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove servono i dati veri), `npx tsc --noEmit` pulito, `npm test` verde (i `*.private` falliscono se manca `data/private`: lo dico), `extract:data` e `validate:data` con report (usi, attivazioni, `missing`), prova in gioco (Privilegi/Attacchi/Stato), `DATA_TODO.md` aggiornato, commit chiaro.
-
-### Lotto 1 — Barbaro e Guerriero ✅ chiuso
-- **Entra**: Barbaro (Attacco irruento, Istinto ferino, Colpo brutale e migliorato, Furia persistente, Potenza indomabile) e sottoclassi Berserker, Cuore selvaggio (scelte), Albero del mondo, Zelota; Guerriero (Seconda ripresa, Azione impetuosa, Indomito, Mente tattica), Campione, Maestro di battaglia (dadi, manovre), Cavaliere mistico, Guerriero psionico.
-- **Richiede il motore**: M3, M2, M1 (base), M5 (Furia senza mente), M11 (Seconda ripresa, dadi), M12 (Potenza indomabile, Atleta straordinario).
-- **Come lo verifico**: test del mini ruleset (Attacco irruento dà Vantaggio solo con stato acceso; Colpo brutale somma 1d10 e scala il limite; Seconda ripresa scala gli usi); test privati sui dati veri; prova in gioco con un Barbaro di livello 9 e un Maestro di battaglia: i numeri cambiano solo con lo stato attivo, gli usi scalano, i riposi ricaricano.
-- **Dati da estrarre prima**: manovre del Maestro di battaglia (non ancora: l'azione «Usa una manovra» spende il dado giusto per livello, la manovra resta testo).
-- **Esito**: vedi `DATA_TODO.md` (voci fatte e voci rimaste solo testo con il motivo). Correzione sul censimento: Atleta straordinario del Campione nei tuoi riepiloghi dà Vantaggio a Iniziativa e Atletica (non la metà competenza): fatto così. Provato nel browser con un Berserker di 9° e un Maestro di battaglia di 5°.
-
-### Lotto 2 — Ladro e Monaco ✅ chiuso
-- **Entra**: Attacco furtivo (da promemoria a extra d'attacco), Colpo astuto e varianti, Talento affidabile, Mira costante, Fortuna; sottoclassi Ladro (Assassino, Lama psichica, Ladro, Mistificatore arcano); Focus del Monaco (Stretta stordente, Deviare attacchi, Metabolismo straordinario), quattro Tradizioni.
-- **Richiede il motore**: M1, M2, M11, M12 (M3 per Mira costante).
-- **Verifica**: come Lotto 1; Attacco furtivo una volta per turno e azzerato dal pulsante.
-- **Esito**: vedi `DATA_TODO.md`. Provato nel browser con un Assassino di 7° (Attacco furtivo 4d6 + Assassinare, spesi al tiro) e un Monaco della Mano aperta di 6° (Stretta stordente con costo, Raffica di colpi).
-
-### Lotto 3 — Paladino e Ranger ✅ chiuso
-- **Entra**: Imposizione delle mani, Punizione divina (M1 con slot) e lancio gratuito, Aure, Colpi radianti, giuramenti; Marchio del cacciatore, Nemico prescelto, sottoclassi del Ranger.
-- **Richiede il motore**: M1 con costo in slot, M4, M5, M3.
-- **Verifica**: Aura di protezione mostra il valore per gli alleati; Coraggio toglie Spaventato dalle condizioni subibili.
-- **Esito**: vedi `DATA_TODO.md`. Provato nel browser con un Paladino della Devozione di 6° (Aure in Stato, Punizione divina con scelta dello slot: 1d8+3d8 con slot di 2°, slot spesi 1/2) e un Ranger Cacciatore di 5° (Marchio del cacciatore +1d6 di forza mentre ci si concentra).
-
-### Lotto 4 — Talenti e Stili di combattimento ✅ chiuso
-- **Entra**: talenti generali e di combattimento con effetto (Maestro delle armi possenti, Maestro delle armature, Combattere con armi possenti, Due armi, Senza armi, Fortunato già fatto); Doni epici.
-- **Richiede il motore**: M1, M2, M12, M13, M11.
-- **Verifica**: una scheda con Maestro di armi possenti e una con armatura media.
-- **Esito**: vedi `DATA_TODO.md`. Provato nel browser con un Campione di 5° con Maestro delle armi possenti, Combattere con armi possenti, Attaccante selvaggio e Caricatore: lo Spadone fa `2d6 +7` (For +4, competenza +3), gli extra compaiono nel tiro e su 80 dadi tirati il minimo è 3.
-
-### Lotto 5 — Chierico, Druido, Bardo ✅ chiuso
-- **Entra**: Incanalare divinità e sue opzioni, Colpi benedetti, domini; Forma selvatica (Forme del Circolo, Forma lunare), Forma stellare; Ispirazione bardica, Jolly, Collegi.
-- **Richiede il motore**: M11, M8, M1, M12; M10 solo per i compagni.
-- **Verifica**: lancio con bonus ai danni dei trucchetti, cure dei Chierici della Vita.
-- **Esito**: vedi `DATA_TODO.md`. Provato nel browser con una Chierica della Vita di 7° (Colpo divino come extra, Scintilla divina 2d8 + Sag tirata e spesa dall'Incanalare divinità, Scacciare non morti con CD 14 e 3d8), un Druido della Luna di 6° (CA 13 → 16 in Forma selvatica, 18 PF temporanei = 3 × livello) e un Bardo della Sapienza di 5° (Ispirazione bardica d8 con ricarica a Riposo Breve, Parole taglienti d8).
-
-### Lotto 6 — Stregone, Mago, Warlock ✅ chiuso
-- **Entra**: punti stregoneria, Metamagia, Stregoneria innata; Arcani firma, Memorizzare, Maestria degli incantesimi, Portento, Barriera arcana, Evocazione potenziata; invocazioni, Arcanum mistico, sottoclassi.
-- **Richiede il motore**: M6, M7, M8, M9, M11.
-- **Dati da estrarre prima**: Metamagie e invocazioni.
-- **Verifica**: conversione slot ↔ punti, costo Metamagia in finestra di lancio, Arcanum una volta per Riposo Lungo.
-- **Esito**: vedi `DATA_TODO.md`. Provato nel browser: pannello Punti stregoneria (Metamagia con costo, Crea slot, slot → punti), Colpo occulto con slot del Patto (6d8), Armatura magica e Charme a volontà, Controincantesimo 1/1, Arcanum mistico per livello.
-
-### Lotto 7 — Specie
-- **Entra**: Mani che curano, Arma del soffio, Fortuna, Adrenalina, Resistenza implacabile, doni dell'Ascendenza gigante, Percezione tellurica, benefici di Forma grande (Vantaggio alle prove di Forza), più le voci F da riverificare.
-- **Richiede il motore**: M11, M1, M12, M3.
-
-### Lotto 8 — Compagni e rifiniture
-- **Entra**: M10, riverifica delle voci F, voci rimaste C da rivalutare, pulizia di `DATA_TODO.md`.
-
-## 5. Criteri di accettazione
-
-**Per lotto** (oltre alla chiusura sopra):
-- ogni privilegio elencato nel lotto ha un'etichetta finale: giocabile (con un test o una prova) o C con motivo in `DATA_TODO.md`;
-- gli id agganciati ai dati estratti: `missing` vuoto (o voci giustificate);
-- nessun numero inventato; dove il testo non lo dà, `needsReview`;
-- i numeri della scheda cambiano solo con lo stato attivo; gli usi scalano; i riposi ricaricano;
-- file sotto ~300 righe, motore senza dipendenze UI, testi in `src/i18n/it.json`, niente contenuti protetti tracciati.
-
-**Globali**:
-- `npm test` e `npm run validate:data` verdi (se manca `data/private` lo dico e non lo nascondo);
-- `DATA_TODO.md` con solo ciò che resta aperto e non pianificato, le voci fatte spostate in "chiuso" con il conteggio aggiornato;
-- elenco finale delle voci rimaste solo testo, con il motivo.
-
-## 6. Cosa serve per i prossimi lotti
-
-1. Estrazioni a parte di **manovre** (Lotto 1, resta aperto), **Metamagie** e **invocazioni** (Lotto 6): stesso prompt, cambia la prima riga.
-2. Il tuo ok per il Lotto 7 (Specie).
-3. Gli altri file delle regole sono già in `docs/rules/` (non tracciati) e i dati si rigenerano con `npm run extract:data`.

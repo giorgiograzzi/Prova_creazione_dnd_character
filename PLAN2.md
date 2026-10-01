@@ -1,25 +1,27 @@
 # PLAN2.md — Privilegi giocabili (classi, sottoclassi, talenti, specie)
 
-Stato: **bozza, in attesa di ok**. Nessun codice toccato. Continua lo step 14b di `PLAN.md`: oggi molti privilegi si leggono ma non cambiano i numeri; qui si decide cosa far diventare giocabile, in che ordine e con quali funzioni nuove del motore.
+Stato: **piano approvato; Lotto 1 (Barbaro e Guerriero) chiuso**, Lotto 2 in attesa di ok. Continua lo step 14b di `PLAN.md`: oggi molti privilegi si leggono ma non cambiano i numeri; qui si decide cosa far diventare giocabile, in che ordine e con quali funzioni nuove del motore.
 
 ## 0. Fonti e limiti (leggere prima)
 
-- Il censimento nasce da due estrazioni fatte sul **Manuale del giocatore 2024 in inglese** (OCR), tenute in `data/private/raw/` (non tracciato): 412 privilegi di classe/sottoclasse, 55 tratti di specie (più 10 varianti di colore del Dragonide), 75 talenti. Il riepilogo italiano `01_Dati_Gioco` **non era disponibile**.
-- Conseguenze: i nomi qui sotto sono quelli inglesi; **gli id (`barbarian/rage`…) non ci sono** e vanno agganciati al Lotto 1 rigenerando `data/private/` (serve `01_Dati_Gioco.pdf`, vedi §6); l'OCR ha errori sui dadi. **Ogni numero citato nelle note è un promemoria e va riletto sul `01`** prima di finire nei dati (regola 1): dove il testo non lo dà, `needsReview: true` e voce in `DATA_TODO.md`.
+- Il censimento nasce da due estrazioni fatte sul **Manuale del giocatore 2024 in inglese** (OCR), tenute in `data/private/raw/` (non tracciato): 412 privilegi di classe/sottoclasse, 55 tratti di specie (più 10 varianti di colore del Dragonide), 75 talenti. Il riepilogo italiano `01_Dati_Gioco` non c'era ancora quando ho scritto il censimento: è arrivato dopo, e **dal Lotto 1 i numeri vengono dai tuoi riepiloghi italiani** (via `data/private/`), non dal manuale inglese.
+- Conseguenze: i nomi nel censimento sono quelli inglesi (gli id veri, come `barbarian/rage`, si agganciano lotto per lotto con `extract:data`); l'OCR ha errori sui dadi. **Ogni numero citato nelle note è un promemoria e va riletto sul `01`** prima di finire nei dati (regola 1): dove il testo non lo dà, `needsReview: true` e voce in `DATA_TODO.md`.
 - In questo file non c'è testo del manuale: solo nomi, livelli e classificazione.
 - I campi delle estrazioni (`effetto_meccanico`, `dipende_da`…) sono dedotti da parole chiave: le etichette sotto sono state riviste a mano, ma restano un punto di partenza.
 - **Dati che non sono nelle estrazioni e vanno estratti a parte** (senza, i lotti relativi non partono): invocazioni del Warlock, opzioni di Metamagia, manovre del Maestro di battaglia, opzioni di Preda del cacciatore e Stili di combattimento (questi ultimi sono già talenti), elenchi dei compagni (Signore delle bestie, Forma selvatica).
 
 ## 1. Etichette
 
+- **✔** — fatto in un lotto di questo piano (con i test).
 - **F** — già modellato in `scripts/lib/*-rules.ts` (da riverificare con `extract:data`, non con l'occhio).
 - **A** — basta un effetto, un contatore o un'attivazione con le funzioni che già ci sono (`resource`, `activation`, `when: active:<id>`, `grantSpell.freeCast`, `critRange`, `setSpeed`…).
 - **B Mn** — serve prima la funzione nuova **Mn** del §3.
 - **C** — resta solo testo, con il motivo: reazione, scelta del Master, effetto sull'avversario, dipende dalla situazione o dal movimento nel turno.
 
-Totali (classi e sottoclassi, 412 voci): F 141 · A 48 · B 111 · C 112.
+Totali (classi e sottoclassi, 412 voci) dopo il Lotto 1: ✔ 25 · F 139 · A 44 · B 92 · C 112.
 Specie (55 voci): F 34 · A 4 · B 7 · C 10. Talenti (75): F 38 · A 4 · B 9 · C 24.
-Voci B per funzione: M11 44 · M1 31 · M8 11 · M3 8 · M6 7 · M12 6 · M2 4 · M7 4 · M4 3 · M5 3 · M10 3 · M13 2 · M9 1 (le invocazioni e le manovre vere ne aggiungeranno molte).
+Voci B rimaste per funzione: M11 36 · M1 25 · M8 11 · M6 7 · M3 6 · M12 4 · M2 4 · M7 4 · M4 3 · M10 3 · M5 2 · M13 2 · M9 1 (le invocazioni e le manovre vere ne aggiungeranno molte).
+Le «A» sono dove basta un contatore: molte hanno già il contatore da `deriveUsage` (49 in tutto), il resto è testo.
 
 ## 2. Censimento
 
@@ -29,49 +31,51 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Classe**
 
-- **F** già fatto: Rage (1°), Unarmored Defense (1°), Weapon Mastery (1°), Danger Sense (2°), Barbarian Subclass (3°), Primal Knowledge (3°), Ability Score Improvement (4°), Extra Attack (5°), Fast Movement (5°), Epic Boon (19°), Primal Champion (20°)
-- **B**: Reckless Attack (2°) → **M3** (Vantaggio agli attacchi con Forza; gli attacchi contro di te hanno Vantaggio (promemoria)); Feral Instinct (7°) → **M3** (Vantaggio all'Iniziativa); Brutal Strike (9°) → **M1** (danno extra rinunciando al Vantaggio di Attacco irruento; effetto (Spingere ecc.) è testo); Improved Brutal Strike (13°) → **M1** (due effetti a scelta, danno extra); Persistent Rage (15°) → **M11** (recupero usi Ira tirando Iniziativa); Improved Brutal Strike (17°) → **M1** (due effetti a scelta, danno extra); Indomitable Might (18°) → **M12** (minimo alla prova di Forza = punteggio)
+- **✔ fatto nel Lotto 1**: Rage (1°) — attivabile, Danno ira; Reckless Attack (2°) — Vantaggio agli attacchi con Forza; gli attacchi contro di te hanno Vantaggio (promemoria); Feral Instinct (7°) — Vantaggio all'Iniziativa; Brutal Strike (9°) — danno extra rinunciando al Vantaggio di Attacco irruento; effetto (Spingere ecc.) è testo; Improved Brutal Strike (13°) — due effetti a scelta, danno extra; Persistent Rage (15°) — recupero usi Ira tirando Iniziativa; Improved Brutal Strike (17°) — due effetti a scelta, danno extra; Indomitable Might (18°) — minimo alla prova di Forza = punteggio
+- **F** già fatto: Unarmored Defense (1°), Weapon Mastery (1°), Danger Sense (2°), Barbarian Subclass (3°), Primal Knowledge (3°), Ability Score Improvement (4°), Extra Attack (5°), Fast Movement (5°), Epic Boon (19°), Primal Champion (20°)
 - **C**: Instinctive Pounce (7°) — movimento mezza Velocità all'inizio dell'Ira: decisione di movimento; Relentless Rage (11°) — reazione a 0 PF con CD che sale: dipende dalla situazione (resta promemoria)
 
 **Sottoclasse: Path of the Berserker**
 
-- **B**: Frenzy (3°) → **M1** (danno extra 1 volta per turno con Ira e Attacco irruento); Mindless Rage (6°) → **M5** (immunità Affascinato/Spaventato durante l'Ira); Intimidating Presence (14°) → **M11** (1 volta per Riposo Lungo o spendendo un uso di Ira)
+- **✔ fatto nel Lotto 1**: Frenzy (3°) — danno extra 1 volta per turno con Ira e Attacco irruento; Mindless Rage (6°) — immunità Affascinato/Spaventato durante l'Ira; Intimidating Presence (14°) — 1 volta per Riposo Lungo o spendendo un uso di Ira
 - **C**: Retaliation (10°) — reazione
 
 **Sottoclasse: Path of the Wild Heart**
 
-- **A**: Rage of the Wilds (3°) — scelta all'attivazione (Orso: resistenze; Aquila e Lupo: testo); Aspect of the Wilds (6°) — scelta Gufo/Pantera/Salmone: senso o velocità; Power of the Wilds (14°) — scelta Falco/Leone/Ariete; effetti condizionati dall'Ira
+- **✔ fatto nel Lotto 1**: Rage of the Wilds (3°) — scelta all'attivazione (Orso: resistenze; Aquila e Lupo: testo); Aspect of the Wilds (6°) — scelta Gufo/Pantera/Salmone: senso o velocità
+- **A**: Power of the Wilds (14°) — scelta Falco/Leone/Ariete; effetti condizionati dall'Ira
 - **C**: Animal Speaker (3°) — incantesimi rituali: nessun numero; Nature Speaker (10°) — incantesimo: nessun numero
 
 **Sottoclasse: Path of the World Tree**
 
-- **B**: Vitality of the Tree (3°) → **M11** (PF temporanei all'attivazione e a inizio turno)
+- **✔ fatto nel Lotto 1**: Vitality of the Tree (3°) — PF temporanei all'attivazione e a inizio turno
 - **C**: Branches of the Tree (6°) — reazione; Battering Roots (10°) — proprietà di maestria (Spingere/Abbattere): testo; Travel along the Tree (14°) — teletrasporto: decisione del Master/posizione
 
 **Sottoclasse: Path of the Zealot**
 
-- **A**: Rage of the Gods (14°) — attivabile (volo, resistenze); la rinascita a 0 PF è testo
-- **B**: Divine Fury (3°) → **M1** (danno extra 1 volta per turno (1d6 + metà livello) con Ira); Warrior of the Gods (3°) → **M11** (riserva di dadi da spendere in cure); Fanatical Focus (6°) → **M2** (1 volta per Ira: rilancio del TS); Zealous Presence (10°) → **M11** (1 volta per Riposo Lungo o spendendo un uso di Ira)
+- **✔ fatto nel Lotto 1**: Divine Fury (3°) — danno extra 1 volta per turno (1d6 + metà livello) con Ira; Warrior of the Gods (3°) — riserva di dadi da spendere in cure; Zealous Presence (10°) — 1 volta per Riposo Lungo o spendendo un uso di Ira; Rage of the Gods (14°) — attivabile (volo, resistenze); la rinascita a 0 PF è testo
+- **B**: Fanatical Focus (6°) → **M2** (1 volta per Ira: rilancio del TS)
 
 ### GUERRIERO
 
 **Classe**
 
+- **✔ fatto nel Lotto 1**: Second Wind (1°) — 2 usi (scalano), cura 1d10 + livello: tiro e applicazione; Tactical Mind (2°) — spende un uso di Second Wind per aggiungere 1d10 alla prova
 - **F** già fatto: Fighting Style (1°), Weapon Mastery (1°), Fighter Subclass (3°), Ability Score Improvement (4°), Extra Attack (5°), Two Extra Attacks (11°), Epic Boon (19°), Three Extra Attacks (20°)
 - **A**: Action Surge (2°) — contatore; l'azione in più è testo; Indomitable (9°) — contatore; il bonus è il livello
-- **B**: Second Wind (1°) → **M11** (2 usi (scalano), cura 1d10 + livello: tiro e applicazione); Tactical Mind (2°) → **M11** (spende un uso di Second Wind per aggiungere 1d10 alla prova)
 - **C**: Tactical Shift (5°) — movimento con Second Wind, senza Attacchi di opportunità: decisione di movimento; Tactical Master (9°) — cambio proprietà di maestria: testo; Studied Attacks (13°) — Vantaggio sul bersaglio mancato: dipende dalla situazione
 
 **Sottoclasse: Battle Master**
 
-- **F** già fatto: Combat Superiority (3°), Student of War (3°)
-- **B**: Know Your Enemy (7°) → **M11** (1 volta per Riposo Lungo o spendendo un dado); Improved Combat Superiority (10°) → **M11** (dado d8 → d10 → d12 per livello); Relentless (15°) → **M11** (1d8 al posto di un dado, 1 volta per turno); Ultimate Combat Superiority (18°) → **M11** (dado al livello superiore)
+- **✔ fatto nel Lotto 1**: Combat Superiority (3°) — dadi per livello e azione «Usa una manovra»; le manovre vere sono da estrarre; Know Your Enemy (7°) — 1 volta per Riposo Lungo o spendendo un dado
+- **F** già fatto: Student of War (3°)
+- **B**: Improved Combat Superiority (10°) → **M11** (dado d8 → d10 → d12 per livello); Relentless (15°) → **M11** (1d8 al posto di un dado, 1 volta per turno); Ultimate Combat Superiority (18°) → **M11** (dado al livello superiore)
 
 **Sottoclasse: Champion**
 
+- **✔ fatto nel Lotto 1**: Remarkable Athlete (3°) — Vantaggio a Iniziativa e Atletica
 - **F** già fatto: Improved Critical (3°), Superior Critical (15°)
 - **A**: Additional Fighting Style (7°) — seconda scelta dello stesso gruppo
-- **B**: Remarkable Athlete (3°) → **M12** (metà competenza alle prove non competenti di For/Des/Cos)
 - **C**: Heroic Warrior (10°) — Ispirazione eroica a inizio turno: nessun tracciamento dei turni; Survivor (18°) — PF a inizio turno quando Sanguinante e Vantaggio ai TS sulla morte: dipende dalla situazione
 
 **Sottoclasse: Eldritch Knight**
@@ -81,9 +85,9 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 **Sottoclasse: Psi Warrior**
 
+- **✔ fatto nel Lotto 1**: Psionic Power (3°) — dadi, Colpo psionico e Campo protettivo (le altre azioni restano testo); Guarded Mind (10°) — resistenza psichica; la rimozione di condizioni è testo
 - **F** già fatto: Telekinetic Master (18°)
-- **A**: Guarded Mind (10°) — resistenza psichica; la rimozione di condizioni è testo
-- **B**: Psionic Power (3°) → **M1** (dadi fatti; Colpo psionico (danno extra 1 volta per turno, dado + Int) e Campo protettivo (reazione)); Telekinetic Adept (7°) → **M11** (salto / movimento con dado speso)
+- **B**: Telekinetic Adept (7°) → **M11** (salto / movimento con dado speso)
 - **C**: Bulwark of Force (15°) — alleati con copertura: bersagli decisi sul momento
 
 ### LADRO
@@ -460,9 +464,11 @@ Nomi inglesi come nei JSON; il numero tra parentesi è il livello.
 
 ## 3. Funzioni nuove del motore
 
+**Fatte nel Lotto 1**: M1 (extra d'attacco), M2 («Nuovo turno»), M3 (Vantaggio da effetti), M5 (immunità alle condizioni), M11 (azioni di risorsa), M12 (minimo del tiro; la metà competenza resta solo per il Factotum e simili) più due piccole aggiunte: `note` (promemoria che compare tra le note) e la variabile di formula `speed` (volare pari alla Velocità). Restano M4, M6, M7, M8, M9, M10, M13.
+
 Ogni funzione arriva con i suoi test (mini ruleset in `compute/testkit.ts`) **prima** dei privilegi che la usano. Il motore resta in `src/engine`, senza UI; i testi in `src/i18n/it.json`.
 
-- **M1 — Extra d'attacco (`attackRider`)**: danno o effetto in più legato al colpo, con costo (nessuno / uso di risorsa / slot / dado) e limite opzionale. Esempi: Punizione divina, Colpo brutale, Attacco furtivo e Colpo astuto, Colpi benedetti, Furia del Berserker, Preda del cacciatore, Mano del danno del Monaco. *Proposta*: nuova `op` con `dice`, `cost`, `limit: "turn" | "rage" | none`, `when` come le altre. Nella scheda degli Attacchi compare una riga "Extra disponibili" con un pulsante **Applica** che somma i dadi al tiro del danno e scala il costo; quelli senza costo e sempre attivi (Colpi radianti) si sommano da soli.
+- **M1 — Extra d'attacco (`attackRider`)**: danno o effetto in più legato al colpo, con costo (nessuno / uso di risorsa / slot / dado) e limite opzionale. Esempi: Punizione divina, Colpo brutale, Attacco furtivo e Colpo astuto, Colpi benedetti, Furia del Berserker, Preda del cacciatore, Stretta del Monaco. *Proposta*: nuova `op` con `dice`, `cost`, `limit: "turn" | "rage" | none`, `when` come le altre. Nella scheda degli Attacchi compare una riga "Extra disponibili" con un pulsante **Applica** che somma i dadi al tiro del danno e scala il costo; quelli senza costo e sempre attivi (Colpi radianti) si sommano da soli.
 - **M2 — Turni e "1 volta per turno"**: oggi non si tracciano i turni. *Proposta*: `state.turn` con un pulsante **Nuovo turno** nello Stato; azzera i limiti `turn` (M1) e i promemoria "1 per turno" (Attaccante selvaggio, Perforante); il limite `rage` si azzera all'attivazione dell'Ira. Non parte nessun timer: è un segnaposto scelto dal giocatore.
 - **M3 — Vantaggio e Svantaggio da effetti**: nuove `op` `attackAdvantage`, `checkAdvantage` (per abilità o per abilità di caratteristica), `initiativeAdvantage`, tutte con `when`. Usate con gli stati attivabili senza risorsa (l'attivazione già permette `resource` facoltativo): Attacco irruento, Mira costante, Voto di inimicizia, Istinto ferino. Il "Vantaggio contro di te" resta promemoria testuale.
 - **M4 — Aure**: nuovo campo `aura { radius, appliesTo: "self" | "allies" }` sulla `op` (Aura di protezione, di coraggio, di devozione, di difesa). Sulla scheda l'effetto vale su di sé come oggi; in **Stato** un riquadro "Aure attive" mostra raggio e valore calcolato per gli alleati (es. bonus ai TS), così il giocatore lo dice al tavolo. Niente calcolo sui compagni di gruppo.
@@ -473,27 +479,28 @@ Ogni funzione arriva con i suoi test (mini ruleset in `compute/testkit.ts`) **pr
 - **M9 — Invocazioni del Warlock**: sono opzioni di una `Choice` a più voci (elenco da estrarre), ciascuna con i suoi effetti (`spellModifier` M8, `sense`, `grantSpell` illimitato, `acFormula`…) e i prerequisiti (livello, Patto). Quelle senza numeri restano testo.
 - **M10 — Compagni**: Signore delle bestie, Trova famiglio/destriero, Forma selvatica. *Proposta*: riquadro **Compagno** semplice (PF, CA, velocità, attacco con il bonus competenza del padrone) con dati scritti a mano dal giocatore; nessuna automazione. Ultimo lotto, priorità bassa.
 - **M11 — Azioni di risorsa ed eventi di attivazione**: un contatore può avere un pulsante con costo variabile, dado da tirare, cura da applicare e recuperi speciali. Esempi: Seconda ripresa (tira 1d10 + livello e cura), Mani che curano, Imposizione delle mani (riserva di PF spesa a scelta), dadi di Superiorità/Energia psionica (dado per livello, tiro), Ispirazione bardica, Ira persistente (recupero all'Iniziativa), conversioni ("recupera spendendo un uso di un'altra risorsa"), PF temporanei all'attivazione (Vitalità dell'albero). *Proposta*: `resource.die` (stringa o tabella), `resource.actions[]` con `cost`, `roll`, `apply: "heal" | "tempHp" | "note"` e `regainOn: "initiative"`.
-- **M12 — Modificatori al tiro del d20 e dei dadi**: `rollFloor` (minimo al tiro: Talento affidabile, Possanza indomita), `halfProficiency` (Jolly, Atleta straordinario), `rerollOnes` (Fortunato dell'Halfling, Guaritore), `damageDieFloor` (Combattere con armi possenti). Nei tiri compaiono come nota "x ha effetto" e applicano il minimo.
+- **M12 — Modificatori al tiro del d20 e dei dadi**: `rollFloor` (minimo al tiro: Talento affidabile, Potenza indomabile), `halfProficiency` (Jolly, Atleta straordinario), `rerollOnes` (Fortunato dell'Halfling, Guaritore), `damageDieFloor` (Combattere con armi possenti). Nei tiri compaiono come nota "x ha effetto" e applicano il minimo.
 - **M13 — CA e difese particolari**: limite di Des alla CA con l'armatura media (Maestro delle armature medie), riduzione fissa del danno (Maestro delle armature pesanti) come `damageReduction` mostrata in Stato.
 
 ## 4. Lotti (ordine di priorità)
 
 Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove servono i dati veri), `npx tsc --noEmit` pulito, `npm test` verde (i `*.private` falliscono se manca `data/private`: lo dico), `extract:data` e `validate:data` con report (usi, attivazioni, `missing`), prova in gioco (Privilegi/Attacchi/Stato), `DATA_TODO.md` aggiornato, commit chiaro.
 
-### Lotto 1 — Barbaro e Guerriero
-- **Entra**: Barbaro (Attacco irruento, Istinto ferino, Colpo brutale e migliorato, Furia persistente, Possanza indomita) e sottoclassi Berserker, Cuore selvaggio (scelte), Albero del mondo, Zelota; Guerriero (Seconda ripresa, Azione impetuosa, Indomito, Mente tattica), Campione, Maestro di battaglia (dadi, manovre), Cavaliere mistico, Guerriero psionico.
-- **Richiede il motore**: M3, M2, M1 (base), M5 (Furia senza mente), M11 (Seconda ripresa, dadi), M12 (Possanza indomita, Atleta straordinario).
+### Lotto 1 — Barbaro e Guerriero ✅ chiuso
+- **Entra**: Barbaro (Attacco irruento, Istinto ferino, Colpo brutale e migliorato, Furia persistente, Potenza indomabile) e sottoclassi Berserker, Cuore selvaggio (scelte), Albero del mondo, Zelota; Guerriero (Seconda ripresa, Azione impetuosa, Indomito, Mente tattica), Campione, Maestro di battaglia (dadi, manovre), Cavaliere mistico, Guerriero psionico.
+- **Richiede il motore**: M3, M2, M1 (base), M5 (Furia senza mente), M11 (Seconda ripresa, dadi), M12 (Potenza indomabile, Atleta straordinario).
 - **Come lo verifico**: test del mini ruleset (Attacco irruento dà Vantaggio solo con stato acceso; Colpo brutale somma 1d10 e scala il limite; Seconda ripresa scala gli usi); test privati sui dati veri; prova in gioco con un Barbaro di livello 9 e un Maestro di battaglia: i numeri cambiano solo con lo stato attivo, gli usi scalano, i riposi ricaricano.
-- **Dati da estrarre prima**: manovre del Maestro di battaglia.
+- **Dati da estrarre prima**: manovre del Maestro di battaglia (non ancora: l'azione «Usa una manovra» spende il dado giusto per livello, la manovra resta testo).
+- **Esito**: vedi `DATA_TODO.md` (voci fatte e voci rimaste solo testo con il motivo). Correzione sul censimento: Atleta straordinario del Campione nei tuoi riepiloghi dà Vantaggio a Iniziativa e Atletica (non la metà competenza): fatto così. Provato nel browser con un Berserker di 9° e un Maestro di battaglia di 5°.
 
 ### Lotto 2 — Ladro e Monaco
-- **Entra**: Attacco furtivo (da promemoria a extra d'attacco), Colpo astuto e varianti, Talento affidabile, Mira costante, Fortuna; sottoclassi Ladro (Assassino, Lama psichica, Ladro, Mistificatore arcano); Focus del Monaco (Stretta stordente, Deviare attacchi, Metabolismo straordinario), quattro Tradizioni (sottoclassi).
+- **Entra**: Attacco furtivo (da promemoria a extra d'attacco), Colpo astuto e varianti, Talento affidabile, Mira costante, Fortuna; sottoclassi Ladro (Assassino, Lama psichica, Ladro, Mistificatore arcano); Focus del Monaco (Stretta stordente, Deviare attacchi, Metabolismo straordinario), quattro Tradizioni.
 - **Richiede il motore**: M1, M2, M11, M12 (M3 per Mira costante).
 - **Verifica**: come Lotto 1; Attacco furtivo una volta per turno e azzerato dal pulsante.
 
 ### Lotto 3 — Paladino e Ranger
 - **Entra**: Imposizione delle mani, Punizione divina (M1 con slot) e lancio gratuito, Aure, Colpi radianti, giuramenti; Marchio del cacciatore, Nemico prescelto, sottoclassi del Ranger.
-- **Richiede il motore**: M1 con costo in slot, M4, M5, M3.
+- **Richiede il motore**: M1 con costo in slot, M4, M5, M3, M8 (Colpo letale).
 - **Verifica**: Aura di protezione mostra il valore per gli alleati; Coraggio toglie Spaventato dalle condizioni subibili.
 
 ### Lotto 4 — Talenti e Stili di combattimento
@@ -533,9 +540,8 @@ Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove se
 - `DATA_TODO.md` con solo ciò che resta aperto e non pianificato, le voci fatte spostate in "chiuso" con il conteggio aggiornato;
 - elenco finale delle voci rimaste solo testo, con il motivo.
 
-## 6. Cosa mi serve per partire
+## 6. Cosa serve per i prossimi lotti
 
-1. **`01_Dati_Gioco.pdf`** (italiano) in `data/rules/`, per rigenerare `data/private/` con `npm run extract:data` e agganciare gli id. Senza, il Lotto 1 non parte.
-2. Estrazioni a parte di manovre, Metamagie e invocazioni (prompt già pronto, cambia la prima riga).
-3. Il tuo ok a questo piano (e ai lotti in quest'ordine).
-
+1. Estrazioni a parte di **manovre** (Lotto 1, resta aperto), **Metamagie** e **invocazioni** (Lotto 6): stesso prompt, cambia la prima riga.
+2. Il tuo ok per il Lotto 2 (Ladro e Monaco).
+3. Gli altri file delle regole sono già in `docs/rules/` (non tracciati) e i dati si rigenerano con `npm run extract:data`.

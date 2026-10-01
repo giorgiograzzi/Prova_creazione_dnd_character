@@ -65,7 +65,7 @@ export const LOT5: Record<string, Patch> = {
   // ── Druido ──────────────────────────────────────────────────────────────
   "druid/wild_shape": (f) => {
     f.effects.push(action({ actionId: "wild_shape_hp", label: "PF temporanei della forma", resource: "wild_shape", cost: 0, bonus: "classLevel:druid", apply: "tempHp",
-      text: "Quando assumi la forma.", when: "!hasFeature:circle_forms" }));
+      text: "Quando assumi la forma.", when: `!hasFeature:circle_forms && ${active("wild_shape")}`, onActivate: "wild_shape" }));
   },
   "druid/elemental_fury": (f) => {
     const strike = (n: number, from: number, to: number) => rider({ riderId: "primal_strike", label: "Colpo primordiale", count: n, die: 8, limit: "turn", when: dice(from, to, "druid"),
@@ -87,7 +87,7 @@ export const LOT5: Record<string, Patch> = {
   // Luna: in Forma selvatica CA 13 + Sag (l'armatura non conta) e PF temporanei ×3
   "moon/circle_forms": (f) => {
     f.effects.push({ op: "acFormula", formula: "13 + mod:wis", shieldAllowed: false, ignoresArmor: true, when: active("wild_shape") },
-      action({ actionId: "wild_shape_hp", label: "PF temporanei della forma", resource: "wild_shape", cost: 0, bonus: "3 * classLevel:druid", apply: "tempHp", text: "Quando assumi la forma." }));
+      action({ actionId: "wild_shape_hp", label: "PF temporanei della forma", resource: "wild_shape", cost: 0, bonus: "3 * classLevel:druid", apply: "tempHp", text: "Quando assumi la forma.", when: active("wild_shape"), onActivate: "wild_shape" }));
   },
   "moon/improved_circle_forms": (f) => { f.effects.push({ op: "saveBonus", value: "mod:wis", ability: "con", when: active("wild_shape") }); },
   "moon/lunar_form": (f) => {

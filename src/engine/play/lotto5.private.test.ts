@@ -53,14 +53,18 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 5: Chierico, Druido e
 
   describe("Druido", () => {
     it("Forma selvatica: PF temporanei = livello; con le Forme del circolo ×3 e CA 13 + Sag (l'armatura non conta)", () => {
-      expect(act(mk("druid", 5), "wild_shape_hp")).toMatchObject({ bonus: 5, cost: 0 });
+      // i PF temporanei arrivano da soli quando assumi la forma (il pulsante resta solo mentre sei in forma)
+      expect(act(mk("druid", 5), "wild_shape_hp")).toBeUndefined();
+      const plain = on(mk("druid", 5), "wild_shape");
+      expect(plain.state.tempHp).toBe(5);
+      expect(act(plain, "wild_shape_hp")).toMatchObject({ bonus: 5, cost: 0, onActivate: "wild_shape" });
       const moon = mk("druid", 5, "moon", { inventory: [{ itemId: "leather", qty: 1, state: "worn" }] });
-      expect(act(moon, "wild_shape_hp")).toMatchObject({ bonus: 15 });
       expect(D(moon).ac.value).toBe(13); // armatura di cuoio: 11 + Des 2
       const shaped = on(moon, "wild_shape");
+      expect(shaped.state.tempHp).toBe(15); // 3 × livello
       expect(D(shaped).ac.value).toBe(16); // 13 + Sag 3
-      const r = runAction(shaped, D(shaped), "wild_shape_hp");
-      expect(r.character.state.tempHp).toBe(15);
+      expect(act(shaped, "wild_shape_hp")).toMatchObject({ bonus: 15 });
+      expect(runAction(shaped, D(shaped), "wild_shape_hp").character.state.tempHp).toBe(15); // i PF temporanei non si sommano
     });
     it("Luna: Forma lunare 2d10 radiosi solo in forma, Con salvezza + Sag", () => {
       const c = mk("druid", 14, "moon");

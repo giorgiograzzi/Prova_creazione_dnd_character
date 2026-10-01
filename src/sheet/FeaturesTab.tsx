@@ -37,7 +37,7 @@ export function FeaturesTab({ ch, rs, d, update }: TabProps) {
   const activate = (f: FeatureInfo, picks: string[] = []) => {
     const r = setActive(ch, rs, d, f.id, true, picks);
     if (!r.ok) { setError(r.errors[0] ?? ""); return; }
-    setError(""); update(() => r.character); setPick(null); toTop();
+    setError(r.notes?.join(" · ") ?? ""); update(() => r.character); setPick(null); toTop();
   };
   const end = (f: FeatureInfo) => { const r = setActive(ch, rs, d, f.id, false); update(() => r.character); setError(""); toTop(); };
 

@@ -20,10 +20,18 @@ export function untrainedArmor(x: Ctx, profs: Profs) {
   return !!a && !profs.armor.has(a.category);
 }
 
+// Fortuna: ritiro di un 1 sul d20 (vale per ogni tiro d20, quindi anche attacchi e Iniziativa)
+export function rerollFloor(x: Ctx): RollFloor[] {
+  const f = x.active.find(({ effect: e }) => e.op === "rerollOnes");
+  return f ? [{ min: 1, on: "reroll", label: f.label }] : [];
+}
+
 // Il minimo più alto tra gli effetti `rollFloor` che si applicano a questo tiro
 // (uno per tipo: sul dado e sul totale, che possono valere insieme)
 function floorFor(x: Ctx, match: (e: Extract<Effect, { op: "rollFloor" }>) => boolean): RollFloor[] | undefined {
-  const best: Partial<Record<"die" | "total", RollFloor>> = {};
+  const best: Partial<Record<"die" | "total" | "reroll", RollFloor>> = {};
+  const luck = rerollFloor(x)[0];
+  if (luck) best.reroll = luck;
   for (const { effect: e, label } of x.active) {
     if (e.op !== "rollFloor" || !match(e)) continue;
     const min = evalValue(e.min, x);

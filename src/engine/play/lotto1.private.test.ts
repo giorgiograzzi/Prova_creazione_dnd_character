@@ -90,6 +90,15 @@ describe.skipIf(!existsSync(`${DIR}/classes.json`))("Lotto 1: Barbaro e Guerrier
   });
   it("Albero del mondo: PF temporanei pari al livello entrando in Ira", () => {
     const c = on(mk("barbarian", 3, "world_tree"), "rage");
+    expect(c.state.tempHp).toBe(3); // arrivano da soli attivando l'Ira
+    expect(on(mk("barbarian", 14, "world_tree"), "rage").state.tempHp).toBe(14);
+    expect(on(mk("barbarian", 3, "berserker"), "rage").state.tempHp).toBe(0); // le altre sottoclassi no
+    expect(on(mk("barbarian", 3), "rage").state.tempHp).toBe(0);
+    const rich = { ...mk("barbarian", 3, "world_tree"), state: { ...mk("barbarian", 3).state, tempHp: 10 } };
+    expect(on(rich, "rage").state.tempHp).toBe(10); // i PF temporanei non si sommano: resta il valore più alto
+    expect(D(c).actions.find((a) => a.id === "vitality_start_turn")).toMatchObject({ die: 6, count: 2, cost: 0 }); // Danno ira +2
+    expect(D(on(mk("barbarian", 9, "world_tree"), "rage")).actions.find((a) => a.id === "vitality_start_turn")).toMatchObject({ count: 3 });
+    expect(D(mk("barbarian", 3, "world_tree")).actions.find((a) => a.id === "vitality_start_turn")).toBeUndefined(); // solo in Ira
     const r = runAction(c, D(c), "vitality_of_the_tree");
     expect(r).toMatchObject({ ok: true, total: 3 });
     expect(r.character.state.tempHp).toBe(3);

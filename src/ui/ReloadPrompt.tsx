@@ -12,8 +12,12 @@ export function ReloadPrompt() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_url, registration) {
+      if (!registration) return;
+      const check = () => void registration.update().catch(() => undefined);
       // Controlla periodicamente se c'è un nuovo build
-      if (registration) setInterval(() => void registration.update(), CHECK_INTERVAL_MS);
+      setInterval(check, CHECK_INTERVAL_MS);
+      // L'app installata resta in background per giorni e i timer si fermano: si controlla anche quando torna in primo piano
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(); });
     },
   });
 

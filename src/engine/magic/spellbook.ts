@@ -9,7 +9,7 @@ export type SourceKind = "cantrip" | "prepared" | "always" | "book" | "granted";
 export interface SpellSource {
   kind: SourceKind; label: string;
   ability?: Ability; dc?: number; attack?: number;
-  free?: { resourceId: string; max: number; remaining: number; recharge: string }; // lancio gratuito (senza slot)
+  free?: { resourceId: string; max: number; remaining: number; recharge: string; unlimited?: boolean }; // lancio gratuito (senza slot)
 }
 export interface SpellEntry {
   id: string; spell: Spell; sources: SpellSource[];
@@ -51,7 +51,7 @@ export function spellbook(ch: Character, rs: Ruleset, d: Pick<Derived, "grantedS
     add(g.spell, {
       kind: g.mode === "alwaysPrepared" ? "always" : g.mode === "cantrip" ? "cantrip" : "granted", label: g.source,
       ...(g.ability ? { ability: g.ability } : {}), ...(g.dc !== undefined ? { dc: g.dc } : {}), ...(g.attack !== undefined ? { attack: g.attack } : {}),
-      ...(g.freeCast && r ? { free: { resourceId: `spell:${g.spell}`, max: r.max.value, remaining: r.remaining, recharge: r.recharge } } : {}),
+      ...(g.freeCast && r ? { free: { resourceId: `spell:${g.spell}`, max: r.max.value, remaining: r.remaining, recharge: r.recharge, ...(g.freeCast.unlimited ? { unlimited: true } : {}) } } : {}),
     });
   }
 

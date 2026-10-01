@@ -3,8 +3,8 @@
 type Json = Record<string, any>;
 export type Patch = (f: Json, owner: Json, parent?: Json) => void;
 
-const T = (it: string) => ({ it });
-const active = (id: string) => `active:${id}`;
+export const T = (it: string) => ({ it });
+export const active = (id: string) => `active:${id}`;
 
 // Intervalli di livello in cui una colonna della tabella ha lo stesso valore: [da, a, valore]; i valori vuoti/zero si saltano
 export function ranges(col: (number | string)[]): [number, number, number | string][] {
@@ -15,10 +15,10 @@ export function ranges(col: (number | string)[]): [number, number, number | stri
   });
   return out.filter(([, , v]) => v !== 0 && v !== "");
 }
-const lvl = (cls: string, from: number, to: number) => `classLevel:${cls}>=${from}${to < 20 ? ` && classLevel:${cls}<=${to}` : ""}`;
+export const lvl = (cls: string, from: number, to: number) => `classLevel:${cls}>=${from}${to < 20 ? ` && classLevel:${cls}<=${to}` : ""}`;
 
-const rider = (o: Json) => ({ op: "attackRider", attackType: "any", limit: "none", auto: false, ...o });
-const action = (o: Json) => ({ op: "resourceAction", cost: 1, variable: false, apply: "none", ...o });
+export const rider = (o: Json) => ({ op: "attackRider", attackType: "any", limit: "none", auto: false, ...o });
+export const action = (o: Json) => ({ op: "resourceAction", cost: 1, variable: false, apply: "none", ...o });
 
 export const LOT1: Record<string, Patch> = {
   // ── Barbaro ─────────────────────────────────────────────────────────────

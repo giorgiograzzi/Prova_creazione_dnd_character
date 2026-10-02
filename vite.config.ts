@@ -8,9 +8,9 @@ export default defineConfig({
     react(),
     // Config base: manifest e offline completo si rifiniscono allo step 19
     VitePWA({
-      // "prompt": l'app installata non si aggiorna da sola a metà uso, chiede (ReloadPrompt)
-      registerType: "prompt",
-      includeAssets: ["icons/icon.svg", "icons/apple-touch-icon.png"],
+      // "autoUpdate": il nuovo build si attiva subito (skipWaiting + clientsClaim) e la pagina si ricarica da sola
+      registerType: "autoUpdate",
+      includeAssets: ["icons/icon.svg", "icons/apple-touch-icon.png", "icons/favicon-64.png"],
       manifest: {
         id: "./", name: "Personaggi D&D", short_name: "D&D PG", description: "Crea e gestisci personaggi di D&D 5.5 (2024), in italiano, anche senza rete.",
         lang: "it", dir: "ltr", start_url: "./", scope: "./", display: "standalone", orientation: "any", categories: ["games", "entertainment"],
@@ -28,6 +28,8 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 30 * 1024 * 1024,
         navigateFallback: "index.html",
         cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
       },
     }),
   ],

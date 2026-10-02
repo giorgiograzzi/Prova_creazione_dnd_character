@@ -4,7 +4,7 @@ Cose ancora aperte sui dati. Tutto il resto è stato chiuso (elenco in fondo).
 Fonte dei dati: i riepiloghi in `docs/rules/` (non il Manuale del giocatore): nessuna voce è stata confrontata con il manuale.
 Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 
-## 0. Prossimi passi (in ordine di priorità)
+## 0. Prossimi passi (in ordine di priorità; piano in `PLAN3.md`)
 1. ~~**Manovre del Maestro di battaglia**~~ — **fatto** (punto 1 di PLAN3): le 20 manovre sono giocabili (vedi «Chiuso»). Restano solo gli effetti sull'avversario a testo.
 2. **Nomi italiani da confrontare col manuale**: Metamagie e Invocazioni occulte (traduzioni nostre).
 3. **Limiti della magia del Warlock e del Mago** (sezione «Aperto dal Lotto 6»): invocazioni ripetibili con più scelte, prerequisiti sui trucchetti e sul Patto, Distintivi e Maestria limitati al libro, effetto delle Metamagie, costo alternativo a slot di altre classi.

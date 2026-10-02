@@ -528,7 +528,7 @@ Ogni lotto si chiude con: test nuovi (mini ruleset + `*.private.test.ts` dove se
 
 ## 6. Cosa resta dopo il piano
 
-Il piano è completo (lotti 1-8). Il seguito è in `DATA_TODO.md`, sezione 0 «Prossimi passi»:
+Il piano è completo (lotti 1-8). Il seguito è in `PLAN3.md` e in `DATA_TODO.md`, sezione 0 «Prossimi passi»:
 
 1. ~~Manovre del Maestro di battaglia~~ — **fatto** (punto 1 di PLAN3, `scripts/lib/play-maneuvers.ts`): dati dal riepilogo 01, 20 manovre giocabili.
 2. Confronto dei **nomi italiani** di Metamagie e invocazioni con il manuale.

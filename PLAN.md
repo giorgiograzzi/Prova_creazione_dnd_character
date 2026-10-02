@@ -1,6 +1,6 @@
 # PLAN.md — PWA Personaggi D&D 5.5 (2024)
 
-Stato: **Step 1-18 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Step 16 completato (magie). Step 17 completato (avanzamento di livello). Step 18 (Homebrew) completato: specie, background, classi e sottoclassi, talenti, equipaggiamento, incantesimi, linguaggi, tipi di danno e condizioni, con pacchetti, copia da voce ufficiale e integrazione nella creazione. Step 19 (PWA e Docker) completato. Prossimo: step 20 (rifinitura, documentazione, test finali). Da sistemare prima: vedi "Aperti" in fondo a questo file. Passo 0 (livello di partenza) aggiunto al wizard. Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
+Stato: **Step 1-20 completati** (il seguito è in `PLAN3.md`); dettaglio storico: **Step 1-18 completati** (12 classi, 48 sottoclassi, 390 incantesimi); `DATA_TODO.md` ripulito; condizioni complete (15, con motore). Step 10 completato (motore di creazione). Step 11 completato (store e salvataggio). Step 12 completato (tema XP, tab bar, Impostazioni). Step 13 completato (wizard di creazione). Step 14 completato (scheda giocabile). Step 14b completato (privilegi giocabili). Step 15 completato (tab Equip). Step 16 completato (magie). Step 17 completato (avanzamento di livello). Step 18 (Homebrew) completato: specie, background, classi e sottoclassi, talenti, equipaggiamento, incantesimi, linguaggi, tipi di danno e condizioni, con pacchetti, copia da voce ufficiale e integrazione nella creazione. Step 19 (PWA e Docker) e step 20 completati. Prossimi passi: `PLAN3.md`. Voci ancora aperte: vedi "Aperti" in fondo a questo file. Passo 0 (livello di partenza) aggiunto al wizard. Aggiunto step 14b (privilegi giocabili). Tutti i dati vanno in `data/private/` (non tracciati, scelta di Giorgio).
 
 ## 0. Cosa ho trovato nei documenti delle regole
 
@@ -132,7 +132,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - **Fatto**: manifest con icone (192, 512, maschera) e icona iOS; precache di tutto (dati, PDF compresi) con limite alzato a 30 MB; avviso di aggiornamento in stile XP e pulsante «Installa» in Impostazioni; promemoria backup anche nella lista dei personaggi; Docker con nginx (configurazione provata con un nginx vero: fallback, intestazioni di cache, 404) e compose valido. Provato nel browser: service worker attivo, **rete staccata → l'app si apre** (anche su rotte inesistenti) e la scheda PDF si scarica dalla cache. **Provato sul bunker da Giorgio: `docker compose up -d --build` e l'app risponde sulla 8097, tutto funziona.** (Nella sandbox non c'è il demone Docker: il primo avvio aveva rivelato un errore nella configurazione nginx, un commento a metà riga, corretto in `c8e1e0a`.) La PWA richiede HTTPS (sottodominio del tunnel, vedi README).
 
 ### 20. Rifinitura, documentazione, test finali
-- `README.md`, `ARCHITECTURE.md`, `docs/EXTENDING.md` (arma, talento, specie, classe, regola nuova), controllo accessibilità, `npm test` e `validate:data` verdi, verifica che nessun file protetto sia tracciato.
+- `README.md`, `ARCHITECTURE.md`, `docs/EXTENDING.md` (arma, talento, specie, classe, regola nuova; **non è nel repo**, ripreso in `PLAN3.md` punto 7), controllo accessibilità, `npm test` e `validate:data` verdi, verifica che nessun file protetto sia tracciato.
 - **Fatto**: tutti i criteri di accettazione della sezione 13 del brief.
 
 ## Rischi
@@ -142,7 +142,7 @@ Note sul metodo: i PDF sono generati con testo incorporato; li estraggo con uno 
 - **Regole non coperte dai file** (condizioni, morte, riposi, oggetti magici): marcate `needsReview`, da confermare con te sul manuale.
 - **Copyright**: i 3 PDF sono ora tracciati in git; dopo lo spostamento restano nella cronologia. Se la repo è o diventa pubblica va valutato se riscriverla.
 
-## Aperti (da sistemare prima dello step 19)
+## Aperti (seguiti in `PLAN3.md`)
 - **Dadi del danno delle armi (segnalato da Giorgio)**: "il tiro di dadi non tiene conto del numero di dadi impostato per il danno". Nel motore e nei test il danno è giusto (3d8 a una mano, 4d10 a due; `rollExpr` tira il numero di dadi richiesto), quindi serve riprodurlo nel browser con la sua arma ("La Porca Paletta", 2d20): controllare il tiro per colpire (sempre 1d20) contro il tiro per il danno, il Colpo critico (raddoppia i dadi) e cosa compare nel risultato.
 - Server di anteprima non persistente (vedi step 19).
 

@@ -10,6 +10,7 @@ Le voci con `"needsReview": true` nei dati sono quelle da verificare.
 3. **Limiti della magia del Warlock e del Mago** (sezione «Aperto dal Lotto 6»): invocazioni ripetibili con più scelte, prerequisiti sui trucchetti e sul Patto, Distintivi e Maestria limitati al libro, effetto delle Metamagie, costo alternativo a slot di altre classi.
 4. **Piccole lacune degli altri lotti**: tipo di danno dell'Arma del soffio e della Rivelazione celestiale, Adepto elementale sui tiri degli incantesimi, Colpi astuti con dadi rinunciati, bersaglio del Marchio del cacciatore.
 5. Verifica a campione dei numeri con il manuale (i dati vengono dai riepiloghi italiani, nessuna voce è stata confrontata).
+6. **PWA** (non sono dati, ma restano aperti): verifica dell'icona d20 su iPhone dopo il deploy; decidere cosa fare di `ReloadPrompt` ora che l'aggiornamento è automatico (vedi «Aperti» in `PLAN.md`).
 
 ## 1. Serve una fonte che non abbiamo
 - Niente per ora. (Le condizioni sono arrivate con la spec `05_conditions.json`, vedi in fondo.)

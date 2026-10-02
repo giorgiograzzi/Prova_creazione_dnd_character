@@ -13,7 +13,7 @@ appStore.subscribe((s, prev) => { if (s.homebrew !== prev.homebrew) setHomebrewF
 
 // Reset forzato una tantum: svuota le cache e il service worker vecchi (i dati dei personaggi, in localStorage/IndexedDB, restano intatti).
 // Per forzarne un altro dopo una modifica delle icone/risorse, basta cambiare CACHE_RESET_KEY.
-const CACHE_RESET_KEY = "cache-reset-2026-10-icona-d20";
+const CACHE_RESET_KEY = "cache-reset-2026-10-icona-d20-v2";
 async function resetCachesOnce() {
   try {
     if (localStorage.getItem(CACHE_RESET_KEY)) return;
